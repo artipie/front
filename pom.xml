@@ -62,6 +62,7 @@ https://github.com/artipie/front/LICENSE.txt
     <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <docker.image.name>artipie/front</docker.image.name>
   </properties>
   <dependencies>
     <dependency>
