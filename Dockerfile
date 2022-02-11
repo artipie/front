@@ -1,3 +1,6 @@
+# The MIT License (MIT) Copyright (c) 2022 artipie.com
+# https://github.com/artipie/front/LICENSE.txt
+
 FROM openjdk:17-oracle
 ARG JAR_FILE
 ENV JVM_OPTS=""
@@ -15,6 +18,9 @@ COPY target/dependency  /usr/lib/web-service/lib
 COPY target/${JAR_FILE} /usr/lib/web-service/app.jar
 
 WORKDIR /var/web-service
+HEALTHCHECK --interval=10s --timeout=3s \
+  CMD curl -f http://localhost:8080/.health || exit 1
+
 EXPOSE 8080
 CMD [ \
   "java", \
