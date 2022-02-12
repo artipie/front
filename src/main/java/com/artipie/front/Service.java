@@ -8,6 +8,11 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.front.internal.HealthRoute;
 import com.jcabi.log.Logger;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  * Front service.
@@ -16,12 +21,17 @@ import com.jcabi.log.Logger;
 public final class Service {
 
     /**
+     * Name for argument port for service
+     */
+    private static final String PORT_ARG_NAME = "port";
+
+    /**
      * Configuration storage.
      */
     private final Storage storage;
 
     /**
-     * Spart service instance.
+     * Spark service instance.
      */
     private volatile spark.Service ignite;
 
@@ -35,14 +45,14 @@ public final class Service {
 
     /**
      * Start service.
+     * @param port port for service
      */
-    private void start() {
+    private void start(final int port) {
         if (this.ignite != null) {
             throw new IllegalStateException("already started");
         }
-        // TODO: parse port from CLI args: --port=8080
-        Logger.info(this, "starting service");
-        this.ignite = spark.Service.ignite().port(8080);
+        Logger.info(this, "starting service on port: %d", port);
+        this.ignite = spark.Service.ignite().port(port);
         this.ignite.get("/.health", new HealthRoute());
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
@@ -62,10 +72,15 @@ public final class Service {
      * Entry point.
      * @param args CLA
      */
-    public static void main(final String... args) {
-        // TODO: create storage from config file
+    public static void main(final String... args) throws ParseException {
+        final Options options = new Options();
+        options.addOption(null, Service.PORT_ARG_NAME,true,"service port");
+
+        final CommandLineParser parser = new DefaultParser();
+        final CommandLine cmd = parser.parse(options, args);
+
         final var service = new Service(new InMemoryStorage());
-        service.start();
+        service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT_ARG_NAME,"8080")));
         Runtime.getRuntime().addShutdownHook(
             new Thread(() -> service.stop(), "shutdown")
         );
