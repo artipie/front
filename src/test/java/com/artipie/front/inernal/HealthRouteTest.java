@@ -26,6 +26,7 @@ public final class HealthRouteTest {
             "returns OK", new HealthRoute().handle(req, rsp),
             Matchers.equalTo("OK")
         );
+        // @checkstyle MagicNumberCheck (1 line)
         Mockito.verify(rsp).status(200);
     }
 }

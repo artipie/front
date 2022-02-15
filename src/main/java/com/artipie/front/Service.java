@@ -18,6 +18,7 @@ public final class Service {
     /**
      * Configuration storage.
      */
+    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final Storage storage;
 
     /**
@@ -34,14 +35,26 @@ public final class Service {
     }
 
     /**
+     * Entry point.
+     * @param args CLA
+     */
+    public static void main(final String... args) {
+        final var service = new Service(new InMemoryStorage());
+        service.start();
+        Runtime.getRuntime().addShutdownHook(
+            new Thread(() -> service.stop(), "shutdown")
+        );
+    }
+
+    /**
      * Start service.
      */
     private void start() {
         if (this.ignite != null) {
             throw new IllegalStateException("already started");
         }
-        // TODO: parse port from CLI args: --port=8080
         Logger.info(this, "starting service");
+        // @checkstyle MagicNumberCheck (1 line)
         this.ignite = spark.Service.ignite().port(8080);
         this.ignite.get("/.health", new HealthRoute());
         this.ignite.awaitInitialization();
@@ -56,18 +69,5 @@ public final class Service {
         this.ignite.stop();
         this.ignite.awaitStop();
         Logger.info(this, "service stopped");
-    }
-
-    /**
-     * Entry point.
-     * @param args CLA
-     */
-    public static void main(final String... args) {
-        // TODO: create storage from config file
-        final var service = new Service(new InMemoryStorage());
-        service.start();
-        Runtime.getRuntime().addShutdownHook(
-            new Thread(() -> service.stop(), "shutdown")
-        );
     }
 }
