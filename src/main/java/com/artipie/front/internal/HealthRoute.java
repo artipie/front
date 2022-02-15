@@ -17,6 +17,7 @@ public final class HealthRoute implements Route {
 
     @Override
     public Object handle(final Request request, final Response response) throws Exception {
+        // @checkstyle MagicNumberCheck (1 line)
         response.status(200);
         return "OK";
     }

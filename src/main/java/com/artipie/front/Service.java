@@ -29,6 +29,7 @@ public final class Service {
     /**
      * Configuration storage.
      */
+    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final Storage storage;
 
     /**
@@ -42,6 +43,35 @@ public final class Service {
      */
     private Service(final Storage storage) {
         this.storage = storage;
+    }
+
+    /**
+     * Entry point.
+     * @param args CLA
+     * @throws ParseException If cli line argument has wrong format
+     */
+    public static void main(final String... args) throws ParseException {
+        final Options options = new Options();
+        options.addOption(
+            null,
+            Service.PORT_ARG_NAME,
+            true,
+            "service port. Should be int value. Default value 8080"
+        );
+        final CommandLineParser parser = new DefaultParser();
+        final CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (final ParseException ex) {
+            final HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("com.artipie.front.Service", options);
+            throw ex;
+        }
+        final var service = new Service(new InMemoryStorage());
+        service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT_ARG_NAME, "8080")));
+        Runtime.getRuntime().addShutdownHook(
+            new Thread(() -> service.stop(), "shutdown")
+        );
     }
 
     /**
@@ -67,34 +97,5 @@ public final class Service {
         this.ignite.stop();
         this.ignite.awaitStop();
         Logger.info(this, "service stopped");
-    }
-
-    /**
-     * Entry point.
-     * @param args CLA
-     * @throws ParseException If cli line argument has wrong format
-     */
-    public static void main(final String... args) throws ParseException {
-        final Options options = new Options();
-        options.addOption(
-            null,
-            Service.PORT_ARG_NAME,
-            true,
-            "service port. Should be int value. Default value 8080"
-        );
-        final CommandLineParser parser = new DefaultParser();
-        final CommandLine cmd;
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException ex) {
-            final HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("com.artipie.front.Service", options);
-            throw ex;
-        }
-        final var service = new Service(new InMemoryStorage());
-        service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT_ARG_NAME, "8080")));
-        Runtime.getRuntime().addShutdownHook(
-            new Thread(() -> service.stop(), "shutdown")
-        );
     }
 }
