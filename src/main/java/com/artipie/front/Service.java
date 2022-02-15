@@ -62,7 +62,7 @@ public final class Service {
         final CommandLine cmd;
         try {
             cmd = parser.parse(options, args);
-        } catch (ParseException ex) {
+        } catch (final ParseException ex) {
             final HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("com.artipie.front.Service", options);
             throw ex;
