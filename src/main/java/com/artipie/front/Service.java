@@ -34,9 +34,8 @@ public final class Service {
     /**
      * Name for argument config file for service.
      */
-    private static final Option CONFIG = new Option(
-        "f", "config-file", true, "The path to artipie configuration file"
-    );
+    private static final Option CONFIG = Option.builder().option("f").longOpt("config-file")
+        .hasArg(true).desc("The path to artipie configuration file").required(true).build();
 
     /**
      * Configuration storage.
@@ -62,6 +61,7 @@ public final class Service {
      * @param args CLA
      * @throws ParseException If cli line argument has wrong format
      */
+    @SuppressWarnings("PMD.DoNotCallSystemExit")
     public static void main(final String... args) throws ParseException {
         final Options options = new Options();
         options.addOption(Service.PORT);
@@ -70,26 +70,20 @@ public final class Service {
         final CommandLine cmd;
         try {
             cmd = parser.parse(options, args);
-            if (cmd.hasOption(Service.CONFIG)) {
-                final var service = new Service(
-                    new ArtipieYaml(
-                        Yaml.createYamlInput(cmd.getOptionValue(Service.CONFIG)).readYamlMapping()
-                    ).storage()
-                );
-                service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT, "8080")));
-                Runtime.getRuntime().addShutdownHook(new Thread(service::stop, "shutdown"));
-            } else {
-                throw new IllegalStateException(
-                    // @checkstyle LineLengthCheck (1 line)
-                    "Set path to artipie yaml configuration file with the `f` or `config-file` argument"
-                );
-            }
+            final var service = new Service(
+                new ArtipieYaml(
+                    Yaml.createYamlInput(cmd.getOptionValue(Service.CONFIG)).readYamlMapping()
+                ).storage()
+            );
+            service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT, "8080")));
+            Runtime.getRuntime().addShutdownHook(new Thread(service::stop, "shutdown"));
         } catch (final ParseException ex) {
             final HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("com.artipie.front.Service", options);
             throw ex;
         } catch (final IOException ex) {
             Logger.error(Service.class, "Failed to read artipie setting yaml");
+            System.exit(1);
         }
     }
 
