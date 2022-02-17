@@ -16,6 +16,7 @@ USER 2021:2020
 
 COPY target/dependency  /usr/lib/web-service/lib
 COPY target/${JAR_FILE} /usr/lib/web-service/app.jar
+COPY _config.yml /etc/artipie/artipie.yml
 
 WORKDIR /var/web-service
 HEALTHCHECK --interval=10s --timeout=3s \
@@ -28,5 +29,6 @@ CMD [ \
   "--add-opens", "java.base/java.security=ALL-UNNAMED", \
   "-cp", "/usr/lib/web-service/app.jar:/usr/lib/web-service/lib/*", \
   "com.artipie.front.Service", \
-  "--port=8080" \
+  "--port=8080", \
+  "--config=/etc/artipie/artipie.yml" \
 ]
