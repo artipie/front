@@ -5,8 +5,8 @@
 package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.api.ApiAuthFilter;
+import com.artipie.front.api.Repositories;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.settings.ArtipieYaml;
 import com.jcabi.log.Logger;
@@ -40,10 +40,10 @@ public final class Service {
         .hasArg(true).desc("The path to artipie configuration file").required(true).build();
 
     /**
-     * Configuration storage.
+     * Artipie configuration.
      */
     @SuppressWarnings({"PMD.SingularField", "PMD.UnusedPrivateField"})
-    private final BlockingStorage storage;
+    private final ArtipieYaml settings;
 
     /**
      * Spark service instance.
@@ -52,10 +52,10 @@ public final class Service {
 
     /**
      * Service constructor.
-     * @param storage Config storage
+     * @param settings Artipie configuration
      */
-    private Service(final BlockingStorage storage) {
-        this.storage = storage;
+    private Service(final ArtipieYaml settings) {
+        this.settings = settings;
     }
 
     /**
@@ -75,7 +75,7 @@ public final class Service {
             final var service = new Service(
                 new ArtipieYaml(
                     Yaml.createYamlInput(cmd.getOptionValue(Service.CONFIG)).readYamlMapping()
-                ).storage()
+                )
             );
             service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT, "8080")));
             Runtime.getRuntime().addShutdownHook(new Thread(service::stop, "shutdown"));
@@ -100,7 +100,16 @@ public final class Service {
         Logger.info(this, "starting service on port: %d", port);
         this.ignite = spark.Service.ignite().port(port);
         this.ignite.get("/.health", new HealthRoute());
-        this.ignite.before("/api/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
+        this.ignite.path(
+            "/api", () -> {
+                this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
+                this.ignite.path(
+                    "/repositories", () -> {
+                        this.ignite.get("/", new Repositories(this.settings.repoConfigsStorage()));
+                    }
+                );
+            }
+        );
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }

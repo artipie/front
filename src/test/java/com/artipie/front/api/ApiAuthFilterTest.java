@@ -6,6 +6,7 @@ package com.artipie.front.api;
 
 import com.artipie.front.api.ApiAuthFilter.ValidationException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +46,7 @@ final class ApiAuthFilterTest {
         final var err = Assertions.assertThrows(
             HaltException.class,
             () -> new ApiAuthFilter(
-                new FakeTokenValidator(token, "any", Instant.now())
+                new FakeTokenValidator(token, "any", Instant.now().minus(1, ChronoUnit.DAYS))
             ).handle(req, rsp)
         );
         MatcherAssert.assertThat(
