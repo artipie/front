@@ -1,0 +1,15 @@
+{{#partial "content"}}
+
+<form id="form-signin" method="post">
+    <fieldset>
+        <label for="username">User:</label>
+        <input name="username" type="text" placeholder="john123"/>
+        <label for="password">Password:</label>
+        <input name="password" type="password"/>
+        <input name="_crsf" type="hidden" value="{{crsf}}"/>
+        <br/>
+        <input name="submit" type="submit"/>
+    </fieldset>
+</form>
+{{/partial}}
+{{> base}}

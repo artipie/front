@@ -66,6 +66,11 @@ https://github.com/artipie/front/LICENSE.txt
   </properties>
   <dependencies>
     <dependency>
+      <groupId>com.sparkjava</groupId>
+      <artifactId>spark-template-handlebars</artifactId>
+      <version>2.7.1</version>
+    </dependency>
+    <dependency>
       <groupId>javax.json</groupId>
       <artifactId>javax.json-api</artifactId>
     </dependency>
