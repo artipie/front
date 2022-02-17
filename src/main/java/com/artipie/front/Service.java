@@ -6,6 +6,7 @@ package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.settings.ArtipieYaml;
 import com.jcabi.log.Logger;
@@ -21,6 +22,7 @@ import org.apache.commons.cli.ParseException;
 /**
  * Front service.
  * @since 1.0
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class Service {
 
@@ -98,6 +100,7 @@ public final class Service {
         Logger.info(this, "starting service on port: %d", port);
         this.ignite = spark.Service.ignite().port(port);
         this.ignite.get("/.health", new HealthRoute());
+        this.ignite.before("/api/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }
