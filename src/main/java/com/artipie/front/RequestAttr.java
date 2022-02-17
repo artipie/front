@@ -29,6 +29,12 @@ public interface RequestAttr<T> {
     void write(Request req, T val);
 
     /**
+     * Remove attribute.
+     * @param req Spark request
+     */
+    void remove(Request req);
+
+    /**
      * Standard attributes.
      * @since 1.0
      */
@@ -59,6 +65,11 @@ public interface RequestAttr<T> {
         @Override
         public void write(final Request req, final String val) {
             req.attribute(this.name, val);
+        }
+
+        @Override
+        public void remove(final Request req) {
+            req.raw().removeAttribute(this.name);
         }
     }
 }

@@ -9,8 +9,12 @@ import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.settings.ArtipieYaml;
+import com.artipie.front.ui.PostSignIn;
+import com.artipie.front.ui.SignInPage;
 import com.jcabi.log.Logger;
+import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -36,7 +40,7 @@ public final class Service {
     /**
      * Name for argument config file for service.
      */
-    private static final Option CONFIG = Option.builder().option("f").longOpt("config-file")
+    private static final Option CONFIG = Option.builder().option("c").longOpt("config")
         .hasArg(true).desc("The path to artipie configuration file").required(true).build();
 
     /**
@@ -74,7 +78,8 @@ public final class Service {
             cmd = parser.parse(options, args);
             final var service = new Service(
                 new ArtipieYaml(
-                    Yaml.createYamlInput(cmd.getOptionValue(Service.CONFIG)).readYamlMapping()
+                    Yaml.createYamlInput(new File(cmd.getOptionValue(Service.CONFIG)))
+                        .readYamlMapping()
                 )
             );
             service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT, "8080")));
@@ -110,6 +115,21 @@ public final class Service {
                 );
             }
         );
+        this.ignite.path(
+            "/signin",
+            () -> {
+                this.ignite.get("", new SignInPage());
+                this.ignite.post(
+                    "",
+                    new PostSignIn(
+                        (user, pass) -> Optional.of(user)
+                            .filter(u -> u.equals("admin") && pass.equals("qwerty"))
+                    )
+                );
+            }
+        );
+        this.ignite.before(AuthFilters.AUTHENTICATE);
+        this.ignite.before(AuthFilters.SESSION_ATTRS);
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }
