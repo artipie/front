@@ -43,8 +43,6 @@ public final class Repositories implements Route {
                 );
             }
         }
-        // @checkstyle MagicNumberCheck (1 line)
-        response.status(200);
         response.type("application/json");
         return json.build().toString();
     }

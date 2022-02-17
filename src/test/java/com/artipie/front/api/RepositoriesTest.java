@@ -45,8 +45,6 @@ class RepositoriesTest {
             ),
             true
         );
-        // @checkstyle MagicNumberCheck (1 line)
-        Mockito.verify(resp).status(200);
         Mockito.verify(resp).type("application/json");
     }
 
