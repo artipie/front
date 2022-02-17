@@ -7,7 +7,6 @@ package com.artipie.front.api;
 import com.artipie.front.api.ApiAuthFilter.ValidationException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
