@@ -6,6 +6,7 @@ package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
+import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.settings.ArtipieYaml;
@@ -111,6 +112,10 @@ public final class Service {
                 this.ignite.path(
                     "/repositories", () -> {
                         this.ignite.get("/", new Repositories(this.settings.repoConfigsStorage()));
+                        this.ignite.get(
+                            String.format("/%s", GetRepository.PARAM),
+                            new GetRepository(this.settings.repoConfigsStorage())
+                        );
                     }
                 );
             }
