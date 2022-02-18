@@ -15,7 +15,7 @@ import java.util.UUID;
  * @checkstyle AvoidDuplicateLiterals (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class SignInPage extends RouteWrap {
+public final class SignInPage extends RouteWrap.TemplateViewRoute {
 
     /**
      * New sign-in page.
