@@ -7,8 +7,10 @@ package com.artipie.front;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.internal.HealthRoute;
+import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.SignInPage;
@@ -16,6 +18,7 @@ import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import javax.json.Json;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -114,7 +117,11 @@ public final class Service {
                         this.ignite.get("/", new Repositories(this.settings.repoConfigsStorage()));
                         this.ignite.get(
                             String.format("/%s", GetRepository.PARAM),
-                            new GetRepository(this.settings.repoConfigsStorage())
+                            new GetRepository(
+                                new RepoSettings(
+                                    this.settings.layout(), this.settings.repoConfigsStorage()
+                                )
+                            )
                         );
                     }
                 );
@@ -135,6 +142,15 @@ public final class Service {
         );
         this.ignite.before(AuthFilters.AUTHENTICATE);
         this.ignite.before(AuthFilters.SESSION_ATTRS);
+        this.ignite.exception(
+            NotFoundException.class, (ex, rqs, rsp) -> {
+                rsp.type("application/json");
+                rsp.body(
+                    Json.createObjectBuilder().add("error", ex.getLocalizedMessage())
+                    .build().toString()
+                );
+            }
+        );
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }
