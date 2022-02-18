@@ -37,7 +37,7 @@ public final class ApiAuthFilter implements Filter {
     public void handle(final Request request, final Response response) throws Exception {
         try {
             final var uid = this.validator.validate(
-                Optional.of(request.headers("Authorization")).orElse(""),
+                Optional.ofNullable(request.headers("Authorization")).orElse(""),
                 Instant.now()
             );
             RequestAttr.Standard.USER_ID.write(request, uid);
