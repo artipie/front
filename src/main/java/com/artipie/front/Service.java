@@ -23,6 +23,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jetty.http.MimeTypes;
+import spark.template.handlebars.HandlebarsTemplateEngine;
 
 /**
  * Front service.
@@ -111,19 +113,28 @@ public final class Service {
                 this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
                 this.ignite.path(
                     "/repositories", () -> {
-                        this.ignite.get("/", new Repositories(this.settings.repoConfigsStorage()));
+                        this.ignite.get(
+                            "/",
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Repositories(this.settings.repoConfigsStorage())
+                        );
                         this.ignite.get(
                             String.format("/%s", GetRepository.PARAM),
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
                             new GetRepository(this.settings.repoConfigsStorage())
                         );
                     }
                 );
             }
         );
+        final var engine = new HandlebarsTemplateEngine("/html");
         this.ignite.path(
             "/signin",
             () -> {
-                this.ignite.get("", new SignInPage());
+                this.ignite.get(
+                    "", MimeTypes.Type.APPLICATION_JSON.asString(),
+                    new SignInPage(), engine
+                );
                 this.ignite.post(
                     "",
                     new PostSignIn(
