@@ -33,6 +33,7 @@ import spark.template.handlebars.HandlebarsTemplateEngine;
  * Front service.
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 public final class Service {
 
