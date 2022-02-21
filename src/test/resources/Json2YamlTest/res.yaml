@@ -1,0 +1,16 @@
+repo:
+  type: "docker-proxy"
+  remotes:
+    -
+      url: registry1.docker.io
+    -
+      url: mcr.microsoft.com
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  permissions:
+    alice:
+      - read
+    bob:
+      - *
+  url: "http://artipie:8080/my-proxy-docker"
