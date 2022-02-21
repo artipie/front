@@ -57,6 +57,14 @@ public interface RequestAttr<T> {
             this.name = name;
         }
 
+        /**
+         * Attribute name.
+         * @return The name
+         */
+        public String attrName() {
+            return this.name;
+        }
+
         @Override
         public Optional<String> read(final Request req) {
             return Optional.of(req.attribute(this.name));
