@@ -22,6 +22,17 @@ public interface RequestAttr<T> {
     Optional<T> read(Request req);
 
     /**
+     * Read request attribute, throws exception if attribute not found.
+     * @param req Spark request
+     * @return Attribute value if found
+     */
+    default T readOrThrow(final Request req) {
+        return this.read(req).orElseThrow(
+            () -> new IllegalStateException("Required request parameter is not found")
+        );
+    }
+
+    /**
      * Write attribute value.
      * @param req Spark request
      * @param val Attribute value
