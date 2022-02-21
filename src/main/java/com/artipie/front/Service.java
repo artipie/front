@@ -7,8 +7,10 @@ package com.artipie.front;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.internal.HealthRoute;
+import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.SignInPage;
@@ -16,6 +18,7 @@ import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import javax.json.Json;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -23,11 +26,14 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jetty.http.MimeTypes;
+import spark.template.handlebars.HandlebarsTemplateEngine;
 
 /**
  * Front service.
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 public final class Service {
 
@@ -111,19 +117,32 @@ public final class Service {
                 this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
                 this.ignite.path(
                     "/repositories", () -> {
-                        this.ignite.get("/", new Repositories(this.settings.repoConfigsStorage()));
+                        this.ignite.get(
+                            "/",
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Repositories(this.settings.repoConfigsStorage())
+                        );
                         this.ignite.get(
                             String.format("/%s", GetRepository.PARAM),
-                            new GetRepository(this.settings.repoConfigsStorage())
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new GetRepository(
+                                new RepoSettings(
+                                    this.settings.layout(), this.settings.repoConfigsStorage()
+                                )
+                            )
                         );
                     }
                 );
             }
         );
+        final var engine = new HandlebarsTemplateEngine("/html");
         this.ignite.path(
             "/signin",
             () -> {
-                this.ignite.get("", new SignInPage());
+                this.ignite.get(
+                    "", MimeTypes.Type.APPLICATION_JSON.asString(),
+                    new SignInPage(), engine
+                );
                 this.ignite.post(
                     "",
                     new PostSignIn(
@@ -135,6 +154,15 @@ public final class Service {
         );
         this.ignite.before(AuthFilters.AUTHENTICATE);
         this.ignite.before(AuthFilters.SESSION_ATTRS);
+        this.ignite.exception(
+            NotFoundException.class, (ex, rqs, rsp) -> {
+                rsp.type("application/json");
+                rsp.body(
+                    Json.createObjectBuilder().add("error", ex.getLocalizedMessage())
+                    .build().toString()
+                );
+            }
+        );
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }

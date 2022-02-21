@@ -8,6 +8,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.front.RequestAttr;
+import com.artipie.front.misc.RepoSettings;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -37,8 +39,9 @@ class GetRepositoryTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn(name);
+        Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         JSONAssert.assertEquals(
-            new GetRepository(blsto).handle(rqs, resp),
+            new GetRepository(new RepoSettings("flat", blsto)).handle(rqs, resp),
             new String(
                 new TestResource(String.format("GetRepositoryTest/%s.json", name)).asBytes(),
                 StandardCharsets.UTF_8

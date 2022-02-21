@@ -4,8 +4,8 @@
  */
 package com.artipie.front.api;
 
-import com.artipie.asto.Key;
-import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.RequestAttr;
+import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.misc.Yaml2Json;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -34,23 +34,26 @@ public final class GetRepository implements Route {
     private static final String REPO = "repo";
 
     /**
-     * Repositories settings storage.
+     * Repository settings.
      */
-    private final BlockingStorage repos;
+    private final RepoSettings stn;
 
     /**
      * Ctor.
-     * @param repos Repositories settings storage
+     * @param stn Repository settings
      */
-    public GetRepository(final BlockingStorage repos) {
-        this.repos = repos;
+    public GetRepository(final RepoSettings stn) {
+        this.stn = stn;
     }
 
     @Override
     public String handle(final Request request, final Response response) {
         final JsonObject repo = new Yaml2Json().apply(
             new String(
-                this.repos.value(this.find(request.params(GetRepository.PARAM))),
+                this.stn.value(
+                    request.params(GetRepository.PARAM),
+                    RequestAttr.Standard.USER_ID.read(request).orElseThrow()
+                ),
                 StandardCharsets.UTF_8
             )
         ).asJsonObject().getJsonObject(GetRepository.REPO);
@@ -63,21 +66,5 @@ public final class GetRepository implements Route {
         response.type("application/json");
         return Json.createObjectBuilder().add(GetRepository.REPO, builder.build())
             .build().toString();
-    }
-
-    /**
-     * Find repository settings key.
-     * @param name Repo name
-     * @return Key if such repository exists, throws exception if not
-     */
-    private Key find(final String name) {
-        Key res = new Key.From(String.format("%s.yaml", name));
-        if (!this.repos.exists(res)) {
-            res = new Key.From(String.format("%s.yml", name));
-            if (!this.repos.exists(res)) {
-                throw new IllegalArgumentException("Repository not found");
-            }
-        }
-        return res;
     }
 }

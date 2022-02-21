@@ -9,19 +9,13 @@ import java.util.function.Function;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
-import spark.template.handlebars.HandlebarsTemplateEngine;
+import spark.TemplateViewRoute;
 
 /**
  * Handlebars page.
  * @since 1.0
  */
-final class HbPage implements Route {
-
-    /**
-     * Template engine.
-     */
-    private static final HandlebarsTemplateEngine ENGINE = new HandlebarsTemplateEngine("/html");
+final class HbPage implements TemplateViewRoute {
 
     /**
      * Template name.
@@ -54,8 +48,7 @@ final class HbPage implements Route {
     }
 
     @Override
-    public Object handle(final Request req, final Response rsp) throws Exception {
-        rsp.type("text/html");
-        return HbPage.ENGINE.render(new ModelAndView(this.params.apply(req), this.template));
+    public ModelAndView handle(final Request req, final Response rsp) throws Exception {
+        return new ModelAndView(this.params.apply(req), this.template);
     }
 }
