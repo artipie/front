@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
  * Test for {@link Json2Yaml}.
  * @since 0.1
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class Json2YamlTest {
 
     @Test
@@ -25,8 +26,24 @@ class Json2YamlTest {
                 )
             ).toString(),
             new IsEqual<>(
-                new String(
-                    new TestResource("Json2YamlTest/res.yaml").asBytes(), StandardCharsets.UTF_8
+                String.join(
+                    System.lineSeparator(),
+                    "repo:",
+                    "  type: \"docker-proxy\"",
+                    "  remotes:",
+                    "    -",
+                    "      url: registry1.docker.io",
+                    "    -",
+                    "      url: mcr.microsoft.com",
+                    "  storage:",
+                    "    type: fs",
+                    "    path: /var/artipie/data/",
+                    "  permissions:",
+                    "    alice:",
+                    "      - read",
+                    "    bob:",
+                    "      - *",
+                    "  url: \"http://artipie:8080/my-proxy-docker\""
                 )
             )
         );
