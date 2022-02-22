@@ -7,8 +7,10 @@ package com.artipie.front;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.Repositories;
+import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.settings.ArtipieYaml;
@@ -17,7 +19,6 @@ import com.artipie.front.ui.SignInPage;
 import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 import javax.json.Json;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -122,15 +123,15 @@ public final class Service {
                             MimeTypes.Type.APPLICATION_JSON.asString(),
                             new Repositories(this.settings.repoConfigsStorage())
                         );
-                        this.ignite.get(
-                            String.format("/%s", GetRepository.PARAM),
-                            MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new GetRepository(
-                                new RepoSettings(
-                                    this.settings.layout(), this.settings.repoConfigsStorage()
-                                )
-                            )
+                        final RepoSettings stn = new RepoSettings(
+                            this.settings.layout(), this.settings.repoConfigsStorage()
                         );
+                        final String path = String.format("/%s", GetRepository.PARAM);
+                        this.ignite.get(
+                            path, MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new GetRepository(stn)
+                        );
+                        this.ignite.head(path, new HeadRepository(stn));
                     }
                 );
             }
@@ -146,8 +147,7 @@ public final class Service {
                 this.ignite.post(
                     "",
                     new PostSignIn(
-                        (user, pass) -> Optional.of(user)
-                            .filter(u -> u.equals("admin") && pass.equals("qwerty"))
+                        AuthByPassword.withCredentials(this.settings.credentials())
                     )
                 );
             }
