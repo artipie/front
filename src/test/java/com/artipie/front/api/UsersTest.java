@@ -38,31 +38,29 @@ class UsersTest {
                                 Yaml.createYamlSequenceBuilder().add("reader")
                                     .add("dev-lead").build()
                             ).build()
+                    ).add(
+                        "Mark", Yaml.createYamlMappingBuilder().add("pass", "sha256:xxx").build()
                     ).build()
-                ).build().toString(),
-                "Jane",
-                false
+                ).build().toString()
             ).handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
             String.join(
                 "\n",
-                "{\"file\":",
                 "{",
-                "  \"Alice\":{\"email\":\"alice@example.com\"},",
-                "  \"John\":{\"groups\":[\"reader\",\"dev-lead\"]}",
-                "},",
-                "\"env\":{\"Jane\":{}},",
-                "\"github\":{\"enabled\":false}}"
+                "  \"Alice\": {\"email\":\"alice@example.com\"},",
+                "  \"John\": {\"groups\":[\"reader\",\"dev-lead\"]},",
+                "  \"Mark\": {} ",
+                "}"
             ),
             true
         );
     }
 
     @Test
-    void doesNotWriteFileOrEnvWhenAbsent() throws JSONException {
+    void writesEmptyWhenAbsent() throws JSONException {
         JSONAssert.assertEquals(
-            new Users(Optional.empty(), Optional.empty(), true)
+            new Users(Optional.empty())
                 .handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
-            "{\"github\": {\"enabled\": true }}",
+            "{}",
             true
         );
     }
