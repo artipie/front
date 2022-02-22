@@ -6,14 +6,15 @@ package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
+import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
-import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.settings.ArtipieYaml;
+import com.artipie.front.settings.RepoSettings;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.SignInPage;
 import com.jcabi.log.Logger;
@@ -132,6 +133,7 @@ public final class Service {
                             new GetRepository(stn)
                         );
                         this.ignite.head(path, new HeadRepository(stn));
+                        this.ignite.delete(path, new DeleteRepository(stn));
                     }
                 );
             }
