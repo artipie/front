@@ -30,11 +30,11 @@ public final class HeadRepository implements Route {
     }
 
     @Override
-    public String handle(final Request request, final Response response) {
+    public Object handle(final Request request, final Response response) {
         this.stn.key(
             request.params(GetRepository.PARAM),
             RequestAttr.Standard.USER_ID.readOrThrow(request)
         );
-        return "OK";
+        return null;
     }
 }

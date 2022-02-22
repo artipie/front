@@ -10,7 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.front.RequestAttr;
 import com.artipie.front.misc.RepoSettings;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsAnything;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ class HeadRepositoryTest {
         MatcherAssert.assertThat(
             new HeadRepository(new RepoSettings(layout, this.blsto))
                 .handle(rqs, Mockito.mock(Response.class)),
-            new IsEqual<>("OK")
+            new IsAnything<>()
         );
     }
 
