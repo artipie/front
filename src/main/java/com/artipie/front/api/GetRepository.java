@@ -5,8 +5,8 @@
 package com.artipie.front.api;
 
 import com.artipie.front.RequestAttr;
-import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.misc.Yaml2Json;
+import com.artipie.front.settings.RepoSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javax.json.Json;
@@ -18,7 +18,7 @@ import spark.Response;
 import spark.Route;
 
 /**
- * Handle `GET` request to obtain repository setings.
+ * Handle `GET` request to obtain repository settings.
  * @since 0.1
  */
 public final class GetRepository implements Route {
@@ -52,7 +52,7 @@ public final class GetRepository implements Route {
             new String(
                 this.stn.value(
                     request.params(GetRepository.PARAM),
-                    RequestAttr.Standard.USER_ID.read(request).orElseThrow()
+                    RequestAttr.Standard.USER_ID.readOrThrow(request)
                 ),
                 StandardCharsets.UTF_8
             )

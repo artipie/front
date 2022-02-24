@@ -4,17 +4,24 @@
  */
 package com.artipie.front.settings;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.auth.Credentials;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Artipie yaml settings.
  * @since 0.1
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ArtipieYaml {
 
@@ -65,6 +72,29 @@ public final class ArtipieYaml {
             .<Storage>map(str -> new SubStorage(new Key.From(str), this.asto()))
             .orElse(this.asto())
         );
+    }
+
+    /**
+     * Credentials from config.
+     * @return Credentials
+     */
+    public Credentials credentials() {
+        final var cred = this.content.yamlMapping("credentials");
+        if (!cred.string("type").equals("file")) {
+            throw new NotImplementedException("not implemented yet");
+        }
+        try {
+            return new YamlCredentials(
+                Yaml.createYamlInput(
+                    new String(
+                        this.storage().value(new Key.From(cred.string("path"))),
+                        StandardCharsets.UTF_8
+                    )
+                ).readYamlMapping()
+            );
+        } catch (final IOException iex) {
+            throw new UncheckedIOException(iex);
+        }
     }
 
     @Override

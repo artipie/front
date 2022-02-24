@@ -4,8 +4,8 @@
  */
 package com.artipie.front.ui;
 
+import com.artipie.front.auth.AuthByPassword;
 import java.util.Objects;
-import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 import spark.Request;
 import spark.Response;
@@ -23,13 +23,13 @@ public final class PostSignIn implements Route {
     /**
      * Password authenticator.
      */
-    private final PasswordAuthenticator auth;
+    private final AuthByPassword auth;
 
     /**
      * New signin form processor.
      * @param auth Password auth
      */
-    public PostSignIn(final PasswordAuthenticator auth) {
+    public PostSignIn(final AuthByPassword auth) {
         this.auth = auth;
     }
 
@@ -55,21 +55,5 @@ public final class PostSignIn implements Route {
             () -> Spark.halt(HttpStatus.UNAUTHORIZED_401, "bad credentials")
         );
         return "OK";
-    }
-
-    /**
-     * User name authentication function.
-     * @since 1.0
-     */
-    @FunctionalInterface
-    public interface PasswordAuthenticator {
-
-        /**
-         * Authenticate user by password.
-         * @param user Login
-         * @param password Password
-         * @return User ID if found
-         */
-        Optional<String> authenticate(String user, String password);
     }
 }
