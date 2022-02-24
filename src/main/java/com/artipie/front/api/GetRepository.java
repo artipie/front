@@ -5,8 +5,8 @@
 package com.artipie.front.api;
 
 import com.artipie.front.RequestAttr;
-import com.artipie.front.misc.RepoSettings;
 import com.artipie.front.misc.Yaml2Json;
+import com.artipie.front.settings.RepoSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javax.json.Json;
