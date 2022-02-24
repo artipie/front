@@ -9,6 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
  * @since 1.0
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class YamlCredentialsTest {
+public final class YamlCredentialsTest {
 
     @Test
     void findUser() {
@@ -90,8 +91,10 @@ final class YamlCredentialsTest {
      * @param fmt Password format
      * @param users User list
      * @return Yaml
+     * @checkstyle MethodsOrderCheck (10 lines)
      */
-    private static YamlMapping credYaml(final PasswordFormat fmt, final User... users) {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static YamlMapping credYaml(final PasswordFormat fmt, final User... users) {
         var builder = Yaml.createYamlMappingBuilder();
         for (final var user : users) {
             builder = user.render(builder, fmt);
@@ -103,7 +106,7 @@ final class YamlCredentialsTest {
      * User in yaml.
      * @since 1.0
      */
-    private static final class User {
+    public static final class User {
 
         /**
          * User name.
@@ -121,6 +124,11 @@ final class YamlCredentialsTest {
         private final String pass;
 
         /**
+         * User password.
+         */
+        private final Optional<String> email;
+
+        /**
          * User groups.
          */
         private final Set<String> groups;
@@ -130,15 +138,30 @@ final class YamlCredentialsTest {
          * @param name User name
          * @param ptype User password type
          * @param pass User password
+         * @param email User email
          * @param groups User groups
          * @checkstyle ParameterNumberCheck (10 lines)
          */
-        User(final String name, final String ptype, final String pass,
-            final String... groups) {
+        public User(final String name, final String ptype, final String pass,
+            final Optional<String> email, final String... groups) {
             this.name = name;
             this.ptype = ptype;
             this.pass = pass;
+            this.email = email;
             this.groups = new HashSet<>(Arrays.asList(groups));
+        }
+
+        /**
+         * New user.
+         * @param name User name
+         * @param ptype User password type
+         * @param pass User password
+         * @param groups User groups
+         * @checkstyle ParameterNumberCheck (10 lines)
+         */
+        public User(final String name, final String ptype, final String pass,
+            final String... groups) {
+            this(name, ptype, pass, Optional.empty(), groups);
         }
 
         /**
@@ -150,6 +173,9 @@ final class YamlCredentialsTest {
         YamlMappingBuilder render(final YamlMappingBuilder builder, final PasswordFormat fmt) {
             var yaml = Yaml.createYamlMappingBuilder();
             yaml = fmt.apply(yaml, this.ptype, this.pass);
+            if (this.email.isPresent()) {
+                yaml = yaml.add("email", this.email.get());
+            }
             if (!this.groups.isEmpty()) {
                 var gbuild = Yaml.createYamlSequenceBuilder();
                 for (final var group : this.groups) {
@@ -166,7 +192,7 @@ final class YamlCredentialsTest {
      * @since 1.0
      */
     @FunctionalInterface
-    private interface PasswordFormat {
+    public interface PasswordFormat {
 
         /**
          * Simple format, like {@code plain:qwerty}.
