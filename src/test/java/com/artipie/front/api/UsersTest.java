@@ -4,7 +4,7 @@
  */
 package com.artipie.front.api;
 
-import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.front.settings.YamlCredentialsTest;
 import java.util.Optional;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -24,24 +24,13 @@ class UsersTest {
     void writesUsers() throws JSONException {
         JSONAssert.assertEquals(
             new Users(
-                Yaml.createYamlMappingBuilder().add(
-                    "credentials",
-                    Yaml.createYamlMappingBuilder().add(
-                        "Alice",
-                        Yaml.createYamlMappingBuilder().add("pass", "plain:123")
-                            .add("email", "alice@example.com").build()
-                    ).add(
-                        "John",
-                        Yaml.createYamlMappingBuilder().add("type", "sha256").add("pass", "xxx")
-                            .add(
-                                "groups",
-                                Yaml.createYamlSequenceBuilder().add("reader")
-                                    .add("dev-lead").build()
-                            ).build()
-                    ).add(
-                        "Mark", Yaml.createYamlMappingBuilder().add("pass", "sha256:xxx").build()
-                    ).build()
-                ).build().toString()
+                YamlCredentialsTest.credYaml(
+                    YamlCredentialsTest.PasswordFormat.SIMPLE,
+                    // @checkstyle LineLengthCheck (1 line)
+                    new YamlCredentialsTest.User("Alice", "plain", "123", Optional.of("alice@example.com")),
+                    new YamlCredentialsTest.User("John", "sha256", "xxx", "reader", "dev-lead"),
+                    new YamlCredentialsTest.User("Mark", "sha256", "xxx")
+                ).toString()
             ).handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
             String.join(
                 "\n",
