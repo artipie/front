@@ -11,27 +11,27 @@ import spark.Response;
 import spark.Route;
 
 /**
- * Handle `HEAD` request to check if repository exists.
+ * Handle `DELETE` request to delete repository settings.
  * @since 0.1
  */
-public final class HeadRepository implements Route {
+public final class DeleteRepository implements Route {
 
     /**
-     * Repositories settings.
+     * Repository settings.
      */
     private final RepoSettings stn;
 
     /**
      * Ctor.
-     * @param stn Repositories settings
+     * @param stn Repository settings
      */
-    public HeadRepository(final RepoSettings stn) {
+    public DeleteRepository(final RepoSettings stn) {
         this.stn = stn;
     }
 
     @Override
     public Object handle(final Request request, final Response response) {
-        this.stn.key(
+        this.stn.delete(
             request.params(GetRepository.PARAM),
             RequestAttr.Standard.USER_ID.readOrThrow(request)
         );

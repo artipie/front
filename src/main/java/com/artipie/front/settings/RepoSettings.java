@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.misc;
+package com.artipie.front.settings;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
@@ -75,6 +75,16 @@ public final class RepoSettings {
      */
     public byte[] value(final String name, final String uid) {
         return this.repos.value(this.key(name, uid));
+    }
+
+    /**
+     * Removes repository settings.
+     * @param name Repository name
+     * @param uid User id (=name)
+     * @throws NotFoundException If such repository does not exist
+     */
+    public void delete(final String name, final String uid) {
+        this.repos.delete(this.key(name, uid));
     }
 
 }

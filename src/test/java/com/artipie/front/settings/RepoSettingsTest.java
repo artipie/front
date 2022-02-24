@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.misc;
+package com.artipie.front.settings;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
@@ -10,6 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.front.api.NotFoundException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsAnything;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,18 @@ class RepoSettingsTest {
         MatcherAssert.assertThat(
             new RepoSettings("org", this.blsto).value(repo, uid),
             new IsAnything<>()
+        );
+    }
+
+    @Test
+    void deletesValue() {
+        final byte[] bytes = "abc123".getBytes();
+        final Key.From key = new Key.From("my-favorite-repo.yaml");
+        this.blsto.save(key, bytes);
+        new RepoSettings("flat", this.blsto).delete("my-favorite-repo", "any");
+        MatcherAssert.assertThat(
+            this.blsto.exists(key),
+            new IsEqual<>(false)
         );
     }
 
