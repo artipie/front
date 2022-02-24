@@ -6,8 +6,12 @@ package com.artipie.front.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.blocking.BlockingStorage;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -90,20 +94,51 @@ class ArtipieYamlTest {
         );
     }
 
+    @Test
+    void shouldReadCredentials(@TempDir final Path tmp) throws IOException {
+        final String creds = "_credentials.yaml";
+        Files.writeString(
+            tmp.resolve(creds),
+            YamlCredentialsTest.credYaml(
+                YamlCredentialsTest.PasswordFormat.SIMPLE,
+                // @checkstyle LineLengthCheck (1 line)
+                new YamlCredentialsTest.User("Alice", "plain", "123"),
+                new YamlCredentialsTest.User("John", "sha256", "xxx")
+            ).toString()
+        );
+        MatcherAssert.assertThat(
+            new ArtipieYaml(this.config(tmp.toString(), Optional.of(creds)))
+                .credentialsYaml().isPresent(),
+            new IsEqual<>(true)
+        );
+    }
+
     private YamlMapping config(final String stpath) {
-        return Yaml.createYamlMappingBuilder()
+        return this.config(stpath, Optional.empty());
+    }
+
+    private YamlMapping config(final String stpath, final Optional<String> creds) {
+        YamlMappingBuilder meta = Yaml.createYamlMappingBuilder()
             .add(
-                "meta",
+                "storage",
                 Yaml.createYamlMappingBuilder()
+                    .add("type", "fs")
+                    .add("path", stpath).build()
+            )
+            .add("repo_configs", "repos");
+        if (creds.isPresent()) {
+            meta = meta.add(
+                "credentials",
+                Yaml.createYamlSequenceBuilder()
+                    .add(Yaml.createYamlMappingBuilder().add("type", "env").build())
                     .add(
-                        "storage",
                         Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", stpath).build()
-                    )
-                    .add("repo_configs", "repos")
-                    .build()
-            ).build();
+                            .add("type", "file")
+                            .add("path", creds.get()).build()
+                    ).build()
+            );
+        }
+        return Yaml.createYamlMappingBuilder().add("meta", meta.build()).build();
     }
 
 }
