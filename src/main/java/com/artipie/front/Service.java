@@ -10,6 +10,7 @@ import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
+import com.artipie.front.api.PutRepository;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
@@ -134,6 +135,7 @@ public final class Service {
                         );
                         this.ignite.head(path, new HeadRepository(stn));
                         this.ignite.delete(path, new DeleteRepository(stn));
+                        this.ignite.put(path, new PutRepository(stn));
                     }
                 );
             }
