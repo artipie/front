@@ -7,6 +7,8 @@ package com.artipie.front.settings;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.api.NotFoundException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Repository settings. While searching for repo settings key or value,
@@ -51,18 +53,26 @@ public final class RepoSettings {
      * @throws NotFoundException If such repository does not exist
      */
     public Key key(final String name, final String uid) {
-        String first = "";
-        if (this.layout.equals("org")) {
-            first = String.format("%s/", uid);
-        }
-        Key res = new Key.From(String.format("%s%s.yaml", first, name));
+        final Pair<Key, Key> pair = this.keys(name, uid);
+        Key res = pair.getLeft();
         if (!this.repos.exists(res)) {
-            res = new Key.From(String.format("%s%s.yml", first, name));
+            res = pair.getRight();
             if (!this.repos.exists(res)) {
                 throw new NotFoundException(String.format("Repository %s not found", name));
             }
         }
         return res;
+    }
+
+    /**
+     * Checks if repository settings exists key by repository name and username.
+     * @param name Repository name
+     * @param uid User id (=name)
+     * @return True if found
+     */
+    public boolean exists(final String name, final String uid) {
+        return this.repos.exists(this.keys(name, uid).getLeft())
+            || this.repos.exists(this.keys(name, uid).getRight());
     }
 
     /**
@@ -78,6 +88,16 @@ public final class RepoSettings {
     }
 
     /**
+     * Saves repository settings to repository settings storage.
+     * @param name Repository name
+     * @param uid User id (=name)
+     * @param value Settings body
+     */
+    public void save(final String name, final String uid, final byte[] value) {
+        this.repos.save(this.keys(name, uid).getRight(), value);
+    }
+
+    /**
      * Removes repository settings.
      * @param name Repository name
      * @param uid User id (=name)
@@ -85,6 +105,23 @@ public final class RepoSettings {
      */
     public void delete(final String name, final String uid) {
         this.repos.delete(this.key(name, uid));
+    }
+
+    /**
+     * Returns a pair of keys, these keys are possible repository settings names.
+     * @param name Repository name
+     * @param uid User id (=name)
+     * @return Pair of keys
+     */
+    private Pair<Key, Key> keys(final String name, final String uid) {
+        String first = "";
+        if (this.layout.equals("org")) {
+            first = String.format("%s/", uid);
+        }
+        return new ImmutablePair<>(
+            new Key.From(String.format("%s%s.yaml", first, name)),
+            new Key.From(String.format("%s%s.yml", first, name))
+        );
     }
 
 }
