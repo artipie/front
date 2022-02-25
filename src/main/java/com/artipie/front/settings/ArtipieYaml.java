@@ -27,6 +27,11 @@ import org.apache.commons.lang3.NotImplementedException;
 public final class ArtipieYaml {
 
     /**
+     * Yaml node credentials name.
+     */
+    private static final String NODE_CREDENTIALS = "credentials";
+
+    /**
      * YAML file content.
      */
     private final YamlMapping content;
@@ -81,10 +86,13 @@ public final class ArtipieYaml {
      * @return Credentials file yaml
      */
     public Optional<YamlMapping> credentialsYaml() {
-        final var cred = this.meta().yamlSequence("credentials");
-        final Optional<YamlMapping> file = cred.values().stream()
-            .filter(node -> "file".equals(node.asMapping().string("type"))).findFirst()
-            .map(YamlNode::asMapping);
+        final Optional<YamlMapping> file = Optional.ofNullable(
+            this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
+        ).map(
+            seq -> seq.values().stream()
+                .filter(node -> "file".equals(node.asMapping().string("type"))).findFirst()
+                .map(YamlNode::asMapping)
+        ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)));
         Optional<YamlMapping> res = Optional.empty();
         final String path = "path";
         if (file.isPresent()
