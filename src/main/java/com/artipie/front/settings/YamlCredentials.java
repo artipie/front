@@ -86,6 +86,11 @@ public final class YamlCredentials implements Credentials {
                 .collect(Collectors.toSet());
         }
 
+        @Override
+        public Optional<String> email() {
+            return Optional.ofNullable(this.mapping.string("email"));
+        }
+
         /**
          * Validate password string.
          * @param config Passowrd string config

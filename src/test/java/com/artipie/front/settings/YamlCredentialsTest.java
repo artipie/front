@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -83,6 +84,21 @@ public final class YamlCredentialsTest {
         MatcherAssert.assertThat(
             groups,
             Matchers.containsInAnyOrder(admins, readers)
+        );
+    }
+
+    @Test
+    void readUserEmail() {
+        final var username = "Olga";
+        final var email = "olga@example.com";
+        MatcherAssert.assertThat(
+            new YamlCredentials(
+                credYaml(
+                    PasswordFormat.SIMPLE,
+                    new User(username, "plain", "qwerty", Optional.of(email))
+                )
+            ).user(username).orElseThrow().email().get(),
+            new IsEqual<>(email)
         );
     }
 
@@ -162,6 +178,17 @@ public final class YamlCredentialsTest {
         public User(final String name, final String ptype, final String pass,
             final String... groups) {
             this(name, ptype, pass, Optional.empty(), groups);
+        }
+
+        /**
+         * New user.
+         * @param name User name
+         * @param email User email
+         * @param groups User groups
+         * @checkstyle ParameterNumberCheck (10 lines)
+         */
+        public User(final String name, final Optional<String> email, final String... groups) {
+            this(name, "plain", "123", email, groups);
         }
 
         /**
