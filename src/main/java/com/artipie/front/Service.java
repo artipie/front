@@ -12,6 +12,7 @@ import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.PutRepository;
 import com.artipie.front.api.Repositories;
+import com.artipie.front.api.Users;
 import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.settings.ArtipieYaml;
@@ -136,6 +137,14 @@ public final class Service {
                         this.ignite.head(path, new HeadRepository(stn));
                         this.ignite.delete(path, new DeleteRepository(stn));
                         this.ignite.put(path, new PutRepository(stn));
+                    }
+                );
+                this.ignite.path(
+                    "/users", () -> {
+                        this.ignite.get(
+                            "/", MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Users(this.settings)
+                        );
                     }
                 );
             }

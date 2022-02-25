@@ -6,14 +6,22 @@ package com.artipie.front.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.blocking.BlockingStorage;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for {@link ArtipieYaml}.
@@ -22,6 +30,13 @@ import org.junit.jupiter.api.io.TempDir;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ArtipieYamlTest {
+
+    /**
+     * Temp directory.
+     * @checkstyle VisibilityModifierCheck (10 lines)
+     */
+    @TempDir
+    Path tmp;
 
     @Test
     void shouldSetFlatAsDefaultLayout() throws Exception {
@@ -83,27 +98,66 @@ class ArtipieYamlTest {
     }
 
     @Test
-    void returnsRepoConfigs(@TempDir final Path tmp) {
+    void returnsRepoConfigs() {
         MatcherAssert.assertThat(
-            new ArtipieYaml(this.config(tmp.toString())).repoConfigsStorage(),
+            new ArtipieYaml(this.config(this.tmp.toString())).repoConfigsStorage(),
             new IsInstanceOf(BlockingStorage.class)
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("creds")
+    void shouldReadWhenCredentialsIsMapping(final YamlNode node)
+        throws IOException {
+        final String creds = "_credentials.yaml";
+        Files.writeString(
+            this.tmp.resolve(creds),
+            YamlCredentialsTest.credYaml(
+                YamlCredentialsTest.PasswordFormat.SIMPLE,
+                // @checkstyle LineLengthCheck (1 line)
+                new YamlCredentialsTest.User("Alice", "plain", "123"),
+                new YamlCredentialsTest.User("John", "sha256", "xxx")
+            ).toString()
+        );
+        MatcherAssert.assertThat(
+            new ArtipieYaml(this.config(this.tmp.toString(), Optional.of(node)))
+                .fileCredentials().isPresent(),
+            new IsEqual<>(true)
+        );
+    }
+
     private YamlMapping config(final String stpath) {
-        return Yaml.createYamlMappingBuilder()
+        return this.config(stpath, Optional.empty());
+    }
+
+    private YamlMapping config(final String stpath, final Optional<YamlNode> creds) {
+        YamlMappingBuilder meta = Yaml.createYamlMappingBuilder()
             .add(
-                "meta",
+                "storage",
                 Yaml.createYamlMappingBuilder()
-                    .add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", stpath).build()
-                    )
-                    .add("repo_configs", "repos")
-                    .build()
-            ).build();
+                    .add("type", "fs")
+                    .add("path", stpath).build()
+            )
+            .add("repo_configs", "repos");
+        if (creds.isPresent()) {
+            meta = meta.add("credentials", creds.get());
+        }
+        return Yaml.createYamlMappingBuilder().add("meta", meta.build()).build();
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private static Stream<YamlNode> creds() {
+        return Stream.of(
+            Yaml.createYamlSequenceBuilder()
+                .add(Yaml.createYamlMappingBuilder().add("type", "env").build())
+                .add(
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "file")
+                        .add("path", "_credentials.yaml").build()
+                ).build(),
+            Yaml.createYamlMappingBuilder().add("type", "file")
+                .add("path", "_credentials.yaml").build()
+        );
     }
 
 }
