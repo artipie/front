@@ -6,6 +6,7 @@ package com.artipie.front.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -24,6 +25,11 @@ import org.apache.commons.lang3.NotImplementedException;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ArtipieYaml {
+
+    /**
+     * Yaml node credentials name.
+     */
+    private static final String NODE_CREDENTIALS = "credentials";
 
     /**
      * YAML file content.
@@ -75,26 +81,47 @@ public final class ArtipieYaml {
     }
 
     /**
+     * Credentials from config yaml mapping if the credentials type is file and
+     * this exists.
+     * @return Credentials file yaml
+     */
+    public Optional<YamlMapping> fileCredentials() {
+        final Optional<YamlMapping> file = Optional.ofNullable(
+            this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
+        ).map(
+            seq -> seq.values().stream()
+                .filter(node -> "file".equals(node.asMapping().string("type"))).findFirst()
+                .map(YamlNode::asMapping)
+        ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)));
+        Optional<YamlMapping> res = Optional.empty();
+        final String path = "path";
+        if (file.isPresent()
+            && this.storage().exists(new Key.From(file.get().string(path)))) {
+            try {
+                res = Optional.of(
+                    Yaml.createYamlInput(
+                        new String(
+                            this.storage().value(new Key.From(file.get().string(path))),
+                            StandardCharsets.UTF_8
+                        )
+                    ).readYamlMapping()
+                );
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
+        }
+        return res;
+    }
+
+    /**
      * Credentials from config.
      * @return Credentials
      */
     public Credentials credentials() {
-        final var cred = this.content.yamlMapping("credentials");
-        if (!cred.string("type").equals("file")) {
-            throw new NotImplementedException("not implemented yet");
-        }
-        try {
-            return new YamlCredentials(
-                Yaml.createYamlInput(
-                    new String(
-                        this.storage().value(new Key.From(cred.string("path"))),
-                        StandardCharsets.UTF_8
-                    )
-                ).readYamlMapping()
-            );
-        } catch (final IOException iex) {
-            throw new UncheckedIOException(iex);
-        }
+        return new YamlCredentials(
+            this.fileCredentials()
+                .orElseThrow(() -> new NotImplementedException("Not implemented yet"))
+        );
     }
 
     @Override
