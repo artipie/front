@@ -121,7 +121,7 @@ class ArtipieYamlTest {
         );
         MatcherAssert.assertThat(
             new ArtipieYaml(this.config(this.tmp.toString(), Optional.of(node)))
-                .credentialsYaml().isPresent(),
+                .fileCredentials().isPresent(),
             new IsEqual<>(true)
         );
     }

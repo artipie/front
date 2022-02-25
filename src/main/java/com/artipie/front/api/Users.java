@@ -4,7 +4,9 @@
  */
 package com.artipie.front.api;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.front.misc.Yaml2Json;
+import com.artipie.front.settings.ArtipieYaml;
 import java.util.Map;
 import java.util.Optional;
 import javax.json.Json;
@@ -24,29 +26,22 @@ public final class Users implements Route {
     /**
      * Credentials yaml mapping string.
      */
-    private final Optional<String> yaml;
+    private final ArtipieYaml yaml;
 
     /**
      * Ctor.
      * @param creds Credentials yaml mapping
      */
-    public Users(final Optional<String> creds) {
+    public Users(final ArtipieYaml creds) {
         this.yaml = creds;
-    }
-
-    /**
-     * Ctor.
-     * @param creds Credentials yaml mapping
-     */
-    public Users(final String creds) {
-        this(Optional.of(creds));
     }
 
     @Override
     public String handle(final Request request, final Response response) {
         JsonObjectBuilder res = Json.createObjectBuilder();
-        if (this.yaml.isPresent()) {
-            final JsonObject all = new Yaml2Json().apply(this.yaml.get())
+        final Optional<YamlMapping> creds = this.yaml.fileCredentials();
+        if (creds.isPresent()) {
+            final JsonObject all = new Yaml2Json().apply(creds.get().toString())
                 .asJsonObject().getJsonObject("credentials");
             for (final Map.Entry<String, JsonValue> item : all.entrySet()) {
                 JsonObjectBuilder user = Json.createObjectBuilder();

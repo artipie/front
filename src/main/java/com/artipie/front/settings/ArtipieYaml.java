@@ -85,7 +85,7 @@ public final class ArtipieYaml {
      * this exists.
      * @return Credentials file yaml
      */
-    public Optional<YamlMapping> credentialsYaml() {
+    public Optional<YamlMapping> fileCredentials() {
         final Optional<YamlMapping> file = Optional.ofNullable(
             this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
         ).map(
@@ -119,7 +119,7 @@ public final class ArtipieYaml {
      */
     public Credentials credentials() {
         return new YamlCredentials(
-            this.credentialsYaml()
+            this.fileCredentials()
                 .orElseThrow(() -> new NotImplementedException("Not implemented yet"))
         );
     }

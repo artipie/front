@@ -5,7 +5,6 @@
 package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.GetRepository;
@@ -142,7 +141,7 @@ public final class Service {
                     "/users", () -> {
                         this.ignite.get(
                             "/", MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new Users(this.settings.credentialsYaml().map(YamlMapping::toString))
+                            new Users(this.settings)
                         );
                     }
                 );
