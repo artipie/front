@@ -13,6 +13,7 @@ import com.artipie.front.settings.RepoSettings;
 import java.nio.charset.StandardCharsets;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import spark.Response;
 /**
  * Test for {@link PutRepository}.
  * @since 0.1
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PutRepositoryTest {
@@ -52,9 +54,9 @@ class PutRepositoryTest {
             )
         );
         MatcherAssert.assertThat(
-            "Failed to return `Created` response",
+            "Failed to return empty response",
             new PutRepository(new RepoSettings("flat", this.blsto)).handle(rqs, resp),
-            new IsEqual<>("Created")
+            new IsAnything<>()
         );
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(

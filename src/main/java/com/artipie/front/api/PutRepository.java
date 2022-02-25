@@ -38,7 +38,7 @@ public final class PutRepository implements Route {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public String handle(final Request request, final Response response) {
+    public Object handle(final Request request, final Response response) {
         final String param = request.params(GetRepository.PARAM);
         final String uid = RequestAttr.Standard.USER_ID.readOrThrow(request);
         if (this.stn.exists(param, uid)) {
@@ -64,6 +64,6 @@ public final class PutRepository implements Route {
             new Json2Yaml().apply(body.toString()).toString().getBytes(StandardCharsets.UTF_8)
         );
         response.status(HttpStatus.CREATED_201);
-        return "Created";
+        return null;
     }
 }
