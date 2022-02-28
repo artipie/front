@@ -10,6 +10,7 @@ import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
+import com.artipie.front.api.HeadUser;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.PutRepository;
 import com.artipie.front.api.Repositories;
@@ -150,6 +151,10 @@ public final class Service {
                         this.ignite.get(
                             String.format("/%s", GetUser.USER_PARAM),
                             new GetUser(this.settings.credentials())
+                        );
+                        this.ignite.get(
+                            String.format("/%s", GetUser.USER_PARAM),
+                            new HeadUser(this.settings.credentials())
                         );
                     }
                 );
