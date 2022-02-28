@@ -84,3 +84,63 @@ to learn more about different repositories settings.
 Deletes repository called `{name}`, returns status `200` on success, status `404` if repository does
 not exist.
 
+### Users API
+
+> **GET** /users
+
+Returns list of the existing users in json format:
+```json
+{
+  "John": {},
+  "Jane": {
+    "email": "jane@work.com"
+  },
+  "mark": {
+    "email": "mark@example.com",
+    "groups": ["dev", "admin"]
+  }
+}
+```
+Fields `email` and `groups` are optional.
+
+> **GET** /user/{name}
+
+Returns info of the user with name `{name}` as json object:
+
+```json
+{
+  "mark": {
+    "email": "mark@example.com",
+    "groups": ["dev", "admin"]
+  }
+}
+```
+Fields `email` and `groups` are optional, if user does not exist `404` status is returned.
+
+> **HEAD** /user/{name}
+
+Returns response status `200` if user with name `{name}` exists, status `404` otherwise.
+
+> **PUT** /user/{name}
+
+Creates new user with name `{name}`, json request body is expected:
+```json
+{
+  "Alice": {
+    "type": "plain",
+    "pass": "123",
+    "email": "alice@example.com",
+    "groups": ["admin", "dev-lead"]
+  }
+}
+```
+Field `type` is required, can be either `plain` or `sha256`, field `pass` is also required, 
+if `type` is `plain` not-encoded password is expected in `pass` field,
+if `type` is `sha256` sha-256 checksum of the password is expected in `pass` field.
+Fields `email` and `groups` are optional. 
+If user with name `{name}` already exists, status `409` is returned.
+
+> **DELETE** /user/{name}
+
+Removed user with name `{name}`, returns status `200` on success, status `404` if user does
+not exist.
