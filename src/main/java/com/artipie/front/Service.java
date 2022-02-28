@@ -12,6 +12,7 @@ import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.PutRepository;
+import com.artipie.front.api.PutUser;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.api.Users;
 import com.artipie.front.auth.AuthByPassword;
@@ -147,10 +148,9 @@ public final class Service {
                             "/", MimeTypes.Type.APPLICATION_JSON.asString(),
                             new Users(this.settings)
                         );
-                        this.ignite.get(
-                            String.format("/%s", GetUser.USER_PARAM),
-                            new GetUser(this.settings.credentials())
-                        );
+                        final String usr = String.format("/%s", GetUser.USER_PARAM);
+                        this.ignite.get(usr, new GetUser(this.settings.credentials()));
+                        this.ignite.put(usr, new PutUser(this.settings));
                     }
                 );
             }
