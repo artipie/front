@@ -27,9 +27,10 @@ import org.junit.jupiter.params.provider.MethodSource;
  * Test for {@link ArtipieYaml}.
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
+ * @checkstyle MethodsOrderCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class ArtipieYamlTest {
+public final class ArtipieYamlTest {
 
     /**
      * Temp directory.
@@ -107,7 +108,7 @@ class ArtipieYamlTest {
 
     @ParameterizedTest
     @MethodSource("creds")
-    void shouldReadWhenCredentialsIsMapping(final YamlNode node)
+    void shouldReadCredentials(final YamlNode node)
         throws IOException {
         final String creds = "_credentials.yaml";
         Files.writeString(
@@ -120,17 +121,24 @@ class ArtipieYamlTest {
             ).toString()
         );
         MatcherAssert.assertThat(
-            new ArtipieYaml(this.config(this.tmp.toString(), Optional.of(node)))
+            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.of(node)))
                 .fileCredentials().isPresent(),
             new IsEqual<>(true)
         );
     }
 
-    private YamlMapping config(final String stpath) {
-        return this.config(stpath, Optional.empty());
+    @ParameterizedTest
+    @MethodSource("creds")
+    void shouldReturnEmptyMappingIfFileDoesNotExists(final YamlNode node) {
+        MatcherAssert.assertThat(
+            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.of(node)))
+                .fileCredentials().map(yml -> yml.values().size()).get(),
+            new IsEqual<>(0)
+        );
     }
 
-    private YamlMapping config(final String stpath, final Optional<YamlNode> creds) {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static YamlMapping config(final String stpath, final Optional<YamlNode> creds) {
         YamlMappingBuilder meta = Yaml.createYamlMappingBuilder()
             .add(
                 "storage",
@@ -143,6 +151,10 @@ class ArtipieYamlTest {
             meta = meta.add("credentials", creds.get());
         }
         return Yaml.createYamlMappingBuilder().add("meta", meta.build()).build();
+    }
+
+    private YamlMapping config(final String stpath) {
+        return ArtipieYamlTest.config(stpath, Optional.empty());
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

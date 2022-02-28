@@ -40,9 +40,9 @@ public final class Users implements Route {
     public String handle(final Request request, final Response response) {
         JsonObjectBuilder res = Json.createObjectBuilder();
         final Optional<YamlMapping> creds = this.yaml.fileCredentials();
-        if (creds.isPresent()) {
+        if (creds.isPresent() && creds.get().value(ArtipieYaml.NODE_CREDENTIALS) != null) {
             final JsonObject all = new Yaml2Json().apply(creds.get().toString())
-                .asJsonObject().getJsonObject("credentials");
+                .asJsonObject().getJsonObject(ArtipieYaml.NODE_CREDENTIALS);
             for (final Map.Entry<String, JsonValue> item : all.entrySet()) {
                 JsonObjectBuilder user = Json.createObjectBuilder();
                 // @checkstyle LineLengthCheck (1 line)
