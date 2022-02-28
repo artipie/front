@@ -160,7 +160,7 @@ class PutUserTest {
         new PutUser(
             new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.empty()))
         ).handle(Mockito.mock(Request.class), resp);
-        Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
+        Mockito.verify(resp).status(HttpStatus.INTERNAL_SERVER_ERROR_500);
     }
 
     @Test

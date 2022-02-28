@@ -44,7 +44,7 @@ public final class PutUser implements Route {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Object handle(final Request request, final Response response) {
         if (this.artipie.fileCredentialsKey().isEmpty()) {
-            response.status(HttpStatus.BAD_REQUEST_400);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
             return "Authorization type `file` is not configured, cannot add user";
         }
         final String name = request.params(GetUser.USER_PARAM);
