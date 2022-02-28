@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.PutRepository;
@@ -39,6 +40,7 @@ import spark.template.handlebars.HandlebarsTemplateEngine;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class Service {
 
     /**
@@ -144,6 +146,10 @@ public final class Service {
                         this.ignite.get(
                             "/", MimeTypes.Type.APPLICATION_JSON.asString(),
                             new Users(this.settings)
+                        );
+                        this.ignite.get(
+                            String.format("/%s", GetUser.USER_PARAM),
+                            new GetUser(this.settings.credentials())
                         );
                     }
                 );

@@ -37,5 +37,11 @@ public interface Credentials {
          * @return Readonly set of groups
          */
         Set<? extends String> groups();
+
+        /**
+         * User email.
+         * @return Email if present, empty otherwise
+         */
+        Optional<String> email();
     }
 }
