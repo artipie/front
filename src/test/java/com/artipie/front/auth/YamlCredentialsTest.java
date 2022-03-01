@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.settings;
+package com.artipie.front.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
@@ -17,7 +17,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link YamlCredentials}.
+ * Test case for {@link Credentials.FromYaml}.
  * @since 1.0
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -26,7 +26,7 @@ public final class YamlCredentialsTest {
     @Test
     void findUser() {
         final var username = "John";
-        final var user = new YamlCredentials(
+        final var user = new Credentials.FromYaml(
             credYaml(PasswordFormat.SIMPLE, new User(username, "plain", "qwerty"))
         ).user(username);
         MatcherAssert.assertThat(
@@ -37,7 +37,7 @@ public final class YamlCredentialsTest {
     @Test
     void validateShaPass() {
         final var username = "Alice";
-        final var user = new YamlCredentials(
+        final var user = new Credentials.FromYaml(
             // @checkstyle LineLengthCheck (1 line)
             credYaml(PasswordFormat.SIMPLE, new User(username, "sha256", "65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5"))
         ).user(username);
@@ -50,7 +50,7 @@ public final class YamlCredentialsTest {
     @Test
     void validatePlainPass() {
         final var username = "Bob";
-        final var user = new YamlCredentials(
+        final var user = new Credentials.FromYaml(
             credYaml(PasswordFormat.SIMPLE, new User(username, "plain", "1234"))
         ).user(username);
         MatcherAssert.assertThat(
@@ -64,7 +64,7 @@ public final class YamlCredentialsTest {
         final var username = "John";
         final var type = "plain";
         final var pass = "zxcvb";
-        final var user = new YamlCredentials(
+        final var user = new Credentials.FromYaml(
             credYaml(PasswordFormat.STRUCT, new User(username, type, pass))
         ).user(username).get();
         MatcherAssert.assertThat(
@@ -78,7 +78,7 @@ public final class YamlCredentialsTest {
         final var username = "Jane";
         final var admins = "admins";
         final var readers = "readers";
-        final var groups = new YamlCredentials(
+        final var groups = new Credentials.FromYaml(
             credYaml(PasswordFormat.SIMPLE, new User(username, "plain", "qwerty", admins, readers))
         ).user(username).orElseThrow().groups();
         MatcherAssert.assertThat(
@@ -92,7 +92,7 @@ public final class YamlCredentialsTest {
         final var username = "Olga";
         final var email = "olga@example.com";
         MatcherAssert.assertThat(
-            new YamlCredentials(
+            new Credentials.FromYaml(
                 credYaml(
                     PasswordFormat.SIMPLE,
                     new User(username, "plain", "qwerty", Optional.of(email))

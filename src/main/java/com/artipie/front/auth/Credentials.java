@@ -4,8 +4,8 @@
  */
 package com.artipie.front.auth;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Credentials.
@@ -20,28 +20,30 @@ public interface Credentials {
     Optional<User> user(String name);
 
     /**
-     * User.
+     * Yaml credentials parser.
      * @since 1.0
      */
-    interface User {
+    final class FromYaml implements Credentials {
 
         /**
-         * Validate user password.
-         * @param pass Password to check
-         * @return True if password is valid
+         * Yaml source.
          */
-        boolean validatePassword(String pass);
+        private final YamlMapping mapping;
 
         /**
-         * User groups.
-         * @return Readonly set of groups
+         * New yaml credentials.
+         * @param mapping Yaml
          */
-        Set<? extends String> groups();
+        public FromYaml(final YamlMapping mapping) {
+            this.mapping = mapping;
+        }
 
-        /**
-         * User email.
-         * @return Email if present, empty otherwise
-         */
-        Optional<String> email();
+        @Override
+        public Optional<User> user(final String name) {
+            return Optional.ofNullable(this.mapping.yamlMapping("credentials"))
+                .flatMap(cred -> Optional.ofNullable(cred.yamlMapping(name)))
+                .map(yaml -> new User.FromYaml(yaml, name));
+        }
+
     }
 }

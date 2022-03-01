@@ -5,8 +5,8 @@
 package com.artipie.front.api;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.front.settings.YamlCredentials;
-import com.artipie.front.settings.YamlCredentialsTest;
+import com.artipie.front.auth.Credentials;
+import com.artipie.front.auth.YamlCredentialsTest;
 import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONException;
@@ -35,7 +35,7 @@ class GetUserTest {
         Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
         JSONAssert.assertEquals(
             new GetUser(
-                new YamlCredentials(
+                new Credentials.FromYaml(
                     YamlCredentialsTest.credYaml(
                         YamlCredentialsTest.PasswordFormat.SIMPLE,
                         // @checkstyle LineLengthCheck (5 lines)
@@ -56,7 +56,7 @@ class GetUserTest {
         Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn("any");
         final Response resp = Mockito.mock(Response.class);
         new GetUser(
-            new YamlCredentials(
+            new Credentials.FromYaml(
                 Yaml.createYamlMappingBuilder()
                     .add("credentials", Yaml.createYamlMappingBuilder().build()).build()
             )

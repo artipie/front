@@ -2,10 +2,9 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.settings;
+package com.artipie.front.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.front.auth.Credentials;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -15,36 +14,46 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.codec.digest.DigestUtils;
 
 /**
- * Yaml credentials parser.
+ * User.
+ *
  * @since 1.0
  */
-public final class YamlCredentials implements Credentials {
+public interface User {
 
     /**
-     * Yaml source.
+     * Validate user password.
+     *
+     * @param pass Password to check
+     * @return True if password is valid
      */
-    private final YamlMapping mapping;
+    boolean validatePassword(String pass);
 
     /**
-     * New yaml credentials.
-     * @param mapping Yaml
+     * User id (name).
+     *
+     * @return String id
      */
-    public YamlCredentials(final YamlMapping mapping) {
-        this.mapping = mapping;
-    }
+    String uid();
 
-    @Override
-    public Optional<Credentials.User> user(final String name) {
-        return Optional.ofNullable(this.mapping.yamlMapping("credentials"))
-            .flatMap(cred -> Optional.ofNullable(cred.yamlMapping(name)))
-            .map(User::new);
-    }
+    /**
+     * User groups.
+     *
+     * @return Readonly set of groups
+     */
+    Set<? extends String> groups();
+
+    /**
+     * User email.
+     *
+     * @return Email if present, empty otherwise
+     */
+    Optional<String> email();
 
     /**
      * Yaml user item.
      * @since 1.0
      */
-    private static final class User implements Credentials.User {
+    final class FromYaml implements User {
 
         /**
          * Yaml source.
@@ -52,11 +61,18 @@ public final class YamlCredentials implements Credentials {
         private final YamlMapping mapping;
 
         /**
+         * User name (id).
+         */
+        private final String name;
+
+        /**
          * New user.
          * @param mapping Yaml
+         * @param name User name
          */
-        private User(final YamlMapping mapping) {
+        public FromYaml(final YamlMapping mapping, final String name) {
             this.mapping = mapping;
+            this.name = name;
         }
 
         @Override
@@ -75,6 +91,11 @@ public final class YamlCredentials implements Credentials {
                 res = validateStringPass(String.join(":", type, config), pass);
             }
             return res;
+        }
+
+        @Override
+        public String uid() {
+            return this.name;
         }
 
         @Override
