@@ -5,7 +5,6 @@
 package com.artipie.front.auth;
 
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Credentials.
@@ -19,29 +18,4 @@ public interface Credentials {
      */
     Optional<User> user(String name);
 
-    /**
-     * User.
-     * @since 1.0
-     */
-    interface User {
-
-        /**
-         * Validate user password.
-         * @param pass Password to check
-         * @return True if password is valid
-         */
-        boolean validatePassword(String pass);
-
-        /**
-         * User groups.
-         * @return Readonly set of groups
-         */
-        Set<? extends String> groups();
-
-        /**
-         * User email.
-         * @return Email if present, empty otherwise
-         */
-        Optional<String> email();
-    }
 }

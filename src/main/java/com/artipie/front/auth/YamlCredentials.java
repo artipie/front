@@ -2,10 +2,9 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.settings;
+package com.artipie.front.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.front.auth.Credentials;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +15,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Yaml credentials parser.
+ *
  * @since 1.0
  */
 public final class YamlCredentials implements Credentials {
@@ -27,6 +27,7 @@ public final class YamlCredentials implements Credentials {
 
     /**
      * New yaml credentials.
+     *
      * @param mapping Yaml
      */
     public YamlCredentials(final YamlMapping mapping) {
@@ -34,17 +35,17 @@ public final class YamlCredentials implements Credentials {
     }
 
     @Override
-    public Optional<Credentials.User> user(final String name) {
+    public Optional<User> user(final String name) {
         return Optional.ofNullable(this.mapping.yamlMapping("credentials"))
             .flatMap(cred -> Optional.ofNullable(cred.yamlMapping(name)))
-            .map(User::new);
+            .map(yaml -> new YamlUser(yaml, name));
     }
 
     /**
      * Yaml user item.
      * @since 1.0
      */
-    private static final class User implements Credentials.User {
+    public static final class YamlUser implements User {
 
         /**
          * Yaml source.
@@ -52,11 +53,18 @@ public final class YamlCredentials implements Credentials {
         private final YamlMapping mapping;
 
         /**
+         * User name (id).
+         */
+        private final String name;
+
+        /**
          * New user.
          * @param mapping Yaml
+         * @param name User name
          */
-        private User(final YamlMapping mapping) {
+        public YamlUser(final YamlMapping mapping, final String name) {
             this.mapping = mapping;
+            this.name = name;
         }
 
         @Override
@@ -75,6 +83,11 @@ public final class YamlCredentials implements Credentials {
                 res = validateStringPass(String.join(":", type, config), pass);
             }
             return res;
+        }
+
+        @Override
+        public String uid() {
+            return this.name;
         }
 
         @Override

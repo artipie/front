@@ -9,6 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.auth.YamlCredentialsTest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

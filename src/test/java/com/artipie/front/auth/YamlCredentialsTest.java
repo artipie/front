@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.settings;
+package com.artipie.front.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
