@@ -5,6 +5,7 @@
 package com.artipie.front.api;
 
 import com.artipie.front.auth.Credentials;
+import com.artipie.front.auth.User;
 import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -43,7 +44,7 @@ public final class GetUser implements Route {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public String handle(final Request request, final Response response) {
         final String name = request.params(GetUser.USER_PARAM);
-        final Optional<Credentials.User> user = this.creds.user(name);
+        final Optional<User> user = this.creds.user(name);
         if (user.isPresent()) {
             final JsonObjectBuilder json = Json.createObjectBuilder();
             user.get().email().ifPresent(email -> json.add("email", email));

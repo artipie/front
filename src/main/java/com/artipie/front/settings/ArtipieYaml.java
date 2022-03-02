@@ -13,6 +13,9 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.auth.Credentials;
+import com.artipie.front.auth.Users;
+import com.artipie.front.auth.YamlCredentials;
+import com.artipie.front.auth.YamlUsers;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -120,6 +123,18 @@ public final class ArtipieYaml {
                 .map(YamlNode::asMapping)
         ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)))
             .map(file -> new Key.From(file.string("path")));
+    }
+
+    /**
+     * Artipie users.
+     * @return Users instance
+     */
+    public Users users() {
+        return new YamlUsers(
+            this.fileCredentialsKey().orElseThrow(
+                () -> new IllegalStateException("Only users from file auth are supported")
+            ), this.storage()
+        );
     }
 
     /**

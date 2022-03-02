@@ -5,8 +5,8 @@
 package com.artipie.front.api;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.front.settings.YamlCredentials;
-import com.artipie.front.settings.YamlCredentialsTest;
+import com.artipie.front.auth.YamlCredentials;
+import com.artipie.front.auth.YamlCredentialsTest;
 import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONException;

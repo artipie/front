@@ -4,8 +4,8 @@
  */
 package com.artipie.front.api;
 
-import com.artipie.front.settings.YamlCredentials;
-import com.artipie.front.settings.YamlCredentialsTest;
+import com.artipie.front.auth.YamlCredentials;
+import com.artipie.front.auth.YamlCredentialsTest;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

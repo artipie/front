@@ -5,8 +5,8 @@
 package com.artipie.front.api;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.front.auth.YamlCredentialsTest;
 import com.artipie.front.settings.ArtipieYaml;
-import com.artipie.front.settings.YamlCredentialsTest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
