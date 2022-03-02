@@ -84,11 +84,22 @@ public final class ArtipieYaml {
     }
 
     /**
-     * Credentials from config yaml mapping if the credentials type is file and
-     * this file exists.
-     * @return Credentials file yaml
+     * Artipie users.
+     * @return Users instance
      */
-    public Optional<YamlMapping> fileCredentials() {
+    public Users users() {
+        return new YamlUsers(
+            this.fileCredentialsKey().orElseThrow(
+                () -> new IllegalStateException("Only users from file auth are supported")
+            ), this.storage()
+        );
+    }
+
+    /**
+     * Credentials from config.
+     * @return Credentials
+     */
+    public Credentials credentials() {
         final Optional<Key> key = this.fileCredentialsKey();
         Optional<YamlMapping> res = Optional.empty();
         if (key.isPresent() && this.storage().exists(key.get())) {
@@ -107,44 +118,8 @@ public final class ArtipieYaml {
         } else if (key.isPresent()) {
             res = Optional.of(Yaml.createYamlMappingBuilder().build());
         }
-        return res;
-    }
-
-    /**
-     * File credentials key (=storage relative path) if set.
-     * @return Key to credentials file.
-     */
-    public Optional<Key> fileCredentialsKey() {
-        return Optional.ofNullable(
-            this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
-        ).map(
-            seq -> seq.values().stream()
-                .filter(node -> "file".equals(node.asMapping().string("type"))).findFirst()
-                .map(YamlNode::asMapping)
-        ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)))
-            .map(file -> new Key.From(file.string("path")));
-    }
-
-    /**
-     * Artipie users.
-     * @return Users instance
-     */
-    public Users users() {
-        return new YamlUsers(
-            this.fileCredentialsKey().orElseThrow(
-                () -> new IllegalStateException("Only users from file auth are supported")
-            ), this.storage()
-        );
-    }
-
-    /**
-     * Credentials from config.
-     * @return Credentials
-     */
-    public Credentials credentials() {
         return new YamlCredentials(
-            this.fileCredentials()
-                .orElseThrow(() -> new NotImplementedException("Not implemented yet"))
+            res.orElseThrow(() -> new NotImplementedException("Not implemented yet"))
         );
     }
 
@@ -169,5 +144,20 @@ public final class ArtipieYaml {
                 )
             )
         ).storage();
+    }
+
+    /**
+     * File credentials key (=storage relative path) if set.
+     * @return Key to credentials file.
+     */
+    private Optional<Key> fileCredentialsKey() {
+        return Optional.ofNullable(
+            this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
+        ).map(
+            seq -> seq.values().stream()
+                .filter(node -> "file".equals(node.asMapping().string("type"))).findFirst()
+                .map(YamlNode::asMapping)
+        ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)))
+        .map(file -> new Key.From(file.string("path")));
     }
 }

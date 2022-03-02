@@ -4,15 +4,8 @@
  */
 package com.artipie.front.api;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlNode;
-import com.artipie.front.misc.Json2Yaml;
-import com.artipie.front.settings.ArtipieYaml;
+import com.artipie.front.auth.Users;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
@@ -28,27 +21,23 @@ import spark.Route;
 public final class PutUser implements Route {
 
     /**
-     * Artipie yaml settings.
+     * Artipie users.
      */
-    private final ArtipieYaml artipie;
+    private final Users users;
 
     /**
      * Ctor.
-     * @param artipie Artipie yaml settings
+     * @param users Artipie users
      */
-    public PutUser(final ArtipieYaml artipie) {
-        this.artipie = artipie;
+    public PutUser(final Users users) {
+        this.users = users;
     }
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Object handle(final Request request, final Response response) {
-        if (this.artipie.fileCredentialsKey().isEmpty()) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
-            return "Authorization type `file` is not configured, cannot add user";
-        }
         final String name = request.params(GetUser.USER_PARAM);
-        if (this.artipie.credentials().user(name).isPresent()) {
+        if (this.users.list().stream().anyMatch(usr -> name.equals(usr.uid()))) {
             response.status(HttpStatus.CONFLICT_409);
             return String.format("User %s already exists", name);
         }
@@ -66,31 +55,8 @@ public final class PutUser implements Route {
             response.status(HttpStatus.BAD_REQUEST_400);
             return "Password field `pass` is required";
         }
-        this.update(user, name);
+        this.users.add(user, name);
         response.status(HttpStatus.CREATED_201);
         return null;
-    }
-
-    /**
-     * Updates credentials file by adding new user.
-     * @param obj Info of the new user
-     * @param name New username
-     */
-    private void update(final JsonObject obj, final String name) {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-        final Optional<YamlMapping> creds = this.artipie.fileCredentials()
-            .map(yaml -> yaml.yamlMapping(ArtipieYaml.NODE_CREDENTIALS));
-        if (creds.isPresent()) {
-            for (final YamlNode node : creds.get().keys()) {
-                final String val = node.asScalar().value();
-                builder = builder.add(val, creds.get().yamlMapping(val));
-            }
-        }
-        builder = builder.add(name, new Json2Yaml().apply(obj.toString()));
-        this.artipie.storage().save(
-            this.artipie.fileCredentialsKey().get(),
-            Yaml.createYamlMappingBuilder().add(ArtipieYaml.NODE_CREDENTIALS, builder.build())
-                .build().toString().getBytes(StandardCharsets.UTF_8)
-        );
     }
 }

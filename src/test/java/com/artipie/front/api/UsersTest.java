@@ -4,17 +4,16 @@
  */
 package com.artipie.front.api;
 
-import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.asto.Key;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.front.auth.YamlCredentialsTest;
-import com.artipie.front.settings.ArtipieYaml;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.artipie.front.auth.YamlUsers;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import spark.Request;
@@ -30,55 +29,38 @@ class UsersTest {
     /**
      * Credentials file.
      */
-    private static final String CREDS_YAML = "creds.yaml";
+    private static final Key CREDS = new Key.From("creds.yaml");
 
     /**
-     * Test temp dir.
-     * @checkstyle VisibilityModifierCheck (10 lines)
+     * Test storage.
      */
-    @TempDir
-    Path temp;
+    private BlockingStorage blsto;
 
     /**
-     * Test ArtipieYaml instance.
+     * Test users.
      */
-    private ArtipieYaml artipie;
+    private com.artipie.front.auth.Users users;
 
     @BeforeEach
     void init() {
-        this.artipie = new ArtipieYaml(
-            Yaml.createYamlMappingBuilder().add(
-                "meta",
-                Yaml.createYamlMappingBuilder()
-                    .add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", this.temp.toString()).build()
-                    )
-                    .add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder().add("type", "file")
-                            .add("path", UsersTest.CREDS_YAML).build()
-                    ).build()
-            ).build()
-        );
+        this.blsto = new BlockingStorage(new InMemoryStorage());
+        this.users = new YamlUsers(UsersTest.CREDS, this.blsto);
     }
 
     @Test
-    void writesUsers() throws JSONException, IOException {
-        Files.writeString(
-            this.temp.resolve(UsersTest.CREDS_YAML),
+    void writesUsers() throws JSONException {
+        this.blsto.save(
+            UsersTest.CREDS,
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.SIMPLE,
                 // @checkstyle LineLengthCheck (1 line)
                 new YamlCredentialsTest.User("Alice", "plain", "123", Optional.of("alice@example.com")),
                 new YamlCredentialsTest.User("John", "sha256", "xxx", "reader", "dev-lead"),
                 new YamlCredentialsTest.User("Mark", "sha256", "xxx")
-            ).toString()
+            ).toString().getBytes(StandardCharsets.UTF_8)
         );
         JSONAssert.assertEquals(
-            new Users(this.artipie)
+            new Users(this.users)
                 .handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
             String.join(
                 "\n",
@@ -95,7 +77,7 @@ class UsersTest {
     @Test
     void writesEmptyWhenAbsent() throws JSONException {
         JSONAssert.assertEquals(
-            new Users(this.artipie)
+            new Users(this.users)
                 .handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
             "{}",
             true

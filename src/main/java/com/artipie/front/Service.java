@@ -147,11 +147,11 @@ public final class Service {
                     "/users", () -> {
                         this.ignite.get(
                             "/", MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new Users(this.settings)
+                            new Users(this.settings.users())
                         );
                         final String usr = String.format("/%s", GetUser.USER_PARAM);
                         this.ignite.get(usr, new GetUser(this.settings.credentials()));
-                        this.ignite.put(usr, new PutUser(this.settings));
+                        this.ignite.put(usr, new PutUser(this.settings.users()));
                         this.ignite.head(usr, new HeadUser(this.settings.credentials()));
                     }
                 );
