@@ -34,7 +34,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class UsersTest {
+class YamlUsersTest {
 
     /**
      * Test credentials key.
@@ -54,13 +54,13 @@ class UsersTest {
     @BeforeEach
     void init() {
         this.blsto = new BlockingStorage(new InMemoryStorage());
-        this.users = new YamlUsers(UsersTest.KEY, this.blsto);
+        this.users = new YamlUsers(YamlUsersTest.KEY, this.blsto);
     }
 
     @Test
     void listUsers() {
         this.blsto.save(
-            UsersTest.KEY,
+            YamlUsersTest.KEY,
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.STRUCT,
                 new YamlCredentialsTest.User("Alice", Optional.of("alice@example.com"), "admin"),
@@ -85,7 +85,7 @@ class UsersTest {
     @ValueSource(booleans = {true, false})
     void returnsEmptyList(final boolean add) {
         if (add) {
-            this.blsto.save(UsersTest.KEY, new byte[]{});
+            this.blsto.save(YamlUsersTest.KEY, new byte[]{});
         }
         MatcherAssert.assertThat(
             this.users.list(),
@@ -98,7 +98,7 @@ class UsersTest {
     void addsUser(final Pair<YamlMapping, Boolean> pair) {
         if (pair.getRight()) {
             this.blsto.save(
-                UsersTest.KEY,
+                YamlUsersTest.KEY,
                 pair.getLeft().toString().getBytes(StandardCharsets.UTF_8)
             );
         }
@@ -135,7 +135,7 @@ class UsersTest {
     void throwsNotFoundErrorWhenUserNotExist(final Pair<YamlMapping, Boolean> pair) {
         if (pair.getRight()) {
             this.blsto.save(
-                UsersTest.KEY,
+                YamlUsersTest.KEY,
                 pair.getLeft().toString().getBytes(StandardCharsets.UTF_8)
             );
         }
@@ -148,7 +148,7 @@ class UsersTest {
     @Test
     void removesUser() {
         this.blsto.save(
-            UsersTest.KEY,
+            YamlUsersTest.KEY,
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.SIMPLE,
                 new YamlCredentialsTest.User("John", "sha256", "xxx"),
