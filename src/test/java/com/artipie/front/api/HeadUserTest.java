@@ -4,7 +4,7 @@
  */
 package com.artipie.front.api;
 
-import com.artipie.front.auth.Credentials;
+import com.artipie.front.auth.YamlCredentials;
 import com.artipie.front.auth.YamlCredentialsTest;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class HeadUserTest {
         Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(uid);
         final Response resp = Mockito.mock(Response.class);
         new HeadUser(
-            new Credentials.FromYaml(
+            new YamlCredentials(
                 YamlCredentialsTest.credYaml(
                     YamlCredentialsTest.PasswordFormat.SIMPLE,
                     new YamlCredentialsTest.User(uid, "plain", "123")
@@ -42,7 +42,7 @@ class HeadUserTest {
         Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn("Someone");
         final Response resp = Mockito.mock(Response.class);
         new HeadUser(
-            new Credentials.FromYaml(
+            new YamlCredentials(
                 YamlCredentialsTest.credYaml(
                     YamlCredentialsTest.PasswordFormat.SIMPLE,
                     new YamlCredentialsTest.User("John", "plain", "123")

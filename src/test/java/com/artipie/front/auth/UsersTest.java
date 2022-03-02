@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Test for {@link Users.FromYamlFile}.
+ * Test for {@link YamlUsers}.
  * @since 0.1
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -54,7 +54,7 @@ class UsersTest {
     @BeforeEach
     void init() {
         this.blsto = new BlockingStorage(new InMemoryStorage());
-        this.users = new Users.FromYamlFile(UsersTest.KEY, this.blsto);
+        this.users = new YamlUsers(UsersTest.KEY, this.blsto);
     }
 
     @Test
