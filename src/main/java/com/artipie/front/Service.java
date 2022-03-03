@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.GetRepositoryPermissions;
 import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.HeadUser;
@@ -133,14 +134,16 @@ public final class Service {
                         final RepoSettings stn = new RepoSettings(
                             this.settings.layout(), this.settings.repoConfigsStorage()
                         );
-                        final String path = String.format("/%s", GetRepository.PARAM);
+                        final String repo = String.format("/%s", GetRepository.PARAM);
                         this.ignite.get(
-                            path, MimeTypes.Type.APPLICATION_JSON.asString(),
+                            repo, MimeTypes.Type.APPLICATION_JSON.asString(),
                             new GetRepository(stn)
                         );
-                        this.ignite.head(path, new HeadRepository(stn));
-                        this.ignite.delete(path, new DeleteRepository(stn));
-                        this.ignite.put(path, new PutRepository(stn));
+                        this.ignite.head(repo, new HeadRepository(stn));
+                        this.ignite.delete(repo, new DeleteRepository(stn));
+                        this.ignite.put(repo, new PutRepository(stn));
+                        final String perms = String.format("/%s/permissions", GetRepository.PARAM);
+                        this.ignite.get(perms, new GetRepositoryPermissions(stn));
                     }
                 );
                 this.ignite.path(
