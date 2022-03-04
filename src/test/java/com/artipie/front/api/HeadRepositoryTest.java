@@ -45,7 +45,7 @@ class HeadRepositoryTest {
         final String uid = "Mark";
         this.blsto.save(new Key.From(key), new byte[]{});
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn(uid);
         MatcherAssert.assertThat(
             new HeadRepository(new RepoSettings(layout, this.blsto))
@@ -57,7 +57,7 @@ class HeadRepositoryTest {
     @Test
     void throwsExceptionWhenNotFound() {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn("my-repo");
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn("my-repo");
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         Assertions.assertThrows(
             NotFoundException.class,

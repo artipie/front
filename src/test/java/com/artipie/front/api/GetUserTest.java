@@ -32,7 +32,7 @@ class GetUserTest {
         }, delimiterString = ";")
     void returnsUserInfo(final String name, final String res) throws JSONException {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
         JSONAssert.assertEquals(
             new GetUser(
                 new YamlCredentials(
@@ -53,7 +53,7 @@ class GetUserTest {
     @Test
     void returnNotFound() {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn("any");
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("any");
         final Response resp = Mockito.mock(Response.class);
         new GetUser(
             new YamlCredentials(

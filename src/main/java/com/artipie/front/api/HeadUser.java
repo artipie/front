@@ -31,7 +31,7 @@ public final class HeadUser implements Route {
 
     @Override
     public Object handle(final Request request, final Response response) {
-        if (this.creds.user(request.params(GetUser.USER_PARAM)).isEmpty()) {
+        if (this.creds.user(GetUser.USER_PARAM.parse(request)).isEmpty()) {
             response.status(HttpStatus.NOT_FOUND_404);
         } else {
             response.status(HttpStatus.OK_200);
