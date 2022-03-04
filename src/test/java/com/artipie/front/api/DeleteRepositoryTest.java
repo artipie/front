@@ -44,7 +44,7 @@ class DeleteRepositoryTest {
         final String uid = "Alice";
         this.blsto.save(new Key.From(key), new byte[]{});
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn(uid);
         MatcherAssert.assertThat(
             "Failed to process request",

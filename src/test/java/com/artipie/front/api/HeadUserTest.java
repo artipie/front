@@ -23,7 +23,7 @@ class HeadUserTest {
     void returnsOkWhenUserFound() {
         final var rqs = Mockito.mock(Request.class);
         final String uid = "Alice";
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(uid);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(uid);
         final Response resp = Mockito.mock(Response.class);
         new HeadUser(
             new YamlCredentials(
@@ -39,7 +39,7 @@ class HeadUserTest {
     @Test
     void returnsNotFoundWhenUserDoesNotExists() {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn("Someone");
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("Someone");
         final Response resp = Mockito.mock(Response.class);
         new HeadUser(
             new YamlCredentials(

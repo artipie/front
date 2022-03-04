@@ -36,7 +36,7 @@ public final class PutUser implements Route {
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Object handle(final Request request, final Response response) {
-        final String name = request.params(GetUser.USER_PARAM);
+        final String name = GetUser.USER_PARAM.parse(request);
         if (this.users.list().stream().anyMatch(usr -> name.equals(usr.uid()))) {
             response.status(HttpStatus.CONFLICT_409);
             return String.format("User %s already exists", name);

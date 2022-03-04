@@ -38,7 +38,7 @@ class GetRepositoryTest {
         );
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         JSONAssert.assertEquals(
             new GetRepository(new RepoSettings("flat", blsto)).handle(rqs, resp),

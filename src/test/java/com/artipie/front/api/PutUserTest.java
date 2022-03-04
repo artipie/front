@@ -64,7 +64,7 @@ class PutUserTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         final var name = "john";
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
         new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
@@ -99,7 +99,7 @@ class PutUserTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         final var name = "Alice";
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
         new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
@@ -128,7 +128,7 @@ class PutUserTest {
     void returnBadRequest(final String body) {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn("Alice");
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("Alice");
         Mockito.when(rqs.body()).thenReturn(body);
         new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
@@ -146,7 +146,7 @@ class PutUserTest {
         );
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
         new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CONFLICT_409);
     }
