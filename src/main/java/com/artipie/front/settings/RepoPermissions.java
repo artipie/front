@@ -5,6 +5,7 @@
 package com.artipie.front.settings;
 
 import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.json.JsonStructure;
 
 /**
@@ -16,10 +17,10 @@ public interface RepoPermissions {
     /**
      * Read permissions of the repository.
      * @param repo Repository name
-     * @return Permissions as json structure
+     * @return Permissions as json object
      * @throws com.artipie.front.api.NotFoundException If repository does not exist
      */
-    JsonStructure get(String repo);
+    JsonObject get(String repo);
 
     /**
      * Add repository permissions for user.

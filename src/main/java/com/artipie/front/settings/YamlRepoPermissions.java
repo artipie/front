@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import org.apache.commons.lang3.NotImplementedException;
@@ -54,8 +55,9 @@ public final class YamlRepoPermissions implements RepoPermissions {
     }
 
     @Override
-    public JsonStructure get(final String repo) {
+    public JsonObject get(final String repo) {
         return this.permsYaml(repo).map(YamlMapping::toString).map(new Yaml2Json())
+            .map(JsonValue::asJsonObject)
             .orElse(Json.createObjectBuilder().build());
     }
 
