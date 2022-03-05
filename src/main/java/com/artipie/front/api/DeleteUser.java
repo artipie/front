@@ -31,7 +31,7 @@ public final class DeleteUser implements Route {
 
     @Override
     public Object handle(final Request request, final Response response) {
-        this.users.remove(request.params(GetUser.USER_PARAM));
+        this.users.remove(GetUser.USER_PARAM.parse(request));
         response.status(HttpStatus.OK_200);
         return null;
     }

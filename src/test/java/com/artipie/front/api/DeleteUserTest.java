@@ -60,7 +60,7 @@ class DeleteUserTest {
             ).toString().getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(alice);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(alice);
         final Response resp = Mockito.mock(Response.class);
         new DeleteUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.OK_200);
