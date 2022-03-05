@@ -39,7 +39,7 @@ public final class PutRepository implements Route {
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Object handle(final Request request, final Response response) {
-        final String param = GetRepository.NAME_PARAM.parse(request);
+        final String param = GetRepository.REPO_PARAM.parse(request);
         final String uid = RequestAttr.Standard.USER_ID.readOrThrow(request);
         if (this.stn.exists(param, uid)) {
             response.status(HttpStatus.CONFLICT_409);

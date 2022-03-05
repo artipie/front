@@ -44,7 +44,7 @@ public final class GetRepositoryPermissions implements Route {
         final JsonObject perms = new Yaml2Json().apply(
             new String(
                 this.stn.value(
-                    GetRepository.NAME_PARAM.parse(request),
+                    GetRepository.REPO_PARAM.parse(request),
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 ),
                 StandardCharsets.UTF_8

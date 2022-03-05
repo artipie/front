@@ -10,6 +10,7 @@ import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.DeleteUser;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.GetRepositoryPermissions;
+import com.artipie.front.api.GetStorages;
 import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.HeadUser;
@@ -137,7 +138,7 @@ public final class Service {
                         final RepoSettings stn = new RepoSettings(
                             this.settings.layout(), this.settings.repoConfigsStorage()
                         );
-                        final RequestPath path = new RequestPath().with(GetRepository.NAME_PARAM);
+                        final RequestPath path = new RequestPath().with(GetRepository.REPO_PARAM);
                         this.ignite.get(
                             path.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
                             new GetRepository(stn)
@@ -148,6 +149,21 @@ public final class Service {
                         this.ignite.get(
                             path.with("permissions").toString(),
                             new GetRepositoryPermissions(stn)
+                        );
+                        final RequestPath repo = this.repoPath();
+                        this.ignite.get(
+                            repo.with("storages").toString(),
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new GetStorages(this.settings.repoConfigsStorage())
+                        );
+                    }
+                );
+                this.ignite.path(
+                    "/storages", () -> {
+                        this.ignite.get(
+                            "/",
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new GetStorages(this.settings.repoConfigsStorage())
                         );
                     }
                 );
@@ -205,5 +221,18 @@ public final class Service {
         this.ignite.stop();
         this.ignite.awaitStop();
         Logger.info(this, "service stopped");
+    }
+
+    /**
+     * Returns repository name path parameter. When artipie layout is org, repository name
+     * has username path prefix: uname/reponame.
+     * @return Repository name path parameter
+     */
+    private RequestPath repoPath() {
+        RequestPath res = new RequestPath().with(GetRepository.REPO_PARAM);
+        if ("org".equals(this.settings.layout())) {
+            res = new RequestPath().with(GetUser.USER_PARAM).with(GetRepository.REPO_PARAM);
+        }
+        return res;
     }
 }
