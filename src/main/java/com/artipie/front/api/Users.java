@@ -4,15 +4,10 @@
  */
 package com.artipie.front.api;
 
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.front.misc.Yaml2Json;
-import com.artipie.front.settings.ArtipieYaml;
-import java.util.Map;
-import java.util.Optional;
+import com.artipie.front.auth.User;
 import javax.json.Json;
-import javax.json.JsonObject;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -24,35 +19,30 @@ import spark.Route;
 public final class Users implements Route {
 
     /**
-     * Credentials yaml mapping string.
+     * Artipie users.
      */
-    private final ArtipieYaml yaml;
+    private final com.artipie.front.auth.Users ausers;
 
     /**
      * Ctor.
-     * @param creds Credentials yaml mapping
+     * @param creds Artipie users
      */
-    public Users(final ArtipieYaml creds) {
-        this.yaml = creds;
+    public Users(final com.artipie.front.auth.Users creds) {
+        this.ausers = creds;
     }
 
     @Override
     public String handle(final Request request, final Response response) {
-        JsonObjectBuilder res = Json.createObjectBuilder();
-        final Optional<YamlMapping> creds = this.yaml.fileCredentials();
-        if (creds.isPresent() && creds.get().value(ArtipieYaml.NODE_CREDENTIALS) != null) {
-            final JsonObject all = new Yaml2Json().apply(creds.get().toString())
-                .asJsonObject().getJsonObject(ArtipieYaml.NODE_CREDENTIALS);
-            for (final Map.Entry<String, JsonValue> item : all.entrySet()) {
-                JsonObjectBuilder user = Json.createObjectBuilder();
-                // @checkstyle LineLengthCheck (1 line)
-                for (final Map.Entry<String, JsonValue> val : item.getValue().asJsonObject().entrySet()) {
-                    if (!"type".equals(val.getKey()) && !"pass".equals(val.getKey())) {
-                        user = user.add(val.getKey(), val.getValue());
-                    }
-                }
-                res = res.add(item.getKey(), user.build());
+        final JsonObjectBuilder res = Json.createObjectBuilder();
+        for (final User usr : this.ausers.list()) {
+            final JsonObjectBuilder builder = Json.createObjectBuilder();
+            usr.email().ifPresent(email -> builder.add("email", email));
+            if (!usr.groups().isEmpty()) {
+                final JsonArrayBuilder arr = Json.createArrayBuilder();
+                usr.groups().forEach(arr::add);
+                builder.add("groups", arr);
             }
+            res.add(usr.uid(), builder.build());
         }
         return res.build().toString();
     }

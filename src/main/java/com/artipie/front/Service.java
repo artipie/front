@@ -9,6 +9,7 @@ import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.DeleteUser;
 import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.GetRepositoryPermissions;
 import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.HeadUser;
@@ -19,6 +20,7 @@ import com.artipie.front.api.Repositories;
 import com.artipie.front.api.Users;
 import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
+import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoSettings;
 import com.artipie.front.ui.PostSignIn;
@@ -134,27 +136,31 @@ public final class Service {
                         final RepoSettings stn = new RepoSettings(
                             this.settings.layout(), this.settings.repoConfigsStorage()
                         );
-                        final String path = String.format("/%s", GetRepository.PARAM);
+                        final RequestPath path = new RequestPath().with(GetRepository.NAME_PARAM);
                         this.ignite.get(
-                            path, MimeTypes.Type.APPLICATION_JSON.asString(),
+                            path.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
                             new GetRepository(stn)
                         );
-                        this.ignite.head(path, new HeadRepository(stn));
-                        this.ignite.delete(path, new DeleteRepository(stn));
-                        this.ignite.put(path, new PutRepository(stn));
+                        this.ignite.head(path.toString(), new HeadRepository(stn));
+                        this.ignite.delete(path.toString(), new DeleteRepository(stn));
+                        this.ignite.put(path.toString(), new PutRepository(stn));
+                        this.ignite.get(
+                            path.with("permissions").toString(),
+                            new GetRepositoryPermissions(stn)
+                        );
                     }
                 );
                 this.ignite.path(
                     "/users", () -> {
                         this.ignite.get(
                             "/", MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new Users(this.settings)
+                            new Users(this.settings.users())
                         );
-                        final String usr = String.format("/%s", GetUser.USER_PARAM);
-                        this.ignite.get(usr, new GetUser(this.settings.credentials()));
-                        this.ignite.put(usr, new PutUser(this.settings));
-                        this.ignite.head(usr, new HeadUser(this.settings.credentials()));
-                        this.ignite.delete(usr, new DeleteUser(this.settings.users()));
+                        final String path = new RequestPath().with(GetUser.USER_PARAM).toString();
+                        this.ignite.get(path, new GetUser(this.settings.credentials()));
+                        this.ignite.put(path, new PutUser(this.settings.users()));
+                        this.ignite.head(path, new HeadUser(this.settings.credentials()));
+                        this.ignite.delete(path, new DeleteUser(this.settings.users()));
                     }
                 );
             }

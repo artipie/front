@@ -45,7 +45,7 @@ class PutRepositoryTest {
     void addsNewRepo() {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn("my-rpm");
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn("my-rpm");
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         Mockito.when(rqs.body()).thenReturn(
             new String(
@@ -88,7 +88,7 @@ class PutRepositoryTest {
     void returnsBadRequestWhenReqIsInvalid(final String body) {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn("my-maven");
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn("my-maven");
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         Mockito.when(rqs.body()).thenReturn(body);
         new PutRepository(new RepoSettings("org", this.blsto)).handle(rqs, resp);
@@ -101,7 +101,7 @@ class PutRepositoryTest {
         this.blsto.save(new Key.From(jane, "my-docker.yml"), new byte[]{});
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.PARAM)).thenReturn("my-docker");
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn("my-docker");
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn(jane);
         new PutRepository(new RepoSettings("org", this.blsto)).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CONFLICT_409);

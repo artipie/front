@@ -4,16 +4,12 @@
  */
 package com.artipie.front.api;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.front.auth.YamlCredentialsTest;
-import com.artipie.front.settings.ArtipieYaml;
-import com.artipie.front.settings.ArtipieYamlTest;
+import com.artipie.front.auth.YamlUsers;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Optional;
 import javax.json.Json;
 import org.eclipse.jetty.http.HttpStatus;
@@ -21,7 +17,6 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
@@ -38,31 +33,22 @@ class PutUserTest {
     /**
      * Test credentials file name.
      */
-    private static final String CREDS_YAML = "_creds.yaml";
-
-    /**
-     * Credentials yaml node.
-     */
-    private static final Optional<YamlNode> YAML_NODE = Optional.of(
-        Yaml.createYamlMappingBuilder().add("type", "file")
-            .add("path", PutUserTest.CREDS_YAML).build()
-    );
-
-    /**
-     * Temp directory.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     */
-    @TempDir
-    Path tmp;
+    private static final Key CREDS_YAML = new Key.From("_creds.yaml");
 
     /**
      * Test storage.
      */
     private BlockingStorage asto;
 
+    /**
+     * Test users.
+     */
+    private com.artipie.front.auth.Users users;
+
     @BeforeEach
     void init() {
-        this.asto = new BlockingStorage(new FileStorage(this.tmp));
+        this.asto = new BlockingStorage(new InMemoryStorage());
+        this.users = new YamlUsers(PutUserTest.CREDS_YAML, this.asto);
     }
 
     @Test
@@ -78,11 +64,9 @@ class PutUserTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         final var name = "john";
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
-        new PutUser(
-            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), PutUserTest.YAML_NODE))
-        ).handle(rqs, resp);
+        new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(
             new String(
@@ -115,11 +99,9 @@ class PutUserTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         final var name = "Alice";
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
-        new PutUser(
-            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), PutUserTest.YAML_NODE))
-        ).handle(rqs, resp);
+        new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(
             new String(
@@ -146,21 +128,10 @@ class PutUserTest {
     void returnBadRequest(final String body) {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn("Alice");
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("Alice");
         Mockito.when(rqs.body()).thenReturn(body);
-        new PutUser(
-            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), PutUserTest.YAML_NODE))
-        ).handle(rqs, resp);
+        new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
-    }
-
-    @Test
-    void returnsBadRequestIfFileAuthIsNotSet() {
-        final var resp = Mockito.mock(Response.class);
-        new PutUser(
-            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.empty()))
-        ).handle(Mockito.mock(Request.class), resp);
-        Mockito.verify(resp).status(HttpStatus.INTERNAL_SERVER_ERROR_500);
     }
 
     @Test
@@ -175,10 +146,8 @@ class PutUserTest {
         );
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM)).thenReturn(name);
-        new PutUser(
-            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), PutUserTest.YAML_NODE))
-        ).handle(rqs, resp);
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
+        new PutUser(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CONFLICT_409);
     }
 

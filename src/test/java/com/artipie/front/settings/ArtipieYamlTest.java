@@ -122,9 +122,14 @@ public final class ArtipieYamlTest {
             ).toString()
         );
         MatcherAssert.assertThat(
+            "Should find Alice",
             new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.of(node)))
-                .fileCredentials().isPresent(),
-            new IsEqual<>(true)
+                .credentials().user("Alice").isPresent()
+        );
+        MatcherAssert.assertThat(
+            "Should find John",
+            new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.of(node)))
+                .credentials().user("John").isPresent()
         );
     }
 
@@ -133,8 +138,8 @@ public final class ArtipieYamlTest {
     void shouldReturnEmptyMappingIfFileDoesNotExists(final YamlNode node) {
         MatcherAssert.assertThat(
             new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.of(node)))
-                .fileCredentials().map(yml -> yml.values().size()).get(),
-            new IsEqual<>(0)
+                .credentials().user("any").isEmpty(),
+            new IsEqual<>(true)
         );
     }
 
