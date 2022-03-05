@@ -1,0 +1,11 @@
+{
+  "grant" : {
+    "John" : ["read"],
+    "Elen": ["write", "read"]
+  },
+  "revoke": {
+    "Jane": ["tag"],
+    "Mark": ["*"],
+    "John": ["write"]
+  }
+}
