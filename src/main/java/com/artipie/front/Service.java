@@ -7,6 +7,7 @@ package com.artipie.front;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
+import com.artipie.front.api.DeleteUser;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.GetRepositoryPermissions;
 import com.artipie.front.api.GetUser;
@@ -43,6 +44,7 @@ import spark.template.handlebars.HandlebarsTemplateEngine;
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ExecutableStatementCountCheck (500 lines)
+ * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class Service {
@@ -159,6 +161,7 @@ public final class Service {
                         this.ignite.get(path, new GetUser(this.settings.credentials()));
                         this.ignite.put(path, new PutUser(this.settings.users()));
                         this.ignite.head(path, new HeadUser(this.settings.credentials()));
+                        this.ignite.delete(path, new DeleteUser(this.settings.users()));
                     }
                 );
             }
