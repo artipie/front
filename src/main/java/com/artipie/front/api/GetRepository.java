@@ -5,6 +5,7 @@
 package com.artipie.front.api;
 
 import com.artipie.front.RequestAttr;
+import com.artipie.front.misc.RequestPath;
 import com.artipie.front.misc.Yaml2Json;
 import com.artipie.front.settings.RepoSettings;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +27,7 @@ public final class GetRepository implements Route {
     /**
      * Repository name request parameter.
      */
-    public static final String PARAM = ":name";
+    public static final RequestPath.Param NAME_PARAM = new RequestPath.Param("name");
 
     /**
      * Repository settings yaml secton `repo` name.
@@ -51,7 +52,7 @@ public final class GetRepository implements Route {
         final JsonObject repo = new Yaml2Json().apply(
             new String(
                 this.stn.value(
-                    request.params(GetRepository.PARAM),
+                    GetRepository.NAME_PARAM.parse(request),
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 ),
                 StandardCharsets.UTF_8
