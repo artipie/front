@@ -4,8 +4,8 @@
  */
 package com.artipie.front.api;
 
-import com.artipie.asto.Key;
-import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.settings.RepoSettings;
+import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import spark.Request;
@@ -19,29 +19,23 @@ import spark.Route;
 public final class Repositories implements Route {
 
     /**
-     * Artipie repositories settings storage.
+     * Artipie repositories settings.
      */
-    private final BlockingStorage storage;
+    private final RepoSettings stngs;
 
     /**
      * Ctor.
      * @param storage Artipie repositories settings storage
      */
-    public Repositories(final BlockingStorage storage) {
-        this.storage = storage;
+    public Repositories(final RepoSettings storage) {
+        this.stngs = storage;
     }
 
     @Override
     public String handle(final Request request, final Response response) {
         JsonArrayBuilder json = Json.createArrayBuilder();
-        for (final Key key : this.storage.list(Key.ROOT)) {
-            final String name = key.string();
-            if (name.endsWith(".yaml") || name.endsWith(".yml")) {
-                json = json.add(
-                    Json.createObjectBuilder()
-                        .add("fullName", name.replaceAll("\\.yaml|\\.yml", "")).build()
-                );
-            }
+        for (final String name : this.stngs.list(Optional.empty())) {
+            json = json.add(Json.createObjectBuilder().add("fullName", name).build());
         }
         response.type("application/json");
         return json.build().toString();

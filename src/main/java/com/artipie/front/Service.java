@@ -25,6 +25,7 @@ import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoSettings;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.SignInPage;
+import com.artipie.front.ui.UserPage;
 import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
@@ -129,13 +130,11 @@ public final class Service {
                 this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
                 this.ignite.path(
                     "/repositories", () -> {
-                        this.ignite.get(
-                            "/",
-                            MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new Repositories(this.settings.repoConfigsStorage())
-                        );
                         final RepoSettings stn = new RepoSettings(
                             this.settings.layout(), this.settings.repoConfigsStorage()
+                        );
+                        this.ignite.get(
+                            "", MimeTypes.Type.APPLICATION_JSON.asString(), new Repositories(stn)
                         );
                         final RequestPath path = new RequestPath().with(GetRepository.NAME_PARAM);
                         this.ignite.get(
@@ -179,6 +178,17 @@ public final class Service {
                     new PostSignIn(
                         AuthByPassword.withCredentials(this.settings.credentials())
                     )
+                );
+            }
+        );
+        this.ignite.path(
+            "/dashboard",
+            () -> {
+                this.ignite.get(
+                    "",
+                    new UserPage(
+                        new RepoSettings(this.settings.layout(), this.settings.repoConfigsStorage())
+                    ), engine
                 );
             }
         );

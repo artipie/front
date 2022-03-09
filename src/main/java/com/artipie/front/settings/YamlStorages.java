@@ -33,7 +33,7 @@ public final class YamlStorages implements Storages {
     /**
      * Settings file name.
      */
-    private static final String FILE_NAME = "_storages";
+    public static final String FILE_NAME = "_storages";
 
     /**
      * Key for the settings file with .yaml extension.
