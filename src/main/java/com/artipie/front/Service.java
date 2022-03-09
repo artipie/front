@@ -48,7 +48,7 @@ import spark.template.handlebars.HandlebarsTemplateEngine;
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class Service {
 
     /**
