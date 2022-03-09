@@ -84,6 +84,64 @@ to learn more about different repositories settings.
 Deletes repository called `{name}`, returns status `200` on success, status `404` if repository does
 not exist.
 
+### Repository permissions API
+
+> **GET** /repositories/{repo}/permissions
+
+Returns status `404` if repository `{repo}` does not exist, otherwise returns permissions if json format:
+```json
+{ 
+  "permissions": {
+    "Jane": ["read", "write"],
+    "Mark": ["*"],
+    "/readers": ["read"]
+  }
+}
+```
+
+> **PUT** /repositories/{repo}/permissions/{uid}
+
+Adds permissions for user `{uid}` in the repository `{repo}`. This method overrides all previously 
+existed permissions for the user in the repository. Json array with permissions list is expected in
+the request body:
+```json
+["read", "tag"]
+```
+If permissions were successfully added, status `201` is returned, if repository `{repo}` does not exist,
+status `404` is returned.
+
+> **DELETE** /repositories/{repo}/permissions/{uid}
+
+Revokes all permissions for user `{uid}` in the repository `{repo}`, returns status `200` on success. 
+If repository `{repo}` does not exist or user `{uid}` does not have any permissions in the repository,
+status `404` is returned.
+
+> **PATCH** /repositories/{repo}/permissions
+
+Patches permissions of the repository `{repo}`. Json body is expected in the request:
+```json
+{
+  "grant": {
+    "bob": ["read"],
+    "john": ["read"]
+  },
+  "revoke": {
+    "john": ["write"]
+  }
+}
+```
+In this example we grant `read` permission to bob and john but revoke `write` permission for john. 
+All other already granted permissions for user are kept as is. For example, if john already has 
+`tag` permission for the repository, after `PATCH` operation with request body from the example,
+he will have `read` and `tag` permissions.
+
+If repository `{repo}` does not exist, `404` status is returned.
+
+> **Note**  
+> When Artipie layout is `org`, each repository belongs to some user, thus repository name path
+> parameter `{repo}` actually consists of two parts: `{repository_owner_name}/{repository_name}`.
+> When layout is `flat`, `{repo}` is just the name of the repository.
+
 ### Users API
 
 > **GET** /users
