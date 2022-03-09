@@ -51,7 +51,10 @@ public final class PostSignIn implements Route {
             req.queryParamOrDefault("password", "")
         );
         uid.ifPresentOrElse(
-            val -> req.session().attribute("uid", val),
+            val -> {
+                req.session().attribute("uid", val);
+                rsp.redirect("/dashboard");
+            },
             () -> Spark.halt(HttpStatus.UNAUTHORIZED_401, "bad credentials")
         );
         return "OK";
