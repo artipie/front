@@ -23,7 +23,9 @@ import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoSettings;
+import com.artipie.front.ui.HbTemplateEngine;
 import com.artipie.front.ui.PostSignIn;
+import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
 import com.artipie.front.ui.UserPage;
 import com.jcabi.log.Logger;
@@ -38,7 +40,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.http.MimeTypes;
-import spark.template.handlebars.HandlebarsTemplateEngine;
 
 /**
  * Front service.
@@ -165,7 +166,7 @@ public final class Service {
                 );
             }
         );
-        final var engine = new HandlebarsTemplateEngine("/html");
+        final var engine = new HbTemplateEngine("/html");
         this.ignite.path(
             "/signin",
             () -> {
@@ -184,11 +185,14 @@ public final class Service {
         this.ignite.path(
             "/dashboard",
             () -> {
+                final RepoSettings stn = new RepoSettings(
+                    this.settings.layout(), this.settings.repoConfigsStorage()
+                );
+                this.ignite.get("", new UserPage(stn), engine);
                 this.ignite.get(
-                    "",
-                    new UserPage(
-                        new RepoSettings(this.settings.layout(), this.settings.repoConfigsStorage())
-                    ), engine
+                    new RequestPath().with(GetUser.USER_PARAM)
+                        .with(GetRepository.NAME_PARAM).toString(),
+                    new RepoPage(stn), engine
                 );
             }
         );
