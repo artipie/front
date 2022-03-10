@@ -9,7 +9,9 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.front.api.NotFoundException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
@@ -114,6 +116,37 @@ class RepoSettingsTest {
         Assertions.assertThrows(
             NotFoundException.class,
             () -> new RepoSettings("flat", this.blsto).value("rpm", "Jane")
+        );
+    }
+
+    @Test
+    void listsRepos() {
+        this.blsto.save(new Key.From("pypi.yml"), new byte[]{});
+        this.blsto.save(new Key.From("rpm.yaml"), new byte[]{});
+        this.blsto.save(new Key.From("local/maven.yml"), new byte[]{});
+        this.blsto.save(new Key.From("local/bin.yaml"), new byte[]{});
+        this.blsto.save(new Key.From("_storages.yml"), new byte[]{});
+        this.blsto.save(new Key.From("_credentials.yaml"), new byte[]{});
+        this.blsto.save(new Key.From("_permissions.yml"), new byte[]{});
+        MatcherAssert.assertThat(
+            new RepoSettings("flat", this.blsto).list(Optional.empty()),
+            Matchers.containsInAnyOrder("pypi", "rpm", "local/maven", "local/bin")
+        );
+    }
+
+    @Test
+    void listsUserRepos() {
+        final String uid = "alice";
+        this.blsto.save(new Key.From("mark/maven.yml"), new byte[]{});
+        this.blsto.save(new Key.From("john/bin.yaml"), new byte[]{});
+        this.blsto.save(new Key.From(uid, "nuget.yml"), new byte[]{});
+        this.blsto.save(new Key.From(uid, "debian.yaml"), new byte[]{});
+        this.blsto.save(new Key.From(uid, "_storages.yml"), new byte[]{});
+        this.blsto.save(new Key.From("_credentials.yaml"), new byte[]{});
+        this.blsto.save(new Key.From(uid, "_permissions.yml"), new byte[]{});
+        MatcherAssert.assertThat(
+            new RepoSettings("org", this.blsto).list(Optional.of(uid)),
+            Matchers.containsInAnyOrder("alice/nuget", "alice/debian")
         );
     }
 

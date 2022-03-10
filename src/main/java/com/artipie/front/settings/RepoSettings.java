@@ -7,6 +7,9 @@ package com.artipie.front.settings;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.api.NotFoundException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -22,6 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * </p>
  * @since 0.1
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RepoSettings {
 
     /**
@@ -42,6 +46,30 @@ public final class RepoSettings {
     public RepoSettings(final String layout, final BlockingStorage repos) {
         this.layout = layout;
         this.repos = repos;
+    }
+
+    /**
+     * List existing repositories.
+     * @param uid User id (=name)
+     * @return List of the existing repositories
+     */
+    public Collection<String> list(final Optional<String> uid) {
+        Key key = Key.ROOT;
+        if ("org".equals(this.layout) && uid.isPresent()) {
+            key = new Key.From(uid.get());
+        }
+        final Collection<String> res = new ArrayList<>(5);
+        for (final Key item : this.repos.list(key)) {
+            final String name = item.string();
+            // @checkstyle BooleanExpressionComplexityCheck (5 lines)
+            if ((name.endsWith(".yaml") || name.endsWith(".yml"))
+                && !name.contains(YamlStorages.FILE_NAME)
+                && !name.contains("_permissions")
+                && !name.contains("_credentials")) {
+                res.add(name.replaceAll("\\.yaml|\\.yml", ""));
+            }
+        }
+        return res;
     }
 
     /**

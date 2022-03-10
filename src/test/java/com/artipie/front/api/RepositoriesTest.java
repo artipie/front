@@ -7,6 +7,7 @@ package com.artipie.front.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.front.settings.RepoSettings;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -32,7 +33,8 @@ class RepositoriesTest {
         blsto.save(new Key.From("rpm.yml"), new byte[]{});
         final var resp = Mockito.mock(Response.class);
         JSONAssert.assertEquals(
-            new Repositories(blsto).handle(Mockito.mock(Request.class), resp),
+            new Repositories(new RepoSettings("org", blsto))
+                .handle(Mockito.mock(Request.class), resp),
             String.join(
                 "\n", "[",
                 "{\"fullName\":\"Jane/binary\"},",
