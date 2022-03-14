@@ -16,18 +16,24 @@ import com.artipie.front.misc.Yaml2Json;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Implementation of {@link RepoPermissions} to handle repository permissions.
  * This implementation takes into account both .yml and .yaml extensions.
  * @since 0.1
+ * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 public final class YamlRepoPermissions implements RepoPermissions {
 
@@ -83,12 +89,69 @@ public final class YamlRepoPermissions implements RepoPermissions {
 
     @Override
     public void delete(final String repo, final String uid) {
-        throw new NotImplementedException("Not implemented yet");
+        final Optional<YamlMapping> creds = this.permsYaml(repo);
+        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+        if (creds.isPresent() && creds.get().yamlSequence(uid) != null) {
+            for (final YamlNode node : creds.get().keys()) {
+                final String usr = node.asScalar().value();
+                if (!uid.equals(usr)) {
+                    builder = builder.add(usr, creds.get().yamlSequence(usr));
+                }
+            }
+            this.updateRepoSettings(repo, builder.build());
+            return;
+        }
+        throw new NotFoundException(
+            String.format("User %s does have any permissions in repository %s", uid, repo)
+        );
     }
 
     @Override
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     public void patch(final String repo, final JsonStructure perms) {
-        throw new NotImplementedException("To be implemented");
+        final Optional<YamlMapping> creds = this.permsYaml(repo);
+        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+        final JsonObject revoke = perms.asJsonObject().getJsonObject("revoke");
+        final JsonObject grant = perms.asJsonObject().getJsonObject("grant");
+        final Set<String> granted = new HashSet<>(grant.size());
+        if (creds.isPresent()) {
+            for (final YamlNode node : creds.get().keys()) {
+                final String usr = node.asScalar().value();
+                granted.add(usr);
+                Stream<String> stream = creds.get().yamlSequence(usr).values()
+                    .stream().map(item -> item.asScalar().value());
+                if (revoke.containsKey(usr)) {
+                    stream = stream.filter(
+                        item -> YamlRepoPermissions.toStream(revoke.getJsonArray(usr))
+                            .noneMatch(rvk -> rvk.equals(item))
+                    );
+                }
+                if (grant.containsKey(usr)) {
+                    stream = Stream.concat(
+                        stream, YamlRepoPermissions.toStream(grant.getJsonArray(usr))
+                    );
+                }
+                final List<String> list = stream.collect(Collectors.toList());
+                if (!list.isEmpty()) {
+                    YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
+                    for (final String perm : list) {
+                        seq = seq.add(perm);
+                    }
+                    builder = builder.add(usr, seq.build());
+                }
+            }
+        }
+        for (final Map.Entry<String, JsonValue> entry : grant.entrySet()) {
+            if (!granted.contains(entry.getKey())) {
+                YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
+                for (final String perm
+                    : entry.getValue().asJsonArray().getValuesAs(JsonValue::toString)) {
+                    seq = seq.add(perm);
+                }
+                builder = builder.add(entry.getKey(), seq.build());
+            }
+        }
+        this.updateRepoSettings(repo, builder.build());
     }
 
     /**
@@ -152,5 +215,17 @@ public final class YamlRepoPermissions implements RepoPermissions {
         } catch (final IOException err) {
             throw new UncheckedIOException(err);
         }
+    }
+
+    /**
+     * Transform json array to stream of strings.
+     * {@link JsonValue#toString()} method adds extra quotes, so
+     * we need to remove them.
+     * @param arr Json array
+     * @return Stream of strings
+     */
+    private static Stream<String> toStream(final JsonArray arr) {
+        return arr.getValuesAs(JsonValue::toString)
+            .stream().map(val -> val.replace("\"", ""));
     }
 }
