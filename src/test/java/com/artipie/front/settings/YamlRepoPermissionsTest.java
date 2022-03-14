@@ -44,7 +44,7 @@ class YamlRepoPermissionsTest {
         final String repo = "alice/my-maven";
         this.blsto.save(
             new Key.From(String.format("%s.%s", repo, ext)),
-            new TestResource("RepoSettingsTest/my-maven.yaml").asBytes()
+            new TestResource("YamlRepoPermissionsTest/my-maven.yaml").asBytes()
         );
         JSONAssert.assertEquals(
             new YamlRepoPermissions(this.blsto).get(repo).toString(),
@@ -90,7 +90,7 @@ class YamlRepoPermissionsTest {
         final String repo = "alice/my-maven";
         this.blsto.save(
             new Key.From(String.format("%s.%s", repo, ext)),
-            new TestResource("RepoSettingsTest/my-maven.yaml").asBytes()
+            new TestResource("YamlRepoPermissionsTest/my-maven.yaml").asBytes()
         );
         final YamlRepoPermissions perms = new YamlRepoPermissions(this.blsto);
         perms.add(repo, "Alice", Json.createArrayBuilder().add("write").build());
@@ -115,7 +115,7 @@ class YamlRepoPermissionsTest {
         final String repo = "alice/my-maven";
         this.blsto.save(
             new Key.From(String.format("%s.%s", repo, ext)),
-            new TestResource("RepoSettingsTest/my-maven.yaml").asBytes()
+            new TestResource("YamlRepoPermissionsTest/my-maven.yaml").asBytes()
         );
         final YamlRepoPermissions perms = new YamlRepoPermissions(this.blsto);
         perms.add(repo, "Mark", Json.createArrayBuilder().add("write").add("read").build());
@@ -127,6 +127,70 @@ class YamlRepoPermissionsTest {
                 "  \"Jane\": [\"read\", \"write\"],",
                 "  \"/readers\": [\"read\"],",
                 "  \"Mark\": [\"write\", \"read\"]",
+                "}"
+            ),
+            true
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"yaml", "yml"})
+    void deletesUser(final String ext) throws JSONException {
+        final String repo = "alice/my-maven";
+        this.blsto.save(
+            new Key.From(String.format("%s.%s", repo, ext)),
+            new TestResource("YamlRepoPermissionsTest/my-maven.yaml").asBytes()
+        );
+        final YamlRepoPermissions permissions = new YamlRepoPermissions(this.blsto);
+        permissions.delete(repo, "Mark");
+        JSONAssert.assertEquals(
+            permissions.get(repo).toString(),
+            String.join(
+                "\n",
+                "{",
+                "  \"Jane\": [\"read\", \"write\"],",
+                "  \"/readers\": [\"read\"]",
+                "}"
+            ),
+            true
+        );
+    }
+
+    @Test
+    void throwsErrorIfUserNotFound() {
+        this.blsto.save(
+            new Key.From("my-maven.yml"),
+            new TestResource("YamlRepoPermissionsTest/my-maven.yaml").asBytes()
+        );
+        Assertions.assertThrows(
+            NotFoundException.class,
+            () -> new YamlRepoPermissions(this.blsto).delete("my-maven", "any")
+        );
+    }
+
+    @Test
+    void patchesPermissions() throws JSONException {
+        final String repo = "my-python";
+        this.blsto.save(
+            new Key.From("my-python.yaml"),
+            new TestResource("YamlRepoPermissionsTest/my-python.yaml").asBytes()
+        );
+        final YamlRepoPermissions permissions = new YamlRepoPermissions(this.blsto);
+        permissions.patch(
+            repo,
+            Json.createReader(
+                new TestResource("YamlRepoPermissionsTest/patch.json").asInputStream()
+            ).readObject()
+        );
+        JSONAssert.assertEquals(
+            permissions.get(repo).toString(),
+            String.join(
+                "\n",
+                "{",
+                "  \"Jane\": [\"read\", \"write\"],",
+                "  \"John\": [\"read\"],",
+                "  \"/readers\": [\"read\"],",
+                "  \"Elen\": [\"write\", \"read\"]",
                 "}"
             ),
             true

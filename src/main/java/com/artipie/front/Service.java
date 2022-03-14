@@ -10,6 +10,7 @@ import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.DeleteUser;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.GetRepositoryPermissions;
+import com.artipie.front.api.GetStorages;
 import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.HeadUser;
@@ -23,7 +24,10 @@ import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoSettings;
+import com.artipie.front.settings.YamlRepoPermissions;
+import com.artipie.front.ui.HbTemplateEngine;
 import com.artipie.front.ui.PostSignIn;
+import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
 import com.artipie.front.ui.UserPage;
 import com.jcabi.log.Logger;
@@ -38,7 +42,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.http.MimeTypes;
-import spark.template.handlebars.HandlebarsTemplateEngine;
 
 /**
  * Front service.
@@ -47,7 +50,7 @@ import spark.template.handlebars.HandlebarsTemplateEngine;
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class Service {
 
     /**
@@ -136,7 +139,7 @@ public final class Service {
                         this.ignite.get(
                             "", MimeTypes.Type.APPLICATION_JSON.asString(), new Repositories(stn)
                         );
-                        final RequestPath path = new RequestPath().with(GetRepository.NAME_PARAM);
+                        final RequestPath path = new RequestPath().with(GetRepository.REPO_PARAM);
                         this.ignite.get(
                             path.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
                             new GetRepository(stn)
@@ -146,7 +149,24 @@ public final class Service {
                         this.ignite.put(path.toString(), new PutRepository(stn));
                         this.ignite.get(
                             path.with("permissions").toString(),
-                            new GetRepositoryPermissions(stn)
+                            new GetRepositoryPermissions(
+                                new YamlRepoPermissions(this.settings.repoConfigsStorage())
+                            )
+                        );
+                        final RequestPath repo = this.repoPath();
+                        this.ignite.get(
+                            repo.with("storages").toString(),
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new GetStorages(this.settings.repoConfigsStorage())
+                        );
+                    }
+                );
+                this.ignite.path(
+                    "/storages", () -> {
+                        this.ignite.get(
+                            "/",
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new GetStorages(this.settings.repoConfigsStorage())
                         );
                     }
                 );
@@ -165,7 +185,7 @@ public final class Service {
                 );
             }
         );
-        final var engine = new HandlebarsTemplateEngine("/html");
+        final var engine = new HbTemplateEngine("/html");
         this.ignite.path(
             "/signin",
             () -> {
@@ -184,11 +204,14 @@ public final class Service {
         this.ignite.path(
             "/dashboard",
             () -> {
+                final RepoSettings stn = new RepoSettings(
+                    this.settings.layout(), this.settings.repoConfigsStorage()
+                );
+                this.ignite.get("", new UserPage(stn), engine);
                 this.ignite.get(
-                    "",
-                    new UserPage(
-                        new RepoSettings(this.settings.layout(), this.settings.repoConfigsStorage())
-                    ), engine
+                    new RequestPath().with(GetUser.USER_PARAM)
+                        .with(GetRepository.NAME_PARAM).toString(),
+                    new RepoPage(stn), engine
                 );
             }
         );
@@ -215,5 +238,18 @@ public final class Service {
         this.ignite.stop();
         this.ignite.awaitStop();
         Logger.info(this, "service stopped");
+    }
+
+    /**
+     * Returns repository name path parameter. When artipie layout is org, repository name
+     * has username path prefix: uname/reponame.
+     * @return Repository name path parameter
+     */
+    private RequestPath repoPath() {
+        RequestPath res = new RequestPath().with(GetRepository.REPO_PARAM);
+        if ("org".equals(this.settings.layout())) {
+            res = new RequestPath().with(GetUser.USER_PARAM).with(GetRepository.REPO_PARAM);
+        }
+        return res;
     }
 }

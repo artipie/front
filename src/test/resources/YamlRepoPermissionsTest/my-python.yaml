@@ -1,0 +1,13 @@
+repo:
+  type: pypi
+  permissions:
+    Jane:
+      - read
+      - write
+      - tag
+    John:
+      - write
+    Mark:
+      - "*"
+    /readers:
+      - read

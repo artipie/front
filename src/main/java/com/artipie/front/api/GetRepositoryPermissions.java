@@ -4,13 +4,11 @@
  */
 package com.artipie.front.api;
 
-import com.artipie.front.RequestAttr;
-import com.artipie.front.misc.Yaml2Json;
-import com.artipie.front.settings.RepoSettings;
-import java.nio.charset.StandardCharsets;
+import com.artipie.front.settings.RepoPermissions;
 import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObject;
+import org.eclipse.jetty.http.MimeTypes;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -29,30 +27,24 @@ public final class GetRepositoryPermissions implements Route {
     /**
      * Repository settings.
      */
-    private final RepoSettings stn;
+    private final RepoPermissions stn;
 
     /**
      * Ctor.
      * @param stn Repository settings
      */
-    public GetRepositoryPermissions(final RepoSettings stn) {
+    public GetRepositoryPermissions(final RepoPermissions stn) {
         this.stn = stn;
     }
 
     @Override
     public String handle(final Request request, final Response response) {
-        final JsonObject perms = new Yaml2Json().apply(
-            new String(
-                this.stn.value(
-                    GetRepository.NAME_PARAM.parse(request),
-                    RequestAttr.Standard.USER_ID.readOrThrow(request)
-                ),
-                StandardCharsets.UTF_8
-            )
-        ).asJsonObject().getJsonObject("repo").getJsonObject(GetRepositoryPermissions.PERMISSIONS);
-        return Json.createObjectBuilder().add(
-            GetRepositoryPermissions.PERMISSIONS,
-            Optional.ofNullable(perms).orElse(Json.createObjectBuilder().build())
-        ).build().toString();
+        final JsonObject res = this.stn.get(
+            Optional.ofNullable(GetUser.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
+                .orElse("").concat(GetRepository.REPO_PARAM.parse(request))
+        );
+        response.type(MimeTypes.Type.APPLICATION_JSON.toString());
+        return Json.createObjectBuilder().add(GetRepositoryPermissions.PERMISSIONS, res)
+            .build().toString();
     }
 }
