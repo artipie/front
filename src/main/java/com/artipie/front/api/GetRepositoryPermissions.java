@@ -41,7 +41,7 @@ public final class GetRepositoryPermissions implements Route {
     public String handle(final Request request, final Response response) {
         final JsonObject res = this.stn.get(
             Optional.ofNullable(GetUser.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
-                .orElse("").concat(GetRepository.NAME_PARAM.parse(request))
+                .orElse("").concat(GetRepository.REPO_PARAM.parse(request))
         );
         response.type(MimeTypes.Type.APPLICATION_JSON.toString());
         return Json.createObjectBuilder().add(GetRepositoryPermissions.PERMISSIONS, res)
