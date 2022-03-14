@@ -8,8 +8,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.front.RequestAttr;
-import com.artipie.front.settings.RepoSettings;
+import com.artipie.front.settings.RepoPermissions;
+import com.artipie.front.settings.YamlRepoPermissions;
 import java.nio.charset.StandardCharsets;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,14 +31,14 @@ class GetRepositoryPermissionsTest {
     private BlockingStorage blsto;
 
     /**
-     * Test repository settings.
+     * Repository permissions.
      */
-    private RepoSettings snt;
+    private RepoPermissions perms;
 
     @BeforeEach
     void init() {
         this.blsto = new BlockingStorage(new InMemoryStorage());
-        this.snt = new RepoSettings("flat", this.blsto);
+        this.perms = new YamlRepoPermissions(this.blsto);
     }
 
     @Test
@@ -48,10 +48,9 @@ class GetRepositoryPermissionsTest {
             new TestResource("GetRepositoryPermissionsTest/my-maven.yaml").asBytes()
         );
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-maven");
-        Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn("my-maven");
         JSONAssert.assertEquals(
-            new GetRepositoryPermissions(this.snt).handle(rqs, Mockito.mock(Response.class)),
+            new GetRepositoryPermissions(this.perms).handle(rqs, Mockito.mock(Response.class)),
             String.join(
                 "\n",
                 "{\"permissions\": {",
@@ -67,7 +66,7 @@ class GetRepositoryPermissionsTest {
     @Test
     void returnEmptyWhenPermissionsAreNotSet() throws JSONException {
         this.blsto.save(
-            new Key.From("my-python.yaml"),
+            new Key.From("alice/my-python.yaml"),
             String.join(
                 "\n",
                 "repo:",
@@ -75,10 +74,10 @@ class GetRepositoryPermissionsTest {
             ).getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
-        Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("alice");
+        Mockito.when(rqs.params(GetRepository.NAME_PARAM.toString())).thenReturn("my-python");
+        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("alice");
         JSONAssert.assertEquals(
-            new GetRepositoryPermissions(this.snt).handle(rqs, Mockito.mock(Response.class)),
+            new GetRepositoryPermissions(this.perms).handle(rqs, Mockito.mock(Response.class)),
             "{\"permissions\": {}}",
             true
         );
