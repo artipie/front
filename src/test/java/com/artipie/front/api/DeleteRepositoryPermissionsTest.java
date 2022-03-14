@@ -20,11 +20,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link RepositoryPermissions.Put}.
+ * Test for {@link RepositoryPermissions.Delete}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class PutRepositoryPermissionsTest {
+class DeleteRepositoryPermissionsTest {
 
     /**
      * Test storage.
@@ -43,7 +43,7 @@ class PutRepositoryPermissionsTest {
     }
 
     @Test
-    void addsPermissions() {
+    void removesPermissions() {
         final Key.From key = new Key.From("mark/my-python.yaml");
         this.blsto.save(
             key,
@@ -52,8 +52,11 @@ class PutRepositoryPermissionsTest {
                 "repo:",
                 "  type: pypi",
                 "  permissions:",
+                "    alice:",
+                "      - read",
                 "    mark:",
-                "      - read"
+                "      - read",
+                "      - write"
             ).getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
@@ -61,9 +64,8 @@ class PutRepositoryPermissionsTest {
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
         Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("mark");
         Mockito.when(rqs.params(RepositoryPermissions.NAME.toString())).thenReturn("alice");
-        Mockito.when(rqs.body()).thenReturn("[\"read\", \"write\"]");
-        new RepositoryPermissions.Put(this.perms).handle(rqs, resp);
-        Mockito.verify(resp).status(HttpStatus.CREATED_201);
+        new RepositoryPermissions.Delete(this.perms).handle(rqs, resp);
+        Mockito.verify(resp).status(HttpStatus.OK_200);
         MatcherAssert.assertThat(
             new String(this.blsto.value(key), StandardCharsets.UTF_8),
             new IsEqual<>(
@@ -74,11 +76,10 @@ class PutRepositoryPermissionsTest {
                     "  permissions:",
                     "    mark:",
                     "      - read",
-                    "    alice:",
-                    "      - read",
                     "      - write"
                 )
             )
         );
     }
+
 }
