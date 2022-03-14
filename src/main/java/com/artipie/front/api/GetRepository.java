@@ -22,12 +22,13 @@ import spark.Route;
  * Handle `GET` request to obtain repository settings.
  * @since 0.1
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class GetRepository implements Route {
 
     /**
      * Repository name request parameter.
      */
-    public static final RequestPath.Param NAME_PARAM = new RequestPath.Param("name");
+    public static final RequestPath.Param REPO_PARAM = new RequestPath.Param("repo");
 
     /**
      * Repository settings yaml secton `repo` name.
@@ -52,7 +53,7 @@ public final class GetRepository implements Route {
         final JsonObject repo = new Yaml2Json().apply(
             new String(
                 this.stn.value(
-                    GetRepository.NAME_PARAM.parse(request),
+                    GetRepository.REPO_PARAM.parse(request),
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 ),
                 StandardCharsets.UTF_8

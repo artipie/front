@@ -32,7 +32,7 @@ public final class DeleteRepository implements Route {
     @Override
     public Object handle(final Request request, final Response response) {
         this.stn.delete(
-            GetRepository.NAME_PARAM.parse(request),
+            GetRepository.REPO_PARAM.parse(request),
             RequestAttr.Standard.USER_ID.readOrThrow(request)
         );
         return null;
