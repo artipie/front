@@ -75,7 +75,7 @@ public final class YamlRepoPermissions implements RepoPermissions {
         }
         YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
         for (final String item : perms.getValuesAs(JsonValue::toString)) {
-            seq = seq.add(item);
+            seq = seq.add(item.replaceAll("\"", ""));
         }
         builder = builder.add(uid, seq.build());
         this.updateRepoSettings(repo, builder.build());
@@ -105,7 +105,7 @@ public final class YamlRepoPermissions implements RepoPermissions {
             for (final YamlNode node : stngs.keys()) {
                 final String map = node.asScalar().value();
                 if (!YamlRepoPermissions.PERMS.equals(map)) {
-                    builder = builder.add(map, creds.yamlSequence(map));
+                    builder = builder.add(map, stngs.value(map));
                 }
             }
             builder = builder.add(YamlRepoPermissions.PERMS, creds);

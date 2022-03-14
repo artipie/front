@@ -24,6 +24,7 @@ import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoSettings;
 import com.artipie.front.ui.HbTemplateEngine;
+import com.artipie.front.settings.YamlRepoPermissions;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
@@ -147,7 +148,9 @@ public final class Service {
                         this.ignite.put(path.toString(), new PutRepository(stn));
                         this.ignite.get(
                             path.with("permissions").toString(),
-                            new GetRepositoryPermissions(stn)
+                            new GetRepositoryPermissions(
+                                new YamlRepoPermissions(this.settings.repoConfigsStorage())
+                            )
                         );
                     }
                 );
