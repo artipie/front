@@ -210,7 +210,7 @@ public final class Service {
                 this.ignite.get("", new UserPage(stn), engine);
                 this.ignite.get(
                     new RequestPath().with(GetUser.USER_PARAM)
-                        .with(GetRepository.NAME_PARAM).toString(),
+                        .with(GetRepository.REPO_PARAM).toString(),
                     new RepoPage(stn), engine
                 );
             }

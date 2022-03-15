@@ -32,7 +32,7 @@ public final class RepoPage extends RouteWrap.TemplateViewRoute {
                 "repo",
                 req -> {
                     final String uid = RequestAttr.Standard.USER_ID.readOrThrow(req);
-                    final String name = GetRepository.NAME_PARAM.parse(req);
+                    final String name = GetRepository.REPO_PARAM.parse(req);
                     try {
                         return Map.of(
                             "user", uid, "title", uid, "name", name,
