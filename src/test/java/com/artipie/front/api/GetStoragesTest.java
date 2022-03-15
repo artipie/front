@@ -20,7 +20,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link GetStorages}.
+ * Test for {@link Storages}.
  * @since 0.1
  */
 class GetStoragesTest {
@@ -38,17 +38,18 @@ class GetStoragesTest {
     @ParameterizedTest
     @CsvSource({
         "alice,my-maven,alice/my-maven/_storages.yml",
+        "alice,,alice/_storages.yml",
         ",internal-pypi,internal-pypi/_storages.yaml",
         ",,_storages.yml"
     })
     void returnStorages(final String uid, final String repo, final String key)
         throws JSONException {
-        this.createSettings(new Key.From(key));
+        GetStoragesTest.createSettings(this.blsto, new Key.From(key));
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(repo);
         Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(uid);
-        final String handle = new GetStorages(this.blsto).handle(rqs, resp);
+        final String handle = new Storages.Get(this.blsto).handle(rqs, resp);
         JSONAssert.assertEquals(
             handle,
             String.join(
@@ -64,7 +65,7 @@ class GetStoragesTest {
         );
     }
 
-    private void createSettings(final Key key) {
+    static void createSettings(final BlockingStorage blsto, final Key key) {
         YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
         for (final String alias : new String[]{"default", "temp", "mounted"}) {
             builder = builder.add(
@@ -73,7 +74,7 @@ class GetStoragesTest {
                     .add("path", String.format("/data/%s", alias)).build()
             );
         }
-        this.blsto.save(
+        blsto.save(
             key,
             Yaml.createYamlMappingBuilder().add("storages", builder.build())
                 .build().toString().getBytes(StandardCharsets.UTF_8)
