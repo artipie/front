@@ -8,6 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.YamlStorages;
+import java.io.StringReader;
 import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -112,6 +113,48 @@ public final class Storages {
             new YamlStorages(Storages.repoFromRq(request), this.strgs)
                 .remove(Storages.ST_ALIAS.parse(request));
             response.status(HttpStatus.OK_200);
+            return null;
+        }
+    }
+
+    /**
+     * Handle `PUT` request to add storage alias, request line example:
+     * PUT /repositories/{owner_name}/{repo}/storages/{alias}
+     * PUT /storages/{owner_name}/{alias}
+     * for repository and common storages, {owner_name} is required only for `org` layout,
+     * {alias} if the name of storage alias to delete.
+     * Request body is expected to have new storage alias settings in json format.
+     * @since 0.1
+     */
+    public static final class Put implements Route {
+
+        /**
+         * Artipie storage.
+         */
+        private final BlockingStorage strgs;
+
+        /**
+         * Ctor.
+         *
+         * @param strgs Artipie storages
+         */
+        public Put(final BlockingStorage strgs) {
+            this.strgs = strgs;
+        }
+
+        @Override
+        public Object handle(final Request request, final Response response) {
+            final YamlStorages storages =
+                new YamlStorages(Storages.repoFromRq(request), this.strgs);
+            final String alias = Storages.ST_ALIAS.parse(request);
+            if (storages.list().stream().anyMatch(item -> item.alias().equals(alias))) {
+                response.status(HttpStatus.CONFLICT_409);
+            } else {
+                storages.add(
+                    alias, Json.createReader(new StringReader(request.body())).readObject()
+                );
+                response.status(HttpStatus.CREATED_201);
+            }
             return null;
         }
     }
