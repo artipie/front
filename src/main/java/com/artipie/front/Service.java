@@ -9,7 +9,6 @@ import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
 import com.artipie.front.api.DeleteUser;
 import com.artipie.front.api.GetRepository;
-import com.artipie.front.api.GetStorages;
 import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.HeadUser;
@@ -18,6 +17,7 @@ import com.artipie.front.api.PutRepository;
 import com.artipie.front.api.PutUser;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.api.RepositoryPermissions;
+import com.artipie.front.api.Storages;
 import com.artipie.front.api.Users;
 import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
@@ -169,16 +169,24 @@ public final class Service {
                         this.ignite.get(
                             repo.with("storages").toString(),
                             MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new GetStorages(this.settings.repoConfigsStorage())
+                            new Storages.Get(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.delete(
+                            repo.with("storages").with(Storages.ST_ALIAS).toString(),
+                            new Storages.Delete(this.settings.repoConfigsStorage())
                         );
                     }
                 );
                 this.ignite.path(
                     "/storages", () -> {
+                        final RequestPath usr = this.userPath();
                         this.ignite.get(
-                            "/",
-                            MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new GetStorages(this.settings.repoConfigsStorage())
+                            usr.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Storages.Get(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.delete(
+                            usr.with(Storages.ST_ALIAS).toString(),
+                            new Storages.Delete(this.settings.repoConfigsStorage())
                         );
                     }
                 );
@@ -261,6 +269,19 @@ public final class Service {
         RequestPath res = new RequestPath().with(GetRepository.REPO_PARAM);
         if ("org".equals(this.settings.layout())) {
             res = new RequestPath().with(GetUser.USER_PARAM).with(GetRepository.REPO_PARAM);
+        }
+        return res;
+    }
+
+    /**
+     * Returns username path parameter. When artipie layout is org, username
+     * is required, otherwise - not.
+     * @return Username path parameter
+     */
+    private RequestPath userPath() {
+        RequestPath res = new RequestPath();
+        if ("org".equals(this.settings.layout())) {
+            res = res.with(GetUser.USER_PARAM);
         }
         return res;
     }

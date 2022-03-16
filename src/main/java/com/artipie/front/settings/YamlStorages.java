@@ -25,7 +25,8 @@ import javax.json.JsonObject;
 /**
  * Implementation of {@link Storages} to manage storages yaml file settings. This implementation
  * takes info account .yaml/.yml extensions. Note, that storages settings file can be present as
- * for the whole artipie as for repository individually.
+ * for the whole artipie as for repository individually. In the case of `org` layout, storages
+ * can be set for user or for user repository.
  * @since 0.1
  */
 public final class YamlStorages implements Storages {
@@ -46,9 +47,9 @@ public final class YamlStorages implements Storages {
     private static final String STORAGES_NODE = "storages";
 
     /**
-     * Repository key.
+     * Repository or user key.
      */
-    private final Optional<Key> repo;
+    private final Optional<Key> key;
 
     /**
      * Storage.
@@ -57,21 +58,21 @@ public final class YamlStorages implements Storages {
 
     /**
      * Ctor.
-     * @param repo Repository key
+     * @param key Repository or user key
      * @param blsto Storage
      */
-    public YamlStorages(final Optional<Key> repo, final BlockingStorage blsto) {
-        this.repo = repo;
+    public YamlStorages(final Optional<Key> key, final BlockingStorage blsto) {
+        this.key = key;
         this.blsto = blsto;
     }
 
     /**
      * Ctor.
-     * @param repo Repository key
+     * @param key Repository or user key
      * @param blsto Storage
      */
-    public YamlStorages(final Key repo, final BlockingStorage blsto) {
-        this(Optional.of(repo), blsto);
+    public YamlStorages(final Key key, final BlockingStorage blsto) {
+        this(Optional.of(key), blsto);
     }
 
     /**
@@ -104,8 +105,8 @@ public final class YamlStorages implements Storages {
         }
         builder = builder.add(alias, new Json2Yaml().apply(info.toString()));
         this.blsto.save(
-            this.key().orElse(
-                this.repo.<Key>map(val -> new Key.From(val, YamlStorages.YAML))
+            this.settingKey().orElse(
+                this.key.<Key>map(val -> new Key.From(val, YamlStorages.YAML))
                     .orElse(YamlStorages.YAML)
             ),
             Yaml.createYamlMappingBuilder().add(YamlStorages.STORAGES_NODE, builder.build())
@@ -125,7 +126,7 @@ public final class YamlStorages implements Storages {
                 }
             }
             this.blsto.save(
-                this.key().get(),
+                this.settingKey().get(),
                 Yaml.createYamlMappingBuilder().add(YamlStorages.STORAGES_NODE, builder.build())
                     .build().toString().getBytes(StandardCharsets.UTF_8)
             );
@@ -139,13 +140,13 @@ public final class YamlStorages implements Storages {
      * @return Settings storages yaml
      */
     private Optional<YamlMapping> storages() {
-        final Optional<Key> key = this.key();
+        final Optional<Key> stng = this.settingKey();
         Optional<YamlMapping> res = Optional.empty();
-        if (key.isPresent()) {
+        if (stng.isPresent()) {
             try {
                 res = Optional.ofNullable(
                     Yaml.createYamlInput(
-                        new String(this.blsto.value(key.get()), StandardCharsets.UTF_8)
+                        new String(this.blsto.value(stng.get()), StandardCharsets.UTF_8)
                     ).readYamlMapping().yamlMapping(YamlStorages.STORAGES_NODE)
                 );
             } catch (final IOException err) {
@@ -159,21 +160,21 @@ public final class YamlStorages implements Storages {
      * Finds storages settings key.
      * @return The key if found
      */
-    private Optional<Key> key() {
-        Optional<Key> key = Optional.of(
-            this.repo.<Key>map(val -> new Key.From(val, YamlStorages.YAML))
+    private Optional<Key> settingKey() {
+        Optional<Key> res = Optional.of(
+            this.key.<Key>map(val -> new Key.From(val, YamlStorages.YAML))
                 .orElse(YamlStorages.YAML)
         );
-        if (!this.blsto.exists(key.get())) {
+        if (!this.blsto.exists(res.get())) {
             final String yml = String.format("%s.yml", YamlStorages.FILE_NAME);
-            key = Optional.of(
-                this.repo.map(val -> new Key.From(val, yml)).orElse(new Key.From(yml))
+            res = Optional.of(
+                this.key.map(val -> new Key.From(val, yml)).orElse(new Key.From(yml))
             );
-            if (!this.blsto.exists(key.get())) {
-                key = Optional.empty();
+            if (!this.blsto.exists(res.get())) {
+                res = Optional.empty();
             }
         }
-        return key;
+        return res;
     }
 
     /**
