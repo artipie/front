@@ -202,3 +202,55 @@ If user with name `{name}` already exists, status `409` is returned.
 
 Removed user with name `{name}`, returns status `200` on success, status `404` if user does
 not exist.
+
+### Storages API
+
+Artipie can have separate settings for storages, each storage in storages settings has its alias
+and can be used in repositories setting. Storages settings can exist for repository, for user
+is the case of `org` layout or for whole system in the case of `flat` layout. Here is the API to
+manage these storages settings:
+
+> **GET** /repositories/{repo}/storages  
+> **GET** /storages/{uid}
+
+Returns the list of the existing storage aliases as json object:
+```json
+{
+  "storages": {
+    "default": {
+      "type": "file",
+      "path": "/data/default"
+    },
+    "temp": {
+      "type": "file",
+      "path,": "/data/temp,"
+    }
+  }
+}
+```
+
+> **PUT** /repositories/{repo}/storages/{alias}  
+> **PUT** /storages/{uid}/{alias}
+
+Adds storage with alias `{alias}` to the settings, json with full new storage settings is expected 
+in request body, for example:
+```json
+{
+  "type": "file",
+  "path": "path/for/new/storage"
+}
+```
+If storage alias `{alias}` already exists, status `409` is returned.
+
+> **DELETE** /repositories/{repo}/storages/{alias}  
+> **DELETE** /storages/{uid}/{alias}
+
+Removes storage alias `{alias}` from the settings, returns status `200` on success, status `404` is
+returned if such storage alias does not exist.
+
+> **Note**  
+> When Artipie layout is `org`, each repository belongs to some user, thus repository name path
+> parameter `{repo}` actually consists of two parts: `{repository_owner_name}/{repository_name}`.
+> When layout is `flat`, `{repo}` is just the name of the repository.  
+> Path parameter `{uid}` is required only for `org` layout (to manage user's storages settings) 
+> and should be omitted when layout is `flat` (to manage common storages settings).
