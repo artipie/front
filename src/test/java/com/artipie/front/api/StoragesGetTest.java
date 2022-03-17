@@ -23,7 +23,7 @@ import spark.Response;
  * Test for {@link Storages}.
  * @since 0.1
  */
-class GetStoragesTest {
+class StoragesGetTest {
 
     /**
      * Test storage.
@@ -44,7 +44,7 @@ class GetStoragesTest {
     })
     void returnStorages(final String uid, final String repo, final String key)
         throws JSONException {
-        GetStoragesTest.createSettings(this.blsto, new Key.From(key));
+        StoragesGetTest.createSettings(this.blsto, new Key.From(key));
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(repo);
