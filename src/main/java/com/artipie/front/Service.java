@@ -171,7 +171,7 @@ public final class Service {
                                 new YamlRepoPermissions(this.settings.repoConfigsStorage())
                             )
                         );
-                        this.ignite.get(
+                        this.ignite.patch(
                             repo.with("permissions").toString(),
                             new RepositoryPermissions.Patch(
                                 new YamlRepoPermissions(this.settings.repoConfigsStorage())
