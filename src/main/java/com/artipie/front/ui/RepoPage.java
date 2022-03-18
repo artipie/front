@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.jetty.http.HttpStatus;
 import spark.Request;
@@ -47,18 +48,24 @@ public final class RepoPage {
                     req -> {
                         final String uid = RequestAttr.Standard.USER_ID.readOrThrow(req);
                         final String name = GetRepository.REPO_PARAM.parse(req);
-                        try {
-                            final YamlMapping yaml = Yaml.createYamlInput(
-                                new ByteArrayInputStream(repos.value(name, uid))
-                            ).readYamlMapping();
-                            return Map.of(
-                                "user", uid, "title", uid, "name", name,
-                                "type", yaml.yamlMapping("repo").string("type"),
-                                "config", yaml.toString()
-                            );
-                        } catch (final IOException err) {
-                            throw new UncheckedIOException(err);
+                        final Map<String, String> res = new HashMap<>(5);
+                        res.put("user", uid);
+                        res.put("title", uid);
+                        res.put("name", name);
+                        if (repos.exists(name, uid)) {
+                            try {
+                                final YamlMapping yaml = Yaml.createYamlInput(
+                                    new ByteArrayInputStream(repos.value(name, uid))
+                                ).readYamlMapping();
+                                res.put("type", yaml.yamlMapping("repo").string("type"));
+                                res.put("config", yaml.toString());
+                            } catch (final IOException err) {
+                                throw new UncheckedIOException(err);
+                            }
+                        } else {
+                            res.put("type", req.queryParamOrDefault("type", "maven"));
                         }
+                        return res;
                     }
                 )
             );
@@ -108,7 +115,9 @@ public final class RepoPage {
                     response.status(HttpStatus.BAD_REQUEST_400);
                     return "Repository storage is required";
                 }
-                this.stn.delete(name, uid);
+                if (this.stn.exists(name, uid)) {
+                    this.stn.delete(name, uid);
+                }
                 this.stn.save(name, uid, yaml.toString().getBytes(StandardCharsets.UTF_8));
                 response.redirect(String.format("/dashboard/%s/%s", uid, name));
             } else if ("delete".equals(action)) {
@@ -132,4 +141,26 @@ public final class RepoPage {
             }
         }
     }
+
+    /**
+     * Handle get request while creating new repository.
+     * @since 0.1
+     */
+    public static final class Get implements Route {
+
+        @Override
+        public Object handle(final Request request, final Response response) {
+            response.status(HttpStatus.FOUND_302);
+            response.redirect(
+                String.format(
+                    "/dashboard/%s/%s?type=%s",
+                    RequestAttr.Standard.USER_ID.readOrThrow(request),
+                    request.queryParams("repo"),
+                    request.queryParams("type")
+                )
+            );
+            return null;
+        }
+    }
+
 }

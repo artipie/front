@@ -45,6 +45,7 @@ import org.eclipse.jetty.http.MimeTypes;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
+ * @checkstyle JavaNCSSCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class Service {
@@ -240,6 +241,10 @@ public final class Service {
                 this.ignite.post(
                     new RequestPath().with("api").with("repos").with(GetUser.USER_PARAM).toString(),
                     new RepoPage.Post(stn)
+                );
+                this.ignite.get(
+                    new RequestPath().with("api").with("repos").with(GetUser.USER_PARAM).toString(),
+                    new RepoPage.Get()
                 );
             }
         );
