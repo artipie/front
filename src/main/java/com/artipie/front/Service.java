@@ -13,6 +13,7 @@ import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.PutRepository;
 import com.artipie.front.api.Repositories;
+import com.artipie.front.api.RepositoryPermissions;
 import com.artipie.front.api.Storages;
 import com.artipie.front.api.Users;
 import com.artipie.front.auth.AuthByPassword;
@@ -143,13 +144,25 @@ public final class Service {
                         this.ignite.head(path.toString(), new HeadRepository(stn));
                         this.ignite.delete(path.toString(), new DeleteRepository(stn));
                         this.ignite.put(path.toString(), new PutRepository(stn));
+                        final RequestPath repo = this.repoPath();
                         this.ignite.get(
-                            path.with("permissions").toString(),
-                            new GetRepositoryPermissions(
+                            repo.with("permissions").toString(),
+                            new RepositoryPermissions.Get(
                                 new YamlRepoPermissions(this.settings.repoConfigsStorage())
                             )
                         );
-                        final RequestPath repo = this.repoPath();
+                        this.ignite.put(
+                            repo.with("permissions").with(RepositoryPermissions.NAME).toString(),
+                            new RepositoryPermissions.Put(
+                                new YamlRepoPermissions(this.settings.repoConfigsStorage())
+                            )
+                        );
+                        this.ignite.delete(
+                            repo.with("permissions").with(RepositoryPermissions.NAME).toString(),
+                            new RepositoryPermissions.Delete(
+                                new YamlRepoPermissions(this.settings.repoConfigsStorage())
+                            )
+                        );
                         this.ignite.get(
                             repo.with("storages").toString(),
                             MimeTypes.Type.APPLICATION_JSON.asString(),
