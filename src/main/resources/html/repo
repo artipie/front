@@ -8,7 +8,7 @@
   file to get help):
 </p>
 
-<form id="config-form" action="/api/repos/{{user}}" method="POST">
+<form id="config-form" action="/dashboard/api/repos/{{user}}" method="POST">
   <fieldset>
     <textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;"
 >{{#if config}}
@@ -40,7 +40,7 @@ repo:
   </fieldset>
 </form>
 
-<form id="repo-delete-form" action="/api/repos/{{user}}" method="POST">
+<form id="repo-delete-form" action="/dashboard/api/repos/{{user}}" method="POST">
     <fieldset>
         <input name="repo" type="hidden" value="{{name}}"/>
         <input name="action" type="hidden" value="delete"/>

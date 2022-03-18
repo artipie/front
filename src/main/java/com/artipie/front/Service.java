@@ -239,7 +239,11 @@ public final class Service {
                 this.ignite.get(
                     new RequestPath().with(GetUser.USER_PARAM)
                         .with(GetRepository.REPO_PARAM).toString(),
-                    new RepoPage(stn), engine
+                    new RepoPage.TemplateView(stn), engine
+                );
+                this.ignite.post(
+                    new RequestPath().with("api").with("repos").with(GetUser.USER_PARAM).toString(),
+                    new RepoPage.Post(stn)
                 );
             }
         );
