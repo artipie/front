@@ -20,7 +20,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link GetRepositoryPermissions}.
+ * Test for {@link RepositoryPermissions.Get}.
  * @since 0.1
  */
 class GetRepositoryPermissionsTest {
@@ -50,7 +50,7 @@ class GetRepositoryPermissionsTest {
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-maven");
         JSONAssert.assertEquals(
-            new GetRepositoryPermissions(this.perms).handle(rqs, Mockito.mock(Response.class)),
+            new RepositoryPermissions.Get(this.perms).handle(rqs, Mockito.mock(Response.class)),
             String.join(
                 "\n",
                 "{\"permissions\": {",
@@ -77,7 +77,7 @@ class GetRepositoryPermissionsTest {
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
         Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("alice");
         JSONAssert.assertEquals(
-            new GetRepositoryPermissions(this.perms).handle(rqs, Mockito.mock(Response.class)),
+            new RepositoryPermissions.Get(this.perms).handle(rqs, Mockito.mock(Response.class)),
             "{\"permissions\": {}}",
             true
         );
