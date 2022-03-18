@@ -163,6 +163,10 @@ public final class Service {
                             repo.with("storages").with(Storages.ST_ALIAS).toString(),
                             new Storages.Delete(this.settings.repoConfigsStorage())
                         );
+                        this.ignite.put(
+                            repo.with("storages").with(Storages.ST_ALIAS).toString(),
+                            new Storages.Put(this.settings.repoConfigsStorage())
+                        );
                     }
                 );
                 this.ignite.path(
@@ -175,6 +179,10 @@ public final class Service {
                         this.ignite.delete(
                             usr.with(Storages.ST_ALIAS).toString(),
                             new Storages.Delete(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.put(
+                            usr.with(Storages.ST_ALIAS).toString(),
+                            new Storages.Put(this.settings.repoConfigsStorage())
                         );
                     }
                 );
