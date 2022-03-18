@@ -18,7 +18,7 @@ your username is <code>github.com/{{user}}</code>.</p>
 </ul>
 
 
-<form action="/api/repos/{{user}}" method="GET">
+<form action="/dashboard/api/repos/{{user}}" method="GET">
   <label>Create new repository:</label>
   <input id="new-repo-name" name="repo" type="text" size="25" required="true" pattern="[a-z0-9]{3,16}"/>
   <label>Type:</label>
