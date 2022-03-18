@@ -75,7 +75,7 @@ class GetRepositoryPermissionsTest {
         );
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("alice");
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("alice");
         JSONAssert.assertEquals(
             new GetRepositoryPermissions(this.perms).handle(rqs, Mockito.mock(Response.class)),
             "{\"permissions\": {}}",

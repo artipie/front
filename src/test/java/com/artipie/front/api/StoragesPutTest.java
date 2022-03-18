@@ -47,7 +47,7 @@ class StoragesPutTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(repo);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(uid);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(uid);
         Mockito.when(rqs.params(Storages.ST_ALIAS.toString())).thenReturn("local");
         Mockito.when(rqs.body()).thenReturn("{ \"type\": \"file\", \"path\": \"/usr/local\" }");
         new Storages.Put(this.blsto).handle(rqs, resp);
@@ -88,7 +88,7 @@ class StoragesPutTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(repo);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(uid);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(uid);
         Mockito.when(rqs.params(Storages.ST_ALIAS.toString())).thenReturn("temp");
         Mockito.when(rqs.body()).thenReturn("{ \"type\": \"file\", \"path\": \"/usr/temp\" }");
         new Storages.Put(this.blsto).handle(rqs, resp);

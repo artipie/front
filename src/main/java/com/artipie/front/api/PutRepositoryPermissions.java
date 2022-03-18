@@ -42,7 +42,7 @@ public final class PutRepositoryPermissions implements Route {
     @Override
     public Object handle(final Request request, final Response response) {
         this.perms.add(
-            Optional.ofNullable(GetUser.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
+            Optional.ofNullable(Users.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
                 .orElse("").concat(GetRepository.REPO_PARAM.parse(request)),
             PutRepositoryPermissions.NAME.parse(request),
             Json.createReader(new StringReader(request.body())).readArray()

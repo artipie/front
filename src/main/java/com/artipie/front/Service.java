@@ -7,15 +7,11 @@ package com.artipie.front;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
 import com.artipie.front.api.DeleteRepository;
-import com.artipie.front.api.DeleteUser;
 import com.artipie.front.api.GetRepository;
 import com.artipie.front.api.GetRepositoryPermissions;
-import com.artipie.front.api.GetUser;
 import com.artipie.front.api.HeadRepository;
-import com.artipie.front.api.HeadUser;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.PutRepository;
-import com.artipie.front.api.PutUser;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.api.Storages;
 import com.artipie.front.api.Users;
@@ -190,13 +186,13 @@ public final class Service {
                     "/users", () -> {
                         this.ignite.get(
                             "/", MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new Users(this.settings.users())
+                            new Users.GetAll(this.settings.users())
                         );
-                        final String path = new RequestPath().with(GetUser.USER_PARAM).toString();
-                        this.ignite.get(path, new GetUser(this.settings.credentials()));
-                        this.ignite.put(path, new PutUser(this.settings.users()));
-                        this.ignite.head(path, new HeadUser(this.settings.credentials()));
-                        this.ignite.delete(path, new DeleteUser(this.settings.users()));
+                        final String path = new RequestPath().with(Users.USER_PARAM).toString();
+                        this.ignite.get(path, new Users.GetUser(this.settings.credentials()));
+                        this.ignite.put(path, new Users.Put(this.settings.users()));
+                        this.ignite.head(path, new Users.Head(this.settings.credentials()));
+                        this.ignite.delete(path, new Users.Delete(this.settings.users()));
                     }
                 );
             }
@@ -225,7 +221,7 @@ public final class Service {
                 );
                 this.ignite.get("", new UserPage(stn), engine);
                 this.ignite.get(
-                    new RequestPath().with(GetUser.USER_PARAM)
+                    new RequestPath().with(Users.USER_PARAM)
                         .with(GetRepository.REPO_PARAM).toString(),
                     new RepoPage(stn), engine
                 );
@@ -264,7 +260,7 @@ public final class Service {
     private RequestPath repoPath() {
         RequestPath res = new RequestPath().with(GetRepository.REPO_PARAM);
         if ("org".equals(this.settings.layout())) {
-            res = new RequestPath().with(GetUser.USER_PARAM).with(GetRepository.REPO_PARAM);
+            res = new RequestPath().with(Users.USER_PARAM).with(GetRepository.REPO_PARAM);
         }
         return res;
     }
@@ -277,7 +273,7 @@ public final class Service {
     private RequestPath userPath() {
         RequestPath res = new RequestPath();
         if ("org".equals(this.settings.layout())) {
-            res = res.with(GetUser.USER_PARAM);
+            res = res.with(Users.USER_PARAM);
         }
         return res;
     }
