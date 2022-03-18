@@ -20,11 +20,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link RepositoryPermissions.Put}.
+ * Test for {@link RepositoryPermissions.Patch}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class PutRepositoryPermissionsTest {
+class RepositoryPermissionsPatchTest {
 
     /**
      * Test storage.
@@ -43,42 +43,51 @@ class PutRepositoryPermissionsTest {
     }
 
     @Test
-    void addsPermissions() {
-        final Key.From key = new Key.From("mark/my-python.yaml");
+    void patchesPermissions() {
+        final Key.From key = new Key.From("internal-maven.yaml");
         this.blsto.save(
             key,
             String.join(
                 "\n",
                 "repo:",
-                "  type: pypi",
+                "  type: maven",
                 "  permissions:",
-                "    mark:",
+                "    alice:",
                 "      - read"
             ).getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
         final var resp = Mockito.mock(Response.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("mark");
-        Mockito.when(rqs.params(RepositoryPermissions.NAME.toString())).thenReturn("alice");
-        Mockito.when(rqs.body()).thenReturn("[\"read\", \"write\"]");
-        new RepositoryPermissions.Put(this.perms).handle(rqs, resp);
-        Mockito.verify(resp).status(HttpStatus.CREATED_201);
+        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("internal-maven");
+        Mockito.when(rqs.body()).thenReturn(
+            String.join(
+                "\n",
+                "{",
+                "  \"grant\" : {",
+                "    \"Elen\": [\"write\", \"read\"]",
+                "  },",
+                "  \"revoke\": {",
+                "    \"alice\": [\"read\"]",
+                "  }",
+                "}"
+            )
+        );
+        new RepositoryPermissions.Patch(this.perms).handle(rqs, resp);
+        Mockito.verify(resp).status(HttpStatus.OK_200);
         MatcherAssert.assertThat(
             new String(this.blsto.value(key), StandardCharsets.UTF_8),
             new IsEqual<>(
                 String.join(
                     System.lineSeparator(),
                     "repo:",
-                    "  type: pypi",
+                    "  type: maven",
                     "  permissions:",
-                    "    mark:",
-                    "      - read",
-                    "    alice:",
-                    "      - read",
-                    "      - write"
+                    "    Elen:",
+                    "      - write",
+                    "      - read"
                 )
             )
         );
     }
+
 }

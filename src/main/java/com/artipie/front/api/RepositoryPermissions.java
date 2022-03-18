@@ -146,4 +146,39 @@ public final class RepositoryPermissions {
             return null;
         }
     }
+
+    /**
+     * Handle `PATCH` request to update repository permissions, request line format:
+     * PATCH /repo/{owner_name}/{repo_name}/permissions
+     * where {owner_name} is required for `org` layout only, json object with permissions
+     * to update is expected in the request body.
+     * @since 0.1
+     */
+    public static final class Patch implements Route {
+
+        /**
+         * Repository permissions.
+         *
+         * @since 0.1
+         */
+        private final RepoPermissions perms;
+
+        /**
+         * Ctor.
+         * @param perms Repository permissions
+         */
+        public Patch(final RepoPermissions perms) {
+            this.perms = perms;
+        }
+
+        @Override
+        public Object handle(final Request request, final Response response) {
+            this.perms.patch(
+                RepositoryPermissions.repoNameFromRq(request),
+                Json.createReader(new StringReader(request.body())).readObject()
+            );
+            response.status(HttpStatus.OK_200);
+            return null;
+        }
+    }
 }

@@ -144,8 +144,9 @@ public final class YamlRepoPermissions implements RepoPermissions {
         for (final Map.Entry<String, JsonValue> entry : grant.entrySet()) {
             if (!granted.contains(entry.getKey())) {
                 YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
-                for (final String perm
-                    : entry.getValue().asJsonArray().getValuesAs(JsonValue::toString)) {
+                final List<String> list = YamlRepoPermissions
+                    .toStream(entry.getValue().asJsonArray()).collect(Collectors.toList());
+                for (final String perm : list) {
                     seq = seq.add(perm);
                 }
                 builder = builder.add(entry.getKey(), seq.build());

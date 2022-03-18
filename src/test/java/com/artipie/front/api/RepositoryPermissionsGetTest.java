@@ -23,7 +23,7 @@ import spark.Response;
  * Test for {@link RepositoryPermissions.Get}.
  * @since 0.1
  */
-class GetRepositoryPermissionsTest {
+class RepositoryPermissionsGetTest {
 
     /**
      * Test storage.
