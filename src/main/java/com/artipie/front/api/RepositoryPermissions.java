@@ -39,7 +39,7 @@ public final class RepositoryPermissions {
      * @return Repository name
      */
     private static String repoNameFromRq(final Request request) {
-        return Optional.ofNullable(GetUser.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
+        return Optional.ofNullable(Users.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
             .orElse("").concat(GetRepository.REPO_PARAM.parse(request));
     }
 

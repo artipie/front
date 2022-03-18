@@ -13,19 +13,19 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link HeadUser}.
+ * Test for {@link Users.Head}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class HeadUserTest {
+class UsersHeadTest {
 
     @Test
     void returnsOkWhenUserFound() {
         final var rqs = Mockito.mock(Request.class);
         final String uid = "Alice";
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(uid);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(uid);
         final Response resp = Mockito.mock(Response.class);
-        new HeadUser(
+        new Users.Head(
             new YamlCredentials(
                 YamlCredentialsTest.credYaml(
                     YamlCredentialsTest.PasswordFormat.SIMPLE,
@@ -39,9 +39,9 @@ class HeadUserTest {
     @Test
     void returnsNotFoundWhenUserDoesNotExists() {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("Someone");
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("Someone");
         final Response resp = Mockito.mock(Response.class);
-        new HeadUser(
+        new Users.Head(
             new YamlCredentials(
                 YamlCredentialsTest.credYaml(
                     YamlCredentialsTest.PasswordFormat.SIMPLE,

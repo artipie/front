@@ -20,11 +20,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link Users}.
+ * Test for {@link Users.GetAll}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class UsersTest {
+class UsersGetAllTest {
 
     /**
      * Credentials file.
@@ -44,13 +44,13 @@ class UsersTest {
     @BeforeEach
     void init() {
         this.blsto = new BlockingStorage(new InMemoryStorage());
-        this.users = new YamlUsers(UsersTest.CREDS, this.blsto);
+        this.users = new YamlUsers(UsersGetAllTest.CREDS, this.blsto);
     }
 
     @Test
     void writesUsers() throws JSONException {
         this.blsto.save(
-            UsersTest.CREDS,
+            UsersGetAllTest.CREDS,
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.SIMPLE,
                 // @checkstyle LineLengthCheck (1 line)
@@ -60,7 +60,7 @@ class UsersTest {
             ).toString().getBytes(StandardCharsets.UTF_8)
         );
         JSONAssert.assertEquals(
-            new Users(this.users)
+            new Users.GetAll(this.users)
                 .handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
             String.join(
                 "\n",
@@ -77,7 +77,7 @@ class UsersTest {
     @Test
     void writesEmptyWhenAbsent() throws JSONException {
         JSONAssert.assertEquals(
-            new Users(this.users)
+            new Users.GetAll(this.users)
                 .handle(Mockito.mock(Request.class), Mockito.mock(Response.class)),
             "{}",
             true
