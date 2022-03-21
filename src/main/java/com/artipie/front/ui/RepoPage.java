@@ -8,7 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.front.RequestAttr;
 import com.artipie.front.api.GetRepository;
-import com.artipie.front.api.GetUser;
+import com.artipie.front.api.Users;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.misc.ValueFromBody;
 import com.artipie.front.settings.RepoSettings;
@@ -99,7 +99,7 @@ public final class RepoPage {
             final ValueFromBody vals = new ValueFromBody(request.body());
             final String action = vals.byNameOrThrow("action");
             final String name = vals.byNameOrThrow("repo");
-            final String uid = GetUser.USER_PARAM.parse(request);
+            final String uid = Users.USER_PARAM.parse(request);
             if ("update".equals(action)) {
                 final YamlMapping yaml = Post.configsFromBody(vals);
                 final YamlMapping repo = yaml.yamlMapping("repo");
