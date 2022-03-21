@@ -58,7 +58,7 @@ class RepositoryPermissionsPatchTest {
         );
         final var rqs = Mockito.mock(Request.class);
         final var resp = Mockito.mock(Response.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("internal-maven");
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("internal-maven");
         Mockito.when(rqs.body()).thenReturn(
             String.join(
                 "\n",
