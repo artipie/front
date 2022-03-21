@@ -19,10 +19,10 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link GetUser}.
+ * Test for {@link Users.GetUser}.
  * @since 0.1
  */
-class GetUserTest {
+class UsersGetUserTest {
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -32,9 +32,9 @@ class GetUserTest {
         }, delimiterString = ";")
     void returnsUserInfo(final String name, final String res) throws JSONException {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
         JSONAssert.assertEquals(
-            new GetUser(
+            new Users.GetUser(
                 new YamlCredentials(
                     YamlCredentialsTest.credYaml(
                         YamlCredentialsTest.PasswordFormat.SIMPLE,
@@ -53,9 +53,9 @@ class GetUserTest {
     @Test
     void returnNotFound() {
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("any");
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("any");
         final Response resp = Mockito.mock(Response.class);
-        new GetUser(
+        new Users.GetUser(
             new YamlCredentials(
                 Yaml.createYamlMappingBuilder()
                     .add("credentials", Yaml.createYamlMappingBuilder().build()).build()

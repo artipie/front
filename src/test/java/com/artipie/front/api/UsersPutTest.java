@@ -24,11 +24,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link PutUser}.
+ * Test for {@link Users.Put}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class PutUserTest {
+class UsersPutTest {
 
     /**
      * Test credentials file name.
@@ -48,13 +48,13 @@ class PutUserTest {
     @BeforeEach
     void init() {
         this.asto = new BlockingStorage(new InMemoryStorage());
-        this.users = new YamlUsers(PutUserTest.CREDS_YAML, this.asto);
+        this.users = new YamlUsers(UsersPutTest.CREDS_YAML, this.asto);
     }
 
     @Test
     void addsUser() {
         this.asto.save(
-            new Key.From(PutUserTest.CREDS_YAML),
+            new Key.From(UsersPutTest.CREDS_YAML),
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.SIMPLE,
                 // @checkstyle LineLengthCheck (5 lines)
@@ -64,13 +64,13 @@ class PutUserTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         final var name = "john";
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
-        new PutUser(this.users).handle(rqs, resp);
+        new Users.Put(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(
             new String(
-                this.asto.value(new Key.From(PutUserTest.CREDS_YAML)), StandardCharsets.UTF_8
+                this.asto.value(new Key.From(UsersPutTest.CREDS_YAML)), StandardCharsets.UTF_8
             ),
             new IsEqual<>(
                 String.join(
@@ -99,13 +99,13 @@ class PutUserTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         final var name = "Alice";
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
-        new PutUser(this.users).handle(rqs, resp);
+        new Users.Put(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(
             new String(
-                this.asto.value(new Key.From(PutUserTest.CREDS_YAML)), StandardCharsets.UTF_8
+                this.asto.value(new Key.From(UsersPutTest.CREDS_YAML)), StandardCharsets.UTF_8
             ),
             new IsEqual<>(
                 String.join(
@@ -128,9 +128,9 @@ class PutUserTest {
     void returnBadRequest(final String body) {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn("Alice");
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("Alice");
         Mockito.when(rqs.body()).thenReturn(body);
-        new PutUser(this.users).handle(rqs, resp);
+        new Users.Put(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
     }
 
@@ -138,7 +138,7 @@ class PutUserTest {
     void returnConflictWhenUserAlreadyExists() {
         final var name = "Mark";
         this.asto.save(
-            new Key.From(PutUserTest.CREDS_YAML),
+            new Key.From(UsersPutTest.CREDS_YAML),
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.SIMPLE,
                 new YamlCredentialsTest.User("Mark", "plain", "123")
@@ -146,8 +146,8 @@ class PutUserTest {
         );
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(name);
-        new PutUser(this.users).handle(rqs, resp);
+        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
+        new Users.Put(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CONFLICT_409);
     }
 

@@ -22,10 +22,10 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link DeleteUser}.
+ * Test for {@link com.artipie.front.api.Users.Delete}.
  * @since 0.1
  */
-class DeleteUserTest {
+class UsersDeleteTest {
 
     /**
      * Test credentials key.
@@ -45,14 +45,14 @@ class DeleteUserTest {
     @BeforeEach
     void init() {
         this.blsto = new BlockingStorage(new InMemoryStorage());
-        this.users = new YamlUsers(DeleteUserTest.KEY, this.blsto);
+        this.users = new YamlUsers(UsersDeleteTest.KEY, this.blsto);
     }
 
     @Test
     void removesUser() {
         final String alice = "Alice";
         this.blsto.save(
-            DeleteUserTest.KEY,
+            UsersDeleteTest.KEY,
             YamlCredentialsTest.credYaml(
                 YamlCredentialsTest.PasswordFormat.STRUCT,
                 new YamlCredentialsTest.User(alice, Optional.of("alice@example.com"), "admin"),
@@ -60,9 +60,10 @@ class DeleteUserTest {
             ).toString().getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetUser.USER_PARAM.toString())).thenReturn(alice);
+        Mockito.when(rqs.params(com.artipie.front.api.Users.USER_PARAM.toString()))
+            .thenReturn(alice);
         final Response resp = Mockito.mock(Response.class);
-        new DeleteUser(this.users).handle(rqs, resp);
+        new com.artipie.front.api.Users.Delete(this.users).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.OK_200);
         MatcherAssert.assertThat(
             this.users.list().size(),
