@@ -16,11 +16,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link Repositories}.
+ * Test for {@link Repositories.GetAll}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class RepositoriesTest {
+class RepositoriesGetAllTest {
 
     @Test
     void listsRepositories() throws JSONException {
@@ -33,7 +33,7 @@ class RepositoriesTest {
         blsto.save(new Key.From("rpm.yml"), new byte[]{});
         final var resp = Mockito.mock(Response.class);
         JSONAssert.assertEquals(
-            new Repositories(new RepoSettings("org", blsto))
+            new Repositories.GetAll(new RepoSettings("org", blsto))
                 .handle(Mockito.mock(Request.class), resp),
             String.join(
                 "\n", "[",

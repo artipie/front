@@ -40,7 +40,7 @@ public final class RepositoryPermissions {
      */
     private static String repoNameFromRq(final Request request) {
         return Optional.ofNullable(Users.USER_PARAM.parse(request)).map(usr -> usr.concat("/"))
-            .orElse("").concat(GetRepository.REPO_PARAM.parse(request));
+            .orElse("").concat(Repositories.REPO_PARAM.parse(request));
     }
 
     /**
@@ -108,7 +108,7 @@ public final class RepositoryPermissions {
         public String handle(final Request request, final Response response) {
             final JsonObject res = this.stn.get(RepositoryPermissions.repoNameFromRq(request));
             response.type(MimeTypes.Type.APPLICATION_JSON.toString());
-            return Json.createObjectBuilder().add(Get.PERMISSIONS, res)
+            return Json.createObjectBuilder().add(RepositoryPermissions.Get.PERMISSIONS, res)
                 .build().toString();
         }
     }
