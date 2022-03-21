@@ -11,9 +11,8 @@ import com.artipie.front.RequestAttr;
 import com.artipie.front.settings.RepoSettings;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsAnything;
-import org.junit.jupiter.api.Assertions;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
@@ -21,10 +20,10 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link HeadRepository}.
+ * Test for {@link Repositories.Delete}.
  * @since 0.1
  */
-class HeadRepositoryTest {
+class RepositoriesDeleteTest {
 
     /**
      * Test storage.
@@ -39,30 +38,24 @@ class HeadRepositoryTest {
     @ParameterizedTest
     @CsvSource({
         "flat,binary-repo.yaml,binary-repo",
-        "org,Mark/pypi.yml,pypi"
+        "org,Alice/docker.yml,docker"
     })
-    void returnOkWhenRepoFound(final String layout, final String key, final String name) {
-        final String uid = "Mark";
+    void removesRepository(final String layout, final String key, final String name) {
+        final String uid = "Alice";
         this.blsto.save(new Key.From(key), new byte[]{});
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(name);
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn(uid);
         MatcherAssert.assertThat(
-            new HeadRepository(new RepoSettings(layout, this.blsto))
+            "Failed to process request",
+            new Repositories.Delete(new RepoSettings(layout, this.blsto))
                 .handle(rqs, Mockito.mock(Response.class)),
             new IsAnything<>()
         );
-    }
-
-    @Test
-    void throwsExceptionWhenNotFound() {
-        final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-repo");
-        Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
-        Assertions.assertThrows(
-            NotFoundException.class,
-            () -> new HeadRepository(new RepoSettings("flat", this.blsto))
-                .handle(rqs, Mockito.mock(Response.class))
+        MatcherAssert.assertThat(
+            "Item was not removed from storage",
+            this.blsto.exists(new Key.From(key)),
+            new IsEqual<>(false)
         );
     }
 
