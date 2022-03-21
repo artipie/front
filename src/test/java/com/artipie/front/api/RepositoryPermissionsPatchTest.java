@@ -20,11 +20,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link RepositoryPermissions.Delete}.
+ * Test for {@link RepositoryPermissions.Patch}.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class DeleteRepositoryPermissionsTest {
+class RepositoryPermissionsPatchTest {
 
     /**
      * Test storage.
@@ -43,28 +43,36 @@ class DeleteRepositoryPermissionsTest {
     }
 
     @Test
-    void removesPermissions() {
-        final Key.From key = new Key.From("mark/my-python.yaml");
+    void patchesPermissions() {
+        final Key.From key = new Key.From("internal-maven.yaml");
         this.blsto.save(
             key,
             String.join(
                 "\n",
                 "repo:",
-                "  type: pypi",
+                "  type: maven",
                 "  permissions:",
                 "    alice:",
-                "      - read",
-                "    mark:",
-                "      - read",
-                "      - write"
+                "      - read"
             ).getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
         final var resp = Mockito.mock(Response.class);
-        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("my-python");
-        Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("mark");
-        Mockito.when(rqs.params(RepositoryPermissions.NAME.toString())).thenReturn("alice");
-        new RepositoryPermissions.Delete(this.perms).handle(rqs, resp);
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("internal-maven");
+        Mockito.when(rqs.body()).thenReturn(
+            String.join(
+                "\n",
+                "{",
+                "  \"grant\" : {",
+                "    \"Elen\": [\"write\", \"read\"]",
+                "  },",
+                "  \"revoke\": {",
+                "    \"alice\": [\"read\"]",
+                "  }",
+                "}"
+            )
+        );
+        new RepositoryPermissions.Patch(this.perms).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.OK_200);
         MatcherAssert.assertThat(
             new String(this.blsto.value(key), StandardCharsets.UTF_8),
@@ -72,11 +80,11 @@ class DeleteRepositoryPermissionsTest {
                 String.join(
                     System.lineSeparator(),
                     "repo:",
-                    "  type: pypi",
+                    "  type: maven",
                     "  permissions:",
-                    "    mark:",
-                    "      - read",
-                    "      - write"
+                    "    Elen:",
+                    "      - write",
+                    "      - read"
                 )
             )
         );

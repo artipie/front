@@ -22,10 +22,12 @@ import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
 import com.artipie.front.ui.UserPage;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
 import javax.json.Json;
+import javax.json.JsonException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -33,7 +35,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;
+import spark.ExceptionHandler;
 
 /**
  * Front service.
@@ -160,6 +164,12 @@ public final class Service {
                                 new YamlRepoPermissions(this.settings.repoConfigsStorage())
                             )
                         );
+                        this.ignite.patch(
+                            repo.with("permissions").toString(),
+                            new RepositoryPermissions.Patch(
+                                new YamlRepoPermissions(this.settings.repoConfigsStorage())
+                            )
+                        );
                         this.ignite.get(
                             repo.with("storages").toString(),
                             MimeTypes.Type.APPLICATION_JSON.asString(),
@@ -247,15 +257,9 @@ public final class Service {
         );
         this.ignite.before(AuthFilters.AUTHENTICATE);
         this.ignite.before(AuthFilters.SESSION_ATTRS);
-        this.ignite.exception(
-            NotFoundException.class, (ex, rqs, rsp) -> {
-                rsp.type("application/json");
-                rsp.body(
-                    Json.createObjectBuilder().add("error", ex.getLocalizedMessage())
-                    .build().toString()
-                );
-            }
-        );
+        this.ignite.exception(NotFoundException.class, Service.error(HttpStatus.NOT_FOUND_404));
+        this.ignite.exception(JsonException.class, Service.error(HttpStatus.BAD_REQUEST_400));
+        this.ignite.exception(JsonParseException.class, Service.error(HttpStatus.BAD_REQUEST_400));
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }
@@ -294,5 +298,22 @@ public final class Service {
             res = res.with(Users.USER_PARAM);
         }
         return res;
+    }
+
+    /**
+     * Handle exceptions by writing error in json body and returning
+     * provided status.
+     * @param status Status to return
+     * @return Instance of {@link ExceptionHandler}
+     */
+    private static ExceptionHandler<Exception> error(final int status) {
+        return (ex, rqs, rsp) -> {
+            rsp.type(MimeTypes.Type.APPLICATION_JSON.toString());
+            rsp.body(
+                Json.createObjectBuilder().add("error", ex.getLocalizedMessage())
+                    .build().toString()
+            );
+            rsp.status(status);
+        };
     }
 }
