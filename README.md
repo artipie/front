@@ -229,6 +229,23 @@ Returns the list of the existing storage aliases as json object:
 }
 ```
 
+> **GET** /repositories/{repo}/storages/{alias}  
+> **GET** /storages/{uid}/{alias}
+
+Obtain details about storage alias `{alias}`, response is provided as json object:
+```json
+{
+  "type": "file",
+  "path": "/data/default"
+}
+```
+If the storage alias `{alias}` does not exist, status `404` is returned.
+
+> **HEAD** /repositories/{repo}/storages/{alias}  
+> **HEAD** /storages/{uid}/{alias}
+
+If the storage alias `{alias}` exist, status `302` is returned, status `404` is returned otherwise.
+
 > **PUT** /repositories/{repo}/storages/{alias}  
 > **PUT** /storages/{uid}/{alias}
 
