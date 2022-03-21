@@ -7,7 +7,7 @@ package com.artipie.front.ui;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.front.RequestAttr;
-import com.artipie.front.api.GetRepository;
+import com.artipie.front.api.Repositories;
 import com.artipie.front.api.Users;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.misc.ValueFromBody;
@@ -47,7 +47,7 @@ public final class RepoPage {
                     "repo",
                     req -> {
                         final String uid = RequestAttr.Standard.USER_ID.readOrThrow(req);
-                        final String name = GetRepository.REPO_PARAM.parse(req);
+                        final String name = Repositories.REPO_PARAM.parse(req);
                         final Map<String, String> res = new HashMap<>(5);
                         res.put("user", uid);
                         res.put("title", uid);

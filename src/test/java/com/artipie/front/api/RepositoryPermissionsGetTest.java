@@ -48,7 +48,7 @@ class RepositoryPermissionsGetTest {
             new TestResource("GetRepositoryPermissionsTest/my-maven.yaml").asBytes()
         );
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-maven");
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("my-maven");
         JSONAssert.assertEquals(
             new RepositoryPermissions.Get(this.perms).handle(rqs, Mockito.mock(Response.class)),
             String.join(
@@ -74,7 +74,7 @@ class RepositoryPermissionsGetTest {
             ).getBytes(StandardCharsets.UTF_8)
         );
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("my-python");
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("alice");
         JSONAssert.assertEquals(
             new RepositoryPermissions.Get(this.perms).handle(rqs, Mockito.mock(Response.class)),

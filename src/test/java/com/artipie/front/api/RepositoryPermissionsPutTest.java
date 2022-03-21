@@ -58,7 +58,7 @@ class RepositoryPermissionsPutTest {
         );
         final var rqs = Mockito.mock(Request.class);
         final var resp = Mockito.mock(Response.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn("my-python");
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("my-python");
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("mark");
         Mockito.when(rqs.params(RepositoryPermissions.NAME.toString())).thenReturn("alice");
         Mockito.when(rqs.body()).thenReturn("[\"read\", \"write\"]");

@@ -6,11 +6,7 @@ package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
-import com.artipie.front.api.DeleteRepository;
-import com.artipie.front.api.GetRepository;
-import com.artipie.front.api.HeadRepository;
 import com.artipie.front.api.NotFoundException;
-import com.artipie.front.api.PutRepository;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.api.RepositoryPermissions;
 import com.artipie.front.api.Storages;
@@ -138,16 +134,17 @@ public final class Service {
                             this.settings.layout(), this.settings.repoConfigsStorage()
                         );
                         this.ignite.get(
-                            "", MimeTypes.Type.APPLICATION_JSON.asString(), new Repositories(stn)
+                            "", MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Repositories.GetAll(stn)
                         );
-                        final RequestPath path = new RequestPath().with(GetRepository.REPO_PARAM);
+                        final RequestPath path = new RequestPath().with(Repositories.REPO_PARAM);
                         this.ignite.get(
                             path.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
-                            new GetRepository(stn)
+                            new Repositories.Get(stn)
                         );
-                        this.ignite.head(path.toString(), new HeadRepository(stn));
-                        this.ignite.delete(path.toString(), new DeleteRepository(stn));
-                        this.ignite.put(path.toString(), new PutRepository(stn));
+                        this.ignite.head(path.toString(), new Repositories.Head(stn));
+                        this.ignite.delete(path.toString(), new Repositories.Delete(stn));
+                        this.ignite.put(path.toString(), new Repositories.Put(stn));
                         final RequestPath repo = this.repoPath();
                         this.ignite.get(
                             repo.with("permissions").toString(),
@@ -245,7 +242,7 @@ public final class Service {
                 this.ignite.get("", new UserPage(stn), engine);
                 this.ignite.get(
                     new RequestPath().with(Users.USER_PARAM)
-                        .with(GetRepository.REPO_PARAM).toString(),
+                        .with(Repositories.REPO_PARAM).toString(),
                     new RepoPage.TemplateView(stn), engine
                 );
                 this.ignite.post(
@@ -283,9 +280,9 @@ public final class Service {
      * @return Repository name path parameter
      */
     private RequestPath repoPath() {
-        RequestPath res = new RequestPath().with(GetRepository.REPO_PARAM);
+        RequestPath res = new RequestPath().with(Repositories.REPO_PARAM);
         if ("org".equals(this.settings.layout())) {
-            res = new RequestPath().with(Users.USER_PARAM).with(GetRepository.REPO_PARAM);
+            res = new RequestPath().with(Users.USER_PARAM).with(Repositories.REPO_PARAM);
         }
         return res;
     }
