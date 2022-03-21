@@ -47,7 +47,7 @@ class StoragesGetTest {
         StoragesGetTest.createSettings(this.blsto, new Key.From(key));
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(repo);
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn(repo);
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(uid);
         final String handle = new Storages.Get(this.blsto).handle(rqs, resp);
         JSONAssert.assertEquals(

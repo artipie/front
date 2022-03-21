@@ -19,10 +19,10 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link GetRepository}.
+ * Test for {@link Repositories.Get}.
  * @since 0.1
  */
-class GetRepositoryTest {
+class RepositoriesGetTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -38,10 +38,10 @@ class GetRepositoryTest {
         );
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
-        Mockito.when(rqs.params(GetRepository.REPO_PARAM.toString())).thenReturn(name);
+        Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         JSONAssert.assertEquals(
-            new GetRepository(new RepoSettings("flat", blsto)).handle(rqs, resp),
+            new Repositories.Get(new RepoSettings("flat", blsto)).handle(rqs, resp),
             new String(
                 new TestResource(String.format("GetRepositoryTest/%s.json", name)).asBytes(),
                 StandardCharsets.UTF_8

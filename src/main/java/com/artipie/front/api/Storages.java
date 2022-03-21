@@ -43,7 +43,7 @@ public final class Storages {
     private static Optional<Key> repoFromRq(final Request request) {
         final Optional<Key> usr = Optional.ofNullable(Users.USER_PARAM.parse(request))
             .map(Key.From::new);
-        Optional<Key> repo = Optional.ofNullable(GetRepository.REPO_PARAM.parse(request))
+        Optional<Key> repo = Optional.ofNullable(Repositories.REPO_PARAM.parse(request))
             .map(Key.From::new);
         if (usr.isPresent()) {
             repo = repo.<Key>map(key -> new Key.From(usr.get(), key)).or(() -> usr);
