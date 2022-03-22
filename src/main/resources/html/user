@@ -32,8 +32,8 @@ your username is <code>github.com/{{user}}</code>.</p>
     <option value="gem">Gem</option>
     <option value="helm">Helm</option>
     <option value="php">PHP</option>
-    <option value="nuget">Debian</option>
-    <option value="deb">Nuget</option>
+    <option value="deb">Debian</option>
+    <option value="nuget">Nuget</option>
     <option value="go">Go</option>
     <option value="conda">Anaconda</option>
     <option value="maven-proxy">Maven proxy (mirror)</option>
