@@ -46,6 +46,7 @@ import spark.ExceptionHandler;
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  * @checkstyle JavaNCSSCheck (500 lines)
+ * @checkstyle MethodLengthCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class Service {
@@ -173,7 +174,15 @@ public final class Service {
                         this.ignite.get(
                             repo.with("storages").toString(),
                             MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Storages.GetAll(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.get(
+                            repo.with("storages").with(Storages.ST_ALIAS).toString(),
                             new Storages.Get(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.head(
+                            repo.with("storages").with(Storages.ST_ALIAS).toString(),
+                            new Storages.Head(this.settings.repoConfigsStorage())
                         );
                         this.ignite.delete(
                             repo.with("storages").with(Storages.ST_ALIAS).toString(),
@@ -190,7 +199,16 @@ public final class Service {
                         final RequestPath usr = this.userPath();
                         this.ignite.get(
                             usr.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Storages.GetAll(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.get(
+                            usr.with(Storages.ST_ALIAS).toString(),
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
                             new Storages.Get(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.head(
+                            usr.with(Storages.ST_ALIAS).toString(),
+                            new Storages.Head(this.settings.repoConfigsStorage())
                         );
                         this.ignite.delete(
                             usr.with(Storages.ST_ALIAS).toString(),
