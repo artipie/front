@@ -11,7 +11,9 @@ import com.artipie.front.api.Repositories;
 import com.artipie.front.api.RepositoryPermissions;
 import com.artipie.front.api.Storages;
 import com.artipie.front.api.Users;
+import com.artipie.front.auth.AccessFilter;
 import com.artipie.front.auth.AuthByPassword;
+import com.artipie.front.auth.AuthPermissions;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
@@ -129,6 +131,7 @@ public final class Service {
         this.ignite.path(
             "/api", () -> {
                 this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
+                this.ignite.before("/*", new AccessFilter(AuthPermissions.STUB));
                 this.ignite.path(
                     "/repositories", () -> {
                         final RepoSettings stn = new RepoSettings(
