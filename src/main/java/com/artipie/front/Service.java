@@ -11,7 +11,9 @@ import com.artipie.front.api.Repositories;
 import com.artipie.front.api.RepositoryPermissions;
 import com.artipie.front.api.Storages;
 import com.artipie.front.api.Users;
+import com.artipie.front.auth.AccessFilter;
 import com.artipie.front.auth.AuthByPassword;
+import com.artipie.front.auth.AuthPermissions;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
@@ -46,6 +48,7 @@ import spark.ExceptionHandler;
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  * @checkstyle JavaNCSSCheck (500 lines)
+ * @checkstyle MethodLengthCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class Service {
@@ -128,6 +131,7 @@ public final class Service {
         this.ignite.path(
             "/api", () -> {
                 this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
+                this.ignite.before("/*", new AccessFilter(AuthPermissions.STUB));
                 this.ignite.path(
                     "/repositories", () -> {
                         final RepoSettings stn = new RepoSettings(
@@ -173,7 +177,15 @@ public final class Service {
                         this.ignite.get(
                             repo.with("storages").toString(),
                             MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Storages.GetAll(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.get(
+                            repo.with("storages").with(Storages.ST_ALIAS).toString(),
                             new Storages.Get(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.head(
+                            repo.with("storages").with(Storages.ST_ALIAS).toString(),
+                            new Storages.Head(this.settings.repoConfigsStorage())
                         );
                         this.ignite.delete(
                             repo.with("storages").with(Storages.ST_ALIAS).toString(),
@@ -190,7 +202,16 @@ public final class Service {
                         final RequestPath usr = this.userPath();
                         this.ignite.get(
                             usr.toString(), MimeTypes.Type.APPLICATION_JSON.asString(),
+                            new Storages.GetAll(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.get(
+                            usr.with(Storages.ST_ALIAS).toString(),
+                            MimeTypes.Type.APPLICATION_JSON.asString(),
                             new Storages.Get(this.settings.repoConfigsStorage())
+                        );
+                        this.ignite.head(
+                            usr.with(Storages.ST_ALIAS).toString(),
+                            new Storages.Head(this.settings.repoConfigsStorage())
                         );
                         this.ignite.delete(
                             usr.with(Storages.ST_ALIAS).toString(),

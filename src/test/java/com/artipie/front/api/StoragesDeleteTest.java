@@ -43,7 +43,7 @@ class StoragesDeleteTest {
         ",,_storages.yml"
     })
     void removesStorage(final String uid, final String repo, final String key) {
-        StoragesGetTest.createSettings(this.blsto, new Key.From(key));
+        StoragesGetAllTest.createSettings(this.blsto, new Key.From(key));
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn(repo);

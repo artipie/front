@@ -13,7 +13,7 @@
       <nav>
         <ul>
           <li>
-            <a href="/"><img src="https://www.artipie.com/logo.svg" style="height:92px;" alt="logo"/></a>
+            <a href="/dashboard"><img src="https://www.artipie.com/logo.svg" style="height:92px;" alt="logo"/></a>
           </li>
         </ul>
       </nav>

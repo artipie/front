@@ -58,7 +58,7 @@ public final class Storages {
      * for common or repository storages, {owner_name} is required only for `org` layout.
      * @since 0.1
      */
-    public static final class Get implements Route {
+    public static final class GetAll implements Route {
 
         /**
          * Artipie storage.
@@ -70,7 +70,7 @@ public final class Storages {
          *
          * @param strgs Artipie storages
          */
-        public Get(final BlockingStorage strgs) {
+        public GetAll(final BlockingStorage strgs) {
             this.strgs = strgs;
         }
 
@@ -81,6 +81,84 @@ public final class Storages {
                 .forEach(item -> res.add(item.alias(), item.info()));
             response.type(MimeTypes.Type.APPLICATION_JSON.asString());
             return Json.createObjectBuilder().add("storages", res.build()).build().toString();
+        }
+    }
+
+    /**
+     * Handle `GET` request to obtain storage alias details, request line example:
+     * GET /repositories/{owner_name}/{repo}/storages/{alias}
+     * GET /storages/{owner_name}/{alias}
+     * for repository and common storages, {owner_name} is required only for `org` layout,
+     * {alias} if the name of storage alias to get info about.
+     * @since 0.1
+     * @checkstyle ReturnCountCheck (500 lines)
+     */
+    public static final class Get implements Route {
+
+        /**
+         * Artipie storage.
+         */
+        private final BlockingStorage strgs;
+
+        /**
+         * Ctor.
+         * @param strgs Artipie storage
+         */
+        public Get(final BlockingStorage strgs) {
+            this.strgs = strgs;
+        }
+
+        @Override
+        @SuppressWarnings("PMD.OnlyOneReturn")
+        public String handle(final Request request, final Response response) {
+            final Optional<? extends com.artipie.front.settings.Storages.Storage> res =
+                new YamlStorages(Storages.repoFromRq(request), this.strgs).list().stream().filter(
+                    item -> item.alias().equals(Storages.ST_ALIAS.parse(request))
+                ).findFirst();
+            if (res.isPresent()) {
+                return res.get().info().toString();
+            } else {
+                response.status(HttpStatus.NOT_FOUND_404);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Handle `HEAD` request to check is storage alias exists, request line example:
+     * HEAD /repositories/{owner_name}/{repo}/storages/{alias}
+     * HEAD /storages/{owner_name}/{alias}
+     * for repository and common storages, {owner_name} is required only for `org` layout,
+     * {alias} if the name of storage alias to get info about.
+     * @since 0.1
+     */
+    public static final class Head implements Route {
+
+        /**
+         * Artipie storage.
+         */
+        private final BlockingStorage strgs;
+
+        /**
+         * Ctor.
+         * @param strgs Artipie storage
+         */
+        public Head(final BlockingStorage strgs) {
+            this.strgs = strgs;
+        }
+
+        @Override
+        public Object handle(final Request request, final Response response) {
+            final Optional<? extends com.artipie.front.settings.Storages.Storage> res =
+                new YamlStorages(Storages.repoFromRq(request), this.strgs).list().stream().filter(
+                    item -> item.alias().equals(Storages.ST_ALIAS.parse(request))
+                ).findFirst();
+            if (res.isPresent()) {
+                response.status(HttpStatus.FOUND_302);
+            } else {
+                response.status(HttpStatus.NOT_FOUND_404);
+            }
+            return null;
         }
     }
 
