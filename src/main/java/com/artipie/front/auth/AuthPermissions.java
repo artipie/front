@@ -4,6 +4,9 @@
  */
 package com.artipie.front.auth;
 
+import com.amihaiemil.eoyaml.YamlMapping;
+import java.util.Optional;
+
 /**
  * Authorization permissions.
  * @since 1.0
@@ -23,4 +26,33 @@ public interface AuthPermissions {
      * @return True if allowed
      */
     boolean allowed(String uid, String perm);
+
+    /**
+     * Permissions from yaml.
+     * @since 0.1
+     */
+    final class FromYaml implements AuthPermissions {
+
+        /**
+         * Users permissions yaml.
+         */
+        private final YamlMapping yaml;
+
+        /**
+         * Ctor.
+         * @param yaml Users permissions yaml
+         */
+        public FromYaml(final YamlMapping yaml) {
+            this.yaml = yaml;
+        }
+
+        @Override
+        public boolean allowed(final String uid, final String perm) {
+            return Optional.ofNullable(this.yaml.yamlSequence(uid))
+                .map(
+                    seq -> seq.values().stream().map(item -> item.asScalar().value())
+                        .anyMatch(perm::equals)
+                ).orElse(false);
+        }
+    }
 }
