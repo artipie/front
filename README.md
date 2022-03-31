@@ -271,3 +271,83 @@ returned if such storage alias does not exist.
 > When layout is `flat`, `{repo}` is just the name of the repository.  
 > Path parameter `{uid}` is required only for `org` layout (to manage user's storages settings) 
 > and should be omitted when layout is `flat` (to manage common storages settings).
+
+## Public API permissions
+
+Permissions to access API endpoints are very flexible and can be granted however it is convenient 
+for the team. To create and grant any permissions to users, create `api_permissions.yml` file. The
+format is the following:
+```yaml
+endpoints:
+  # This section maps endpoints and permissions
+  "/repositories.*":  # Regex to match request line
+    "GET|HEAD":       # Regex to match request method
+      - repo-read     # Name of the permission required to access the API endpoint
+      - repo-write
+    "PUT|DELETE":
+      - repo-write
+  "/users.*":
+    "GET|HEAD":
+      - users-read
+      - users-write
+    "PUT|DELETE|POST":
+      - users-write
+  ".*":
+    ".*":
+      - god
+
+users:
+  # This sections grants permissions to users
+  jane:
+    - repo-read
+    - users-read
+  john:
+    - repo-write
+    - users-write
+  olga:
+    - users-read
+  mark:
+    - god
+```
+
+The first section `endpoints` defines what permission is required to access the API endpoint: 
+the upper level is a regular expression to match the request line, the second level is the 
+regular expression to match the request method. Here are some examples:
+```yaml
+endpoints:
+  # Storages API (all methods) is available with `storages-all` permission
+  "/storages.*":
+    ".*":
+      - storages-all
+  # Storages API settings for alice (all methods) are available with `storages-alice` permission
+  "/storages/alice.*":
+    ".*":
+      - storages-alice
+  # Users API with GET or HEAD methods is available with `users-read`
+  "/users.*":
+    "GET|HEAD":
+      - users-read
+  # `admin` permission allows to access all the endpoints
+  ".*":
+    ".*":
+      - admin
+```
+
+The second section `users` defines permissions list granted for the user:
+```yaml
+users:
+  # Margo has access to whole storages API and can read users information
+  margo:
+    - storages-all
+    - users-read
+  # Alice can only read her storages settings
+  alice:
+    - storages-alice
+  # Olga has access to all API endpoints
+  olga:
+    - admin
+```
+
+When API request is accepted, request line and method are matched by `endpoint` regular expressions
+to get the list of the permissions required to access the endpoint. Then, we check if the user has 
+any of the required permission to accept or deny the request.
