@@ -36,13 +36,13 @@ public final class AccessFilter implements Filter {
     /**
      * Permissions.
      */
-    private final AuthPermissions perms;
+    private final UserPermissions perms;
 
     /**
      * Access filter.
      * @param perms Permissions
      */
-    public AccessFilter(final AuthPermissions perms) {
+    public AccessFilter(final UserPermissions perms) {
         this.perms = perms;
     }
 

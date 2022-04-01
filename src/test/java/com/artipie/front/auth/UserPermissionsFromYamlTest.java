@@ -10,17 +10,17 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link AuthPermissions.FromYaml}.
+ * Test for {@link UserPermissions.FromYaml}.
  * @since 0.1
  */
-class AuthPermissionsFromYamlTest {
+class UserPermissionsFromYamlTest {
 
     @Test
     void findsPermission() {
         final String uid = "jane";
         final String prm = "read-repo";
         MatcherAssert.assertThat(
-            new AuthPermissions.FromYaml(
+            new UserPermissions.FromYaml(
                 Yaml.createYamlMappingBuilder()
                     .add(uid, Yaml.createYamlSequenceBuilder().add(prm).add("write-repo").build())
                     .add("olga", Yaml.createYamlSequenceBuilder().add(prm).build()).build()
@@ -32,7 +32,7 @@ class AuthPermissionsFromYamlTest {
     @Test
     void returnsFalseWhenYamlIsEmpty() {
         MatcherAssert.assertThat(
-            new AuthPermissions.FromYaml(Yaml.createYamlMappingBuilder().build())
+            new UserPermissions.FromYaml(Yaml.createYamlMappingBuilder().build())
                 .allowed("any", "write"),
             new IsEqual<>(false)
         );
@@ -43,7 +43,7 @@ class AuthPermissionsFromYamlTest {
         final String uid = "mark";
         final String prm = "users-write";
         MatcherAssert.assertThat(
-            new AuthPermissions.FromYaml(
+            new UserPermissions.FromYaml(
                 Yaml.createYamlMappingBuilder()
                     .add(
                         uid,
