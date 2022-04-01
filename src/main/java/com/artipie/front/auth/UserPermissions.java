@@ -8,16 +8,16 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import java.util.Optional;
 
 /**
- * Authorization permissions.
+ * User authorization permissions.
  * @since 1.0
  */
-public interface AuthPermissions {
+public interface UserPermissions {
 
     /**
      * Stub permissions for development and debugging.
      * Remove after actual implementation.
      */
-    AuthPermissions STUB = (uid, perm) -> true;
+    UserPermissions STUB = (uid, perm) -> true;
 
     /**
      * Check if permissions is allowed for user.
@@ -31,7 +31,7 @@ public interface AuthPermissions {
      * Permissions from yaml.
      * @since 0.1
      */
-    final class FromYaml implements AuthPermissions {
+    final class FromYaml implements UserPermissions {
 
         /**
          * Users permissions yaml.
