@@ -9,6 +9,8 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.auth.AccessPermissions;
+import com.artipie.front.auth.UserPermissions;
 import com.artipie.front.auth.YamlCredentialsTest;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,7 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @checkstyle MethodNameCheck (500 lines)
  * @checkstyle MethodsOrderCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class ArtipieYamlTest {
 
     /**
@@ -140,6 +142,24 @@ public final class ArtipieYamlTest {
             new ArtipieYaml(ArtipieYamlTest.config(this.tmp.toString(), Optional.of(node)))
                 .credentials().user("any").isEmpty(),
             new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void readsApiPermissions() throws IOException {
+        Files.writeString(
+            this.tmp.resolve("_api_permissions.yml"),
+            String.join("\n", "endpoints: {}", "users: {}")
+        );
+        MatcherAssert.assertThat(
+            "Reads access permissions",
+            new ArtipieYaml(this.config(this.tmp.toString())).accessPermissions(),
+            new IsInstanceOf(AccessPermissions.FromYaml.class)
+        );
+        MatcherAssert.assertThat(
+            "Reads user permissions",
+            new ArtipieYaml(this.config(this.tmp.toString())).userPermissions(),
+            new IsInstanceOf(UserPermissions.FromYaml.class)
         );
     }
 

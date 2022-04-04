@@ -12,7 +12,9 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.front.auth.AccessPermissions;
 import com.artipie.front.auth.Credentials;
+import com.artipie.front.auth.UserPermissions;
 import com.artipie.front.auth.Users;
 import com.artipie.front.auth.YamlCredentials;
 import com.artipie.front.auth.YamlUsers;
@@ -27,6 +29,7 @@ import org.apache.commons.lang3.NotImplementedException;
  * @since 0.1
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class ArtipieYaml {
 
     /**
@@ -123,6 +126,26 @@ public final class ArtipieYaml {
         );
     }
 
+    /**
+     * Read access permissions.
+     * @return Instance of {@link AccessPermissions}
+     */
+    public AccessPermissions accessPermissions() {
+        return this.apiPermissions("endpoints")
+            .<AccessPermissions>map(AccessPermissions.FromYaml::new)
+            .orElse(AccessPermissions.STUB);
+    }
+
+    /**
+     * Read users api permissions.
+     * @return Instance of {@link UserPermissions}
+     */
+    public UserPermissions userPermissions() {
+        return this.apiPermissions("users")
+            .<UserPermissions>map(UserPermissions.FromYaml::new)
+            .orElse(UserPermissions.STUB);
+    }
+
     @Override
     public String toString() {
         return String.format("YamlSettings{\n%s\n}", this.content.toString());
@@ -159,5 +182,27 @@ public final class ArtipieYaml {
                 .map(YamlNode::asMapping)
         ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)))
         .map(file -> new Key.From(file.string("path")));
+    }
+
+    /**
+     * Read API permissions.
+     * @param section Yaml section to read
+     * @return Yaml mapping if the file exists
+     */
+    private Optional<YamlMapping> apiPermissions(final String section) {
+        Optional<YamlMapping> res = Optional.empty();
+        final Key key = new Key.From("_api_permissions.yml");
+        if (this.storage().exists(key)) {
+            try {
+                res = Optional.of(
+                    Yaml.createYamlInput(
+                        new String(this.storage().value(key), StandardCharsets.UTF_8)
+                    ).readYamlMapping().yamlMapping(section)
+                );
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
+        }
+        return res;
     }
 }
