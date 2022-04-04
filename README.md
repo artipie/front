@@ -275,7 +275,7 @@ returned if such storage alias does not exist.
 ## Public API permissions
 
 Permissions to access API endpoints are very flexible and can be granted however it is convenient 
-for the team. To create and grant any permissions to users, create `api_permissions.yml` file. The
+for the team. To create and grant any permissions to users, create `_api_permissions.yml` file. The
 format is the following:
 ```yaml
 endpoints:

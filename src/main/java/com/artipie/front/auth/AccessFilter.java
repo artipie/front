@@ -5,16 +5,11 @@
 package com.artipie.front.auth;
 
 import com.artipie.front.RequestAttr;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import org.eclipse.jetty.http.HttpStatus;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
-import wtf.g4s8.tuples.Pair;
 
 /**
  * Access HTTP filter.
@@ -24,14 +19,9 @@ import wtf.g4s8.tuples.Pair;
 public final class AccessFilter implements Filter {
 
     /**
-     * Permissions allowed to handle request.
+     * Access permissions.
      */
-    private static final Map<Pair<String, String>, Collection<String>> PERM_REQ = Map.of(
-        Pair.of("GET", "/repositories.*"), List.of("repo-read"),
-        Pair.of("HEAD", "/repositories.*"), List.of("repo-read"),
-        Pair.of("PUT", "/repositories.*"), List.of("repo-write"),
-        Pair.of("DELETE", "/repositories.*"), List.of("repo-write")
-    );
+    private final AccessPermissions access;
 
     /**
      * Permissions.
@@ -40,9 +30,11 @@ public final class AccessFilter implements Filter {
 
     /**
      * Access filter.
+     * @param access Access permissions
      * @param perms Permissions
      */
-    public AccessFilter(final UserPermissions perms) {
+    public AccessFilter(final AccessPermissions access, final UserPermissions perms) {
+        this.access = access;
         this.perms = perms;
     }
 
@@ -52,9 +44,8 @@ public final class AccessFilter implements Filter {
         if (uid.isEmpty()) {
             Spark.halt(HttpStatus.UNAUTHORIZED_401, "Authentication required");
         }
-        final boolean allowed = AccessFilter.PERM_REQ.getOrDefault(
-            Pair.of(req.requestMethod(), req.pathInfo()), Collections.emptyList()
-        ).stream().anyMatch(perm -> this.perms.allowed(uid.get(), perm));
+        final boolean allowed = this.access.get(req.requestMethod(), req.pathInfo())
+            .stream().anyMatch(perm -> this.perms.allowed(uid.get(), perm));
         if (!allowed) {
             Spark.halt(HttpStatus.FORBIDDEN_403, "Request is not allowed");
         }

@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import io.vavr.collection.Stream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * @since 0.1
  */
 public interface AccessPermissions {
+
+    /**
+     * Fake access permissions for tests usages.
+     */
+    AccessPermissions STUB = (line, method) -> Collections.emptyList();
 
     /**
      * Obtain the list of permissions, required to access the endpoint.
