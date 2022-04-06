@@ -6,12 +6,14 @@ package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
+import com.artipie.front.api.GetToken;
 import com.artipie.front.api.NotFoundException;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.api.RepositoryPermissions;
 import com.artipie.front.api.Storages;
 import com.artipie.front.api.Users;
 import com.artipie.front.auth.AccessFilter;
+import com.artipie.front.auth.ApiTokens;
 import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import javax.json.Json;
 import javax.json.JsonException;
 import org.apache.commons.cli.CommandLine;
@@ -36,6 +39,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;
 import spark.ExceptionHandler;
@@ -66,6 +70,11 @@ public final class Service {
         .hasArg(true).desc("The path to artipie configuration file").required(true).build();
 
     /**
+     * Api tokens.
+     */
+    private final ApiTokens tkn;
+
+    /**
      * Artipie configuration.
      */
     @SuppressWarnings({"PMD.SingularField", "PMD.UnusedPrivateField"})
@@ -78,9 +87,11 @@ public final class Service {
 
     /**
      * Service constructor.
+     * @param tkn Api tokens
      * @param settings Artipie configuration
      */
-    private Service(final ArtipieYaml settings) {
+    private Service(final ApiTokens tkn, final ArtipieYaml settings) {
+        this.tkn = tkn;
         this.settings = settings;
     }
 
@@ -99,6 +110,7 @@ public final class Service {
         try {
             cmd = parser.parse(options, args);
             final var service = new Service(
+                new ApiTokens(DigestUtils.sha1(System.getenv("TKN_KEY")), new Random()),
                 new ArtipieYaml(
                     Yaml.createYamlInput(new File(cmd.getOptionValue(Service.CONFIG)))
                         .readYamlMapping()
@@ -127,9 +139,13 @@ public final class Service {
         Logger.info(this, "starting service on port: %d", port);
         this.ignite = spark.Service.ignite().port(port);
         this.ignite.get("/.health", new HealthRoute());
+        this.ignite.get(
+            "/api/token",
+            new GetToken(AuthByPassword.withCredentials(this.settings.credentials()), this.tkn)
+        );
         this.ignite.path(
             "/api", () -> {
-                this.ignite.before("/*", new ApiAuthFilter((tkn, time) -> "anonymous"));
+                this.ignite.before("/*", new ApiAuthFilter((token, time) -> "anonymous"));
                 this.ignite.before(
                     "/*",
                     new AccessFilter(
