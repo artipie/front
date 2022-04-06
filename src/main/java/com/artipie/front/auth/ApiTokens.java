@@ -145,7 +145,7 @@ public final class ApiTokens {
             final byte[] bin = new byte[4];
             System.arraycopy(this.data, 1 + len, bin, 0, 4);
             final int epoch = ByteBuffer.wrap(bin).getInt();
-            return Instant.ofEpochMilli(epoch * 1000).isBefore(now);
+            return Instant.ofEpochMilli(epoch * 1000L).isBefore(now);
         }
 
         /**
