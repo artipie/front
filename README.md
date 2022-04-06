@@ -18,6 +18,29 @@ Front web service provides API and UI pages for managing Artipie configuration, 
 
 ## Public API
 
+### API tokens
+
+API works with token-based authorization, each API endpoint expects `Authorization` header with the valid token. 
+To generate a token, use the following request:
+
+> **GET** /api/token
+
+Json body is expected with user and password to generate token for:
+
+```json
+{
+  "name": "Alice",
+  "pass": "123"
+}
+```
+30 days valid token will be generated and returned in the response:
+
+```json
+{
+  "token": "token-value"
+}
+```
+
 ### Repositories API
 
 > **GET** /repositories
