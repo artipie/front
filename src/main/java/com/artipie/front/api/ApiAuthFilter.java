@@ -5,6 +5,7 @@
 package com.artipie.front.api;
 
 import com.artipie.front.RequestAttr;
+import com.artipie.front.auth.ApiTokens;
 import java.time.Instant;
 import java.util.Optional;
 import javax.json.Json;
@@ -66,6 +67,37 @@ public final class ApiAuthFilter implements Filter {
          * @throws ValidationException If token is not valid
          */
         String validate(String token, Instant time) throws ValidationException;
+    }
+
+    /**
+     * Api token validator implementation.
+     * @since 0.1
+     */
+    public static final class ApiTokenValidator implements TokenValidator {
+
+        /**
+         * Api tokens.
+         */
+        private final ApiTokens tkn;
+
+        /**
+         * Ctor.
+         * @param tkn Api tokens
+         */
+        public ApiTokenValidator(final ApiTokens tkn) {
+            this.tkn = tkn;
+        }
+
+        @Override
+        public String validate(final String token, final Instant time) throws ValidationException {
+            if (this.tkn.validate(token)) {
+                final ApiTokens.Token valid = ApiTokens.Token.parse(token);
+                if (!valid.expired(time)) {
+                    return valid.user();
+                }
+            }
+            throw new ValidationException("Invalid token");
+        }
     }
 
     /**

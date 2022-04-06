@@ -145,7 +145,9 @@ public final class Service {
         );
         this.ignite.path(
             "/api", () -> {
-                this.ignite.before("/*", new ApiAuthFilter((token, time) -> "anonymous"));
+                this.ignite.before(
+                    "/*", new ApiAuthFilter(new ApiAuthFilter.ApiTokenValidator(this.tkn))
+                );
                 this.ignite.before(
                     "/*",
                     new AccessFilter(
