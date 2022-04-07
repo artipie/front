@@ -23,7 +23,7 @@ Front web service provides API and UI pages for managing Artipie configuration, 
 API works with token-based authorization, each API endpoint expects `Authorization` header with the valid token. 
 To generate a token, use the following request:
 
-> **GET** /api/token
+> **POST** /api/token
 
 Json body is expected with user and password to generate token for:
 

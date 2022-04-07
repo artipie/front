@@ -19,11 +19,11 @@ import spark.Response;
 import spark.Route;
 
 /**
- * Endpoint to generate token for user. Accepts GET request with json body
+ * Endpoint to generate token for user. Accepts POST request with json body
  * with fields `name` and `pass` and returns json with `token` field.
  * @since 0.1
  */
-public final class GetToken implements Route {
+public final class PostToken implements Route {
 
     /**
      * Password-based authentication.
@@ -40,7 +40,7 @@ public final class GetToken implements Route {
      * @param auth Password-based authentication
      * @param tkn Tokens
      */
-    public GetToken(final AuthByPassword auth, final ApiTokens tkn) {
+    public PostToken(final AuthByPassword auth, final ApiTokens tkn) {
         this.auth = auth;
         this.tkn = tkn;
     }

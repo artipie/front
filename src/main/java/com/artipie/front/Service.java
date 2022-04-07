@@ -6,8 +6,8 @@ package com.artipie.front;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.front.api.ApiAuthFilter;
-import com.artipie.front.api.GetToken;
 import com.artipie.front.api.NotFoundException;
+import com.artipie.front.api.PostToken;
 import com.artipie.front.api.Repositories;
 import com.artipie.front.api.RepositoryPermissions;
 import com.artipie.front.api.Storages;
@@ -90,7 +90,7 @@ public final class Service {
      * @param tkn Api tokens
      * @param settings Artipie configuration
      */
-    private Service(final ApiTokens tkn, final ArtipieYaml settings) {
+    Service(final ApiTokens tkn, final ArtipieYaml settings) {
         this.tkn = tkn;
         this.settings = settings;
     }
@@ -132,16 +132,16 @@ public final class Service {
      * Start service.
      * @param port Port for service
      */
-    private void start(final int port) {
+    void start(final int port) {
         if (this.ignite != null) {
             throw new IllegalStateException("already started");
         }
         Logger.info(this, "starting service on port: %d", port);
         this.ignite = spark.Service.ignite().port(port);
         this.ignite.get("/.health", new HealthRoute());
-        this.ignite.get(
-            "/api/token",
-            new GetToken(AuthByPassword.withCredentials(this.settings.credentials()), this.tkn)
+        this.ignite.post(
+            "/token",
+            new PostToken(AuthByPassword.withCredentials(this.settings.credentials()), this.tkn)
         );
         this.ignite.path(
             "/api", () -> {
@@ -310,7 +310,7 @@ public final class Service {
     /**
      * Stop service.
      */
-    private void stop() {
+    void stop() {
         Logger.info(this, "stopping service");
         this.ignite.stop();
         this.ignite.awaitStop();
