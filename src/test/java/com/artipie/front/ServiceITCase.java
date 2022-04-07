@@ -9,6 +9,7 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.front.auth.ApiTokens;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.ArtipieYamlTest;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
@@ -21,14 +22,20 @@ import java.util.Optional;
 import java.util.Random;
 import javax.json.Json;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.jetty.http.HttpHeader;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +47,7 @@ import org.junit.jupiter.api.io.TempDir;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle MagicNumberCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ServiceITCase {
 
     /**
@@ -77,6 +85,11 @@ class ServiceITCase {
             this.tmp.resolve("_api_permissions.yml"),
             new TestResource("ServiceITCase/_api_permissions.yml").asBytes()
         );
+        this.tmp.resolve("repos").toFile().mkdir();
+        Files.write(
+            this.tmp.resolve("repos").resolve("maven-repo.yaml"),
+            new TestResource("ServiceITCase/maven-repo.yaml").asBytes()
+        );
         this.service = new Service(
             new ApiTokens(key, new Random()),
             new ArtipieYaml(
@@ -95,10 +108,42 @@ class ServiceITCase {
     }
 
     @Test
-    void aliceCanGetToken() throws UnsupportedEncodingException {
+    void aliceCanGetRepoAndUsers() throws UnsupportedEncodingException {
+        final String token = this.token("Alice", "wonderland");
         MatcherAssert.assertThat(
-            this.token("Alice", "wanderland"),
+            "Failed to obtain auth token",
+            token,
             new IsNot<>(Matchers.emptyString())
+        );
+        MatcherAssert.assertThat(
+            "Failed to get users info",
+            this.get("/api/users", token),
+            new StringContainsInOrder(Lists.newArrayList("Alice", "Aladdin"))
+        );
+        MatcherAssert.assertThat(
+            "Failed to get check Aladdin exists",
+            this.head("/api/users/Aladdin", token),
+            new IsEqual<>(200)
+        );
+        MatcherAssert.assertThat(
+            "Failed to get Aladdin info",
+            this.get("/api/users/Alice", token),
+            new StringContains("Alice")
+        );
+        MatcherAssert.assertThat(
+            "Failed to get repos info",
+            this.get("/api/repositories", token),
+            new StringContains("maven-repo")
+        );
+        MatcherAssert.assertThat(
+            "Failed to check maven repo exists",
+            this.head("/api/repositories/maven-repo", token),
+            new IsEqual<>(200)
+        );
+        MatcherAssert.assertThat(
+            "Failed to get maven repo info",
+            this.get("/api/repositories/maven-repo", token),
+            new StringContainsInOrder(Lists.newArrayList("type", "maven"))
         );
     }
 
@@ -127,6 +172,30 @@ class ServiceITCase {
         try (CloseableHttpResponse response = this.http.execute(request)) {
             return Json.createReader(new StringReader(EntityUtils.toString(response.getEntity())))
                 .readObject().getString("token");
+        } catch (final IOException err) {
+            throw new UncheckedIOException(err);
+        }
+    }
+
+    private String get(final String line, final String token) {
+        final HttpGet request = new HttpGet(
+            String.format("http://localhost:%d%s", this.port, line)
+        );
+        request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
+        try (CloseableHttpResponse response = this.http.execute(request)) {
+            return EntityUtils.toString(response.getEntity());
+        } catch (final IOException err) {
+            throw new UncheckedIOException(err);
+        }
+    }
+
+    private int head(final String line, final String token) {
+        final HttpHead request = new HttpHead(
+            String.format("http://localhost:%d%s", this.port, line)
+        );
+        request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
+        try (CloseableHttpResponse response = this.http.execute(request)) {
+            return response.getStatusLine().getStatusCode();
         } catch (final IOException err) {
             throw new UncheckedIOException(err);
         }

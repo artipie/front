@@ -188,7 +188,7 @@ public final class Repositories {
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
             );
-            return null;
+            return "";
         }
     }
 

@@ -158,7 +158,7 @@ public final class Storages {
             } else {
                 response.status(HttpStatus.NOT_FOUND_404);
             }
-            return null;
+            return "";
         }
     }
 

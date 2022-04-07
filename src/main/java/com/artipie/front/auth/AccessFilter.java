@@ -44,8 +44,9 @@ public final class AccessFilter implements Filter {
         if (uid.isEmpty()) {
             Spark.halt(HttpStatus.UNAUTHORIZED_401, "Authentication required");
         }
-        final boolean allowed = this.access.get(req.requestMethod(), req.pathInfo())
-            .stream().anyMatch(perm -> this.perms.allowed(uid.get(), perm));
+        final boolean allowed = this.access.get(
+            req.pathInfo().replace("/api", ""), req.requestMethod()
+        ).stream().anyMatch(perm -> this.perms.allowed(uid.get(), perm));
         if (!allowed) {
             Spark.halt(HttpStatus.FORBIDDEN_403, "Request is not allowed");
         }
