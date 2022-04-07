@@ -248,7 +248,7 @@ public final class Service {
                 this.ignite.path(
                     "/users", () -> {
                         this.ignite.get(
-                            "/", MimeTypes.Type.APPLICATION_JSON.asString(),
+                            "", MimeTypes.Type.APPLICATION_JSON.asString(),
                             new Users.GetAll(this.settings.users())
                         );
                         final String path = new RequestPath().with(Users.USER_PARAM).toString();

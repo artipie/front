@@ -182,7 +182,7 @@ public final class Users {
             } else {
                 response.status(HttpStatus.OK_200);
             }
-            return null;
+            return "";
         }
     }
 
