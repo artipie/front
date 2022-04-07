@@ -23,7 +23,7 @@ public enum AuthFilters implements Filter {
      */
     AUTHENTICATE(
         (req, rsp) -> {
-            if (req.pathInfo().equals("/signin")) {
+            if (req.pathInfo().equals("/signin") || req.pathInfo().equals("/token")) {
                 return;
             }
             if (req.session() == null || !req.session().attributes().contains("uid")) {

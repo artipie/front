@@ -18,11 +18,11 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Test for {@link GetToken}.
+ * Test for {@link PostToken}.
  * @since 0.1
  * @checkstyle MagicNumberCheck (500 lines)
  */
-class GetTokenTest {
+class PostTokenTest {
 
     /**
      * Tokens instance.
@@ -42,7 +42,7 @@ class GetTokenTest {
         final var rsp = Mockito.mock(Response.class);
         Mockito.when(rqs.body()).thenReturn("{ \"name\":\"Alice\", \"pass\":\"123\" }");
         MatcherAssert.assertThat(
-            new GetToken((usr, pswd) -> Optional.of("Alice"), this.tokens).handle(rqs, rsp),
+            new PostToken((usr, pswd) -> Optional.of("Alice"), this.tokens).handle(rqs, rsp),
             new StringContains("token")
         );
         Mockito.verify(rsp).status(HttpStatus.CREATED_201);
@@ -54,7 +54,7 @@ class GetTokenTest {
         final var rsp = Mockito.mock(Response.class);
         Mockito.when(rqs.body()).thenReturn("{ \"name\":\"Mark\", \"pass\":\"123\" }");
         MatcherAssert.assertThat(
-            new GetToken((usr, pswd) -> Optional.empty(), this.tokens).handle(rqs, rsp),
+            new PostToken((usr, pswd) -> Optional.empty(), this.tokens).handle(rqs, rsp),
             new StringContains("err")
         );
         Mockito.verify(rsp).status(HttpStatus.UNAUTHORIZED_401);
