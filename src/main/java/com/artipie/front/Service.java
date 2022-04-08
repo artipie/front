@@ -252,9 +252,9 @@ public final class Service {
                             new Users.GetAll(this.settings.users())
                         );
                         final String path = new RequestPath().with(Users.USER_PARAM).toString();
-                        this.ignite.get(path, new Users.GetUser(this.settings.credentials()));
+                        this.ignite.get(path, new Users.GetUser(this.settings.users()));
                         this.ignite.put(path, new Users.Put(this.settings.users()));
-                        this.ignite.head(path, new Users.Head(this.settings.credentials()));
+                        this.ignite.head(path, new Users.Head(this.settings.users()));
                         this.ignite.delete(path, new Users.Delete(this.settings.users()));
                     }
                 );
