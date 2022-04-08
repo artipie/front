@@ -4,7 +4,6 @@
  */
 package com.artipie.front.api;
 
-import com.artipie.front.auth.Credentials;
 import com.artipie.front.auth.User;
 import com.artipie.front.misc.RequestPath;
 import java.io.StringReader;
@@ -94,23 +93,24 @@ public final class Users {
     public static final class GetUser implements Route {
 
         /**
-         * Credentials.
+         * Artipie users.
          */
-        private final Credentials creds;
+        private final com.artipie.front.auth.Users users;
 
         /**
          * Ctor.
-         * @param creds Users credentials
+         * @param users Artipie users
          */
-        public GetUser(final Credentials creds) {
-            this.creds = creds;
+        public GetUser(final com.artipie.front.auth.Users users) {
+            this.users = users;
         }
 
         @Override
         @SuppressWarnings("PMD.OnlyOneReturn")
         public String handle(final Request request, final Response response) {
             final String name = USER_PARAM.parse(request);
-            final Optional<User> user = this.creds.user(name);
+            final Optional<? extends User> user = this.users.list().stream()
+                .filter(usr -> usr.uid().equals(name)).findFirst();
             if (user.isPresent()) {
                 final JsonObjectBuilder json = Json.createObjectBuilder();
                 user.get().email().ifPresent(email -> json.add(Users.EMAIL, email));
@@ -150,7 +150,7 @@ public final class Users {
         public Object handle(final Request request, final Response response) {
             this.users.remove(USER_PARAM.parse(request));
             response.status(HttpStatus.OK_200);
-            return null;
+            return "";
         }
     }
 
@@ -163,21 +163,22 @@ public final class Users {
     public static final class Head implements Route {
 
         /**
-         * Credentials.
+         * Artipie users.
          */
-        private final Credentials creds;
+        private final com.artipie.front.auth.Users users;
 
         /**
          * Ctor.
-         * @param creds Credentials
+         * @param users Artipie users
          */
-        public Head(final Credentials creds) {
-            this.creds = creds;
+        public Head(final com.artipie.front.auth.Users users) {
+            this.users = users;
         }
 
         @Override
         public Object handle(final Request request, final Response response) {
-            if (this.creds.user(USER_PARAM.parse(request)).isEmpty()) {
+            if (this.users.list().stream()
+                .noneMatch(usr -> usr.uid().equals(USER_PARAM.parse(request)))) {
                 response.status(HttpStatus.NOT_FOUND_404);
             } else {
                 response.status(HttpStatus.OK_200);
@@ -233,7 +234,7 @@ public final class Users {
             }
             this.users.add(user, name);
             response.status(HttpStatus.CREATED_201);
-            return null;
+            return "";
         }
     }
 }

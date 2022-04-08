@@ -17,5 +17,5 @@ users:
     - repo-read
     - repo-write
     - users-read
-  Alladin:
+  Aladdin:
     - users-write
