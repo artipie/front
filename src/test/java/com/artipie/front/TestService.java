@@ -77,7 +77,7 @@ public final class TestService implements BeforeEachCallback, AfterEachCallback 
                 )
             )
         );
-        this.prt = this.randomFreePort();
+        this.prt = TestService.randomFreePort();
         this.service.start(this.prt);
     }
 
