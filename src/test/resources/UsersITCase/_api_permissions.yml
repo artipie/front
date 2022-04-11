@@ -1,10 +1,4 @@
 endpoints:
-  "/repositories.*":
-    "GET|HEAD":
-      - repo-read
-      - repo-write
-    "PUT|DELETE":
-      - repo-write
   "/users.*":
     "GET|HEAD":
       - users-read
@@ -19,3 +13,5 @@ users:
     - users-read
   Aladdin:
     - users-write
+  Mark:
+    - users-read
