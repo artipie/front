@@ -4,22 +4,11 @@
  */
 package com.artipie.front;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.asto.test.TestResource;
-import com.artipie.front.auth.ApiTokens;
-import com.artipie.front.settings.ArtipieYaml;
-import com.artipie.front.settings.ArtipieYamlTest;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
-import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Random;
 import javax.json.Json;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -43,7 +32,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Service IT.
@@ -55,21 +44,14 @@ import org.junit.jupiter.api.io.TempDir;
 class ServiceITCase {
 
     /**
-     * Temp directory.
+     * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Test service instance.
-     */
-    private Service service;
-
-    /**
-     * Test port.
-     */
-    private int port;
+    @RegisterExtension
+    final TestService service = new TestService()
+        .withResource(TestService.CREDS, "ServiceITCase/_credentials.yaml")
+        .withResource("_api_permissions.yml", "ServiceITCase/_api_permissions.yml")
+        .withResource("repos/maven-repo.yaml", "ServiceITCase/maven-repo.yaml");
 
     /**
      * Test http client.
@@ -77,37 +59,7 @@ class ServiceITCase {
     private CloseableHttpClient http;
 
     @BeforeEach
-    void init() throws IOException {
-        final byte[] key = new byte[20];
-        Arrays.fill(key, (byte) 0);
-        final String creds = "_credentials.yaml";
-        Files.write(
-            this.tmp.resolve(creds),
-            new TestResource("ServiceITCase/_credentials.yaml").asBytes()
-        );
-        Files.write(
-            this.tmp.resolve("_api_permissions.yml"),
-            new TestResource("ServiceITCase/_api_permissions.yml").asBytes()
-        );
-        this.tmp.resolve("repos").toFile().mkdir();
-        Files.write(
-            this.tmp.resolve("repos").resolve("maven-repo.yaml"),
-            new TestResource("ServiceITCase/maven-repo.yaml").asBytes()
-        );
-        this.service = new Service(
-            new ApiTokens(key, new Random()),
-            new ArtipieYaml(
-                ArtipieYamlTest.config(
-                    this.tmp.toString(),
-                    Optional.of(
-                        Yaml.createYamlMappingBuilder().add("type", "file")
-                            .add("path", creds).build()
-                    )
-                )
-            )
-        );
-        this.port = this.randomFreePort();
-        this.service.start(this.port);
+    void init() {
         this.http = HttpClients.createDefault();
     }
 
@@ -189,19 +141,12 @@ class ServiceITCase {
 
     @AfterEach
     void stop() throws IOException {
-        this.service.stop();
         this.http.close();
-    }
-
-    private int randomFreePort() throws IOException {
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        }
     }
 
     private String token(final String name, final String pswd) {
         final HttpPost request = new HttpPost(
-            String.format("http://localhost:%d/token", this.port)
+            String.format("http://localhost:%d/token", this.service.port())
         );
         request.addHeader(
             HttpHeader.CONTENT_TYPE.toString(),
@@ -223,7 +168,7 @@ class ServiceITCase {
 
     private String get(final String line, final String token) {
         final HttpGet request = new HttpGet(
-            String.format("http://localhost:%d%s", this.port, line)
+            String.format("http://localhost:%d%s", this.service.port(), line)
         );
         request.addHeader(HttpHeader.ACCEPT.toString(), MimeTypes.Type.APPLICATION_JSON.asString());
         request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
@@ -236,7 +181,7 @@ class ServiceITCase {
 
     private int head(final String line, final String token) {
         final HttpHead request = new HttpHead(
-            String.format("http://localhost:%d%s", this.port, line)
+            String.format("http://localhost:%d%s", this.service.port(), line)
         );
         request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
         try (CloseableHttpResponse response = this.http.execute(request)) {
@@ -248,7 +193,7 @@ class ServiceITCase {
 
     private int put(final String line, final String token, final String body) {
         final HttpPut request = new HttpPut(
-            String.format("http://localhost:%d%s", this.port, line)
+            String.format("http://localhost:%d%s", this.service.port(), line)
         );
         request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
         request.addHeader(
@@ -265,7 +210,7 @@ class ServiceITCase {
 
     private int delete(final String line, final String token) {
         final HttpDelete request = new HttpDelete(
-            String.format("http://localhost:%d%s", this.port, line)
+            String.format("http://localhost:%d%s", this.service.port(), line)
         );
         request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
         try (CloseableHttpResponse response = this.http.execute(request)) {
