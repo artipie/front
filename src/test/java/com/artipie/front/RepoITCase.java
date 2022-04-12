@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * Test for repository management APIs.
  * @since 0.1
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RepoITCase {
 
     /**
@@ -69,7 +70,8 @@ public final class RepoITCase {
         );
         final String aladdin = this.client.token("Aladdin", "opensesame");
         MatcherAssert.assertThat(
-            "Alice failed to obtain auth token for Aladdin", aladdin, new IsNot<>(Matchers.emptyString())
+            "Alice failed to obtain auth token for Aladdin", aladdin,
+            new IsNot<>(Matchers.emptyString())
         );
         MatcherAssert.assertThat(
             "Alladin failed to create new repository",
