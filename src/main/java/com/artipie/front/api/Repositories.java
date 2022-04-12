@@ -155,7 +155,7 @@ public final class Repositories {
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
             );
-            return null;
+            return "";
         }
     }
 
@@ -246,7 +246,7 @@ public final class Repositories {
                 new Json2Yaml().apply(body.toString()).toString().getBytes(StandardCharsets.UTF_8)
             );
             response.status(HttpStatus.CREATED_201);
-            return null;
+            return "";
         }
     }
 }

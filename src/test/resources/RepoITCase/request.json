@@ -1,0 +1,19 @@
+{
+  "repo": {
+    "type": "rpm",
+    "storage": {
+      "type": "fs",
+      "path": "/var/artipie/data/my-rpm"
+    },
+    "settings": {
+      "digest": "sha1",
+      "filelists": false
+    },
+    "permissions": {
+      "Alice": [
+        "read",
+        "write"
+      ]
+    }
+  }
+}
