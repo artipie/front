@@ -13,6 +13,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
@@ -123,6 +124,30 @@ public final class TestClient {
      */
     int put(final String line, final String token, final String body) {
         final HttpPut request = new HttpPut(
+            String.format("http://localhost:%d%s", this.port, line)
+        );
+        request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);
+        request.addHeader(
+            HttpHeader.CONTENT_TYPE.toString(),
+            MimeTypes.Type.APPLICATION_JSON.asString()
+        );
+        request.setEntity(new ByteArrayEntity(body.getBytes(StandardCharsets.UTF_8)));
+        try (CloseableHttpResponse response = this.client.execute(request)) {
+            return response.getStatusLine().getStatusCode();
+        } catch (final IOException err) {
+            throw new UncheckedIOException(err);
+        }
+    }
+
+    /**
+     * Perform patch request with provided body and return response status.
+     * @param line Request line
+     * @param token User token
+     * @param body Response body
+     * @return Response status
+     */
+    int patch(final String line, final String token, final String body) {
+        final HttpPatch request = new HttpPatch(
             String.format("http://localhost:%d%s", this.port, line)
         );
         request.addHeader(HttpHeader.AUTHORIZATION.toString(), token);

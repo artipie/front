@@ -74,7 +74,7 @@ public final class RepositoryPermissions {
                 Json.createReader(new StringReader(request.body())).readArray()
             );
             response.status(HttpStatus.CREATED_201);
-            return null;
+            return "";
         }
     }
 
@@ -143,7 +143,7 @@ public final class RepositoryPermissions {
                 RepositoryPermissions.NAME.parse(request)
             );
             response.status(HttpStatus.OK_200);
-            return null;
+            return "";
         }
     }
 
@@ -178,7 +178,7 @@ public final class RepositoryPermissions {
                 Json.createReader(new StringReader(request.body())).readObject()
             );
             response.status(HttpStatus.OK_200);
-            return null;
+            return "";
         }
     }
 }

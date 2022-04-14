@@ -1,0 +1,13 @@
+endpoints:
+  "/repositories/.*/permissions.*":
+    "GET":
+      - perms-read
+    "PUT|DELETE|PATCH":
+      - perms-write
+
+users:
+  Alice:
+    - perms-read
+  Aladdin:
+    - perms-write
+    - perms-read
