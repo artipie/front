@@ -4,6 +4,7 @@
  */
 package com.artipie.front;
 
+import java.io.IOException;
 import java.util.Arrays;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
@@ -11,6 +12,7 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.text.StringContainsInOrder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -104,6 +106,11 @@ class RepoPermITCase {
                 Arrays.asList("Elen", "write", "read", "Alice", "read")
             )
         );
+    }
+
+    @AfterEach
+    void stop() throws IOException {
+        this.client.close();
     }
 
 }

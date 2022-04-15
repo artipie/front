@@ -191,7 +191,7 @@ public final class Storages {
             new YamlStorages(Storages.repoFromRq(request), this.strgs)
                 .remove(Storages.ST_ALIAS.parse(request));
             response.status(HttpStatus.OK_200);
-            return null;
+            return "";
         }
     }
 
@@ -233,7 +233,7 @@ public final class Storages {
                 );
                 response.status(HttpStatus.CREATED_201);
             }
-            return null;
+            return "";
         }
     }
 

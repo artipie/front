@@ -54,7 +54,7 @@ public final class RequestPath {
     public String toString() {
         final String res;
         if (this.path.isEmpty()) {
-            res = "/";
+            res = "";
         } else {
             res = this.path;
         }

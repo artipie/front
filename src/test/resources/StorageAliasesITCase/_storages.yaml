@@ -1,0 +1,7 @@
+storages:
+  default:
+    type: file
+    path: /usr/local/def
+  temp:
+    type: file
+    path: /usr/tmp
