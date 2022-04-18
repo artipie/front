@@ -40,6 +40,11 @@ public final class TestService implements BeforeEachCallback, AfterEachCallback 
     private final Path tmp;
 
     /**
+     * Artipie layout.
+     */
+    private final String layout;
+
+    /**
      * Test service instance.
      */
     private Service service;
@@ -51,14 +56,23 @@ public final class TestService implements BeforeEachCallback, AfterEachCallback 
 
     /**
      * Ctor.
+     * @param layout Artipie layout
      */
     @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
-    public TestService() {
+    public TestService(final String layout) {
+        this.layout = layout;
         try {
             this.tmp = Files.createTempDirectory("front-it-case");
         } catch (final IOException err) {
             throw new UncheckedIOException(err);
         }
+    }
+
+    /**
+     * Ctor.
+     */
+    public TestService() {
+        this("flat");
     }
 
     @Override
@@ -73,7 +87,8 @@ public final class TestService implements BeforeEachCallback, AfterEachCallback 
                     Optional.of(
                         Yaml.createYamlMappingBuilder().add("type", "file")
                             .add("path", TestService.CREDS).build()
-                    )
+                    ),
+                    this.layout
                 )
             )
         );

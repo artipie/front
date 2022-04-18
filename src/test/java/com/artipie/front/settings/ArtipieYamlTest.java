@@ -165,6 +165,12 @@ public final class ArtipieYamlTest {
 
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static YamlMapping config(final String stpath, final Optional<YamlNode> creds) {
+        return ArtipieYamlTest.config(stpath, creds, "flat");
+    }
+
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static YamlMapping config(final String stpath, final Optional<YamlNode> creds,
+        final String layout) {
         YamlMappingBuilder meta = Yaml.createYamlMappingBuilder()
             .add(
                 "storage",
@@ -172,7 +178,8 @@ public final class ArtipieYamlTest {
                     .add("type", "fs")
                     .add("path", stpath).build()
             )
-            .add("repo_configs", "repos");
+            .add("repo_configs", "repos")
+            .add("layout", layout);
         if (creds.isPresent()) {
             meta = meta.add("credentials", creds.get());
         }

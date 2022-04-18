@@ -1,0 +1,13 @@
+endpoints:
+  "/repositories.*":
+    "GET|HEAD":
+      - repo-read
+    "PUT|DELETE|POST|PATCH":
+      - repo-write
+
+users:
+  Alice:
+    - repo-read
+    - repo-write
+  Aladdin:
+    - repo-write
