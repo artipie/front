@@ -10,8 +10,8 @@
 
 <form id="config-form" action="/dashboard/api/repos/{{user}}" method="POST">
   <fieldset>
-    <textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;"
->{{#if config}}
+    <textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;">
+{{#if config}}
 {{config}}
 {{else}}
 repo:
@@ -39,6 +39,7 @@ repo:
     <input id="config-submit" type="submit" value="Update"/>
   </fieldset>
 </form>
+{{#if config}}
 <form id="repo-delete-form" action="/dashboard/api/repos/{{user}}" method="POST">
     <fieldset>
         <input name="repo" type="hidden" value="{{name}}"/>
@@ -46,6 +47,13 @@ repo:
         <input id="repo-delete" type="submit" value="Delete"/>
     </fieldset>
 </form>
+{{else}}
+<form id="repo-cancel-form" action="/dashboard" method="GET">
+    <fieldset>
+        <input id="repo-cancel" type="submit" value="Cancel"/>
+    </fieldset>
+</form>
+{{/if}}
 
 {{#eq type "maven"}}
 <p>With this confirmation,
