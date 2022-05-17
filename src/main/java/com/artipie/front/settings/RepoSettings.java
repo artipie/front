@@ -136,6 +136,17 @@ public final class RepoSettings {
     }
 
     /**
+     * Moves repository settings.
+     * @param name Repository name
+     * @param uid User id (=name)
+     * @param nname New name
+     * @throws NotFoundException If such repository does not exist
+     */
+    public void move(final String name, final String uid, final String nname) {
+        this.repos.move(this.key(name, uid), this.keys(nname, uid).getRight());
+    }
+
+    /**
      * Returns a pair of keys, these keys are possible repository settings names.
      * @param name Repository name
      * @param uid User id (=name)
