@@ -252,7 +252,7 @@ public final class Repositories {
 
     /**
      * Handle `PUT` request to rename the repository, request line example:
-     * PUT /repositories/move/{repo_name}
+     * PUT /repositories/{repo_name}/move
      * where {repo_name} is the name of the repository. In the case of `org` layout,
      * repository owner is obtained from request attributes. Json with repository
      * new name (field `new_name`) is expected in the request body.

@@ -171,6 +171,7 @@ public final class Service {
                         this.ignite.head(path.toString(), new Repositories.Head(stn));
                         this.ignite.delete(path.toString(), new Repositories.Delete(stn));
                         this.ignite.put(path.toString(), new Repositories.Put(stn));
+                        this.ignite.put(path.with("move").toString(), new Repositories.Move(stn));
                         final RequestPath repo = this.repoPath();
                         this.ignite.get(
                             repo.with("permissions").toString(),
