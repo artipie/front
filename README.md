@@ -107,6 +107,17 @@ to learn more about different repositories settings.
 Deletes repository called `{name}`, returns status `200` on success, status `404` if repository does
 not exist.
 
+> **PUT** /repository/{name}/move
+
+Renames repository and moves all the data. Json with the new name is expected in the request body:
+
+```json
+{ 
+  "new_name" : "repo_new_name"
+}
+```
+Returns response status `200` if operation was successful.
+
 ### Repository permissions API
 
 > **GET** /repositories/{repo}/permissions

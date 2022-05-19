@@ -249,4 +249,50 @@ public final class Repositories {
             return "";
         }
     }
+
+    /**
+     * Handle `PUT` request to rename the repository, request line example:
+     * PUT /repositories/{repo_name}/move
+     * where {repo_name} is the name of the repository. In the case of `org` layout,
+     * repository owner is obtained from request attributes. Json with repository
+     * new name (field `new_name`) is expected in the request body.
+     *
+     * @since 0.1
+     * @checkstyle ReturnCountCheck (500 lines)
+     */
+    public static final class Move implements Route {
+
+        /**
+         * Repository settings.
+         */
+        private final RepoSettings stn;
+
+        /**
+         * Ctor.
+         * @param stn Repository settings
+         */
+        public Move(final RepoSettings stn) {
+            this.stn = stn;
+        }
+
+        @Override
+        @SuppressWarnings("PMD.OnlyOneReturn")
+        public Object handle(final Request request, final Response response) {
+            final String param = REPO_PARAM.parse(request);
+            final String uid = RequestAttr.Standard.USER_ID.readOrThrow(request);
+            if (!this.stn.exists(param, uid)) {
+                response.status(HttpStatus.BAD_REQUEST_400);
+                return String.format("Repository does not %s exist", param);
+            }
+            final String nname = Json.createReader(new StringReader(request.body()))
+                .readObject().getString("new_name");
+            if (nname == null) {
+                response.status(HttpStatus.BAD_REQUEST_400);
+                return "Field `new_name` is required";
+            }
+            this.stn.move(param, uid, nname);
+            response.status(HttpStatus.OK_200);
+            return "";
+        }
+    }
 }
