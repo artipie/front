@@ -147,6 +147,20 @@ public final class RepoSettings {
     }
 
     /**
+     * Returns repository name, the same as settings file key, but without yaml extension.
+     * @param name Repository name
+     * @param uid User id (=name)
+     * @return String name
+     */
+    public String name(final String name, final String uid) {
+        String res = name;
+        if (this.layout.equals("org")) {
+            res = String.format("%s/%s", uid, name);
+        }
+        return res;
+    }
+
+    /**
      * Returns a pair of keys, these keys are possible repository settings names.
      * @param name Repository name
      * @param uid User id (=name)
