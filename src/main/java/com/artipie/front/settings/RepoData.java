@@ -10,17 +10,20 @@ import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
+import com.artipie.asto.blocking.BlockingStorage;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.stream.Stream;
 
 /**
  * Repository data management.
  * @since 0.1
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RepoData {
 
     /**
@@ -29,11 +32,18 @@ public final class RepoData {
     private final RepoSettings stn;
 
     /**
+     * Artipie settings storage.
+     */
+    private final BlockingStorage storage;
+
+    /**
      * Ctor.
      * @param stn Repository settings
+     * @param storage Artipie settings storage
      */
-    public RepoData(final RepoSettings stn) {
+    public RepoData(final RepoSettings stn, final BlockingStorage storage) {
         this.stn = stn;
+        this.storage = storage;
     }
 
     /**
@@ -76,20 +86,50 @@ public final class RepoData {
      * @return Abstract storage
      */
     private Storage asto(final String name, final String uid) {
-        final Storage asto;
         try {
             final YamlMapping yaml = Yaml.createYamlInput(
                 new String(this.stn.value(name, uid), StandardCharsets.UTF_8)
             ).readYamlMapping().yamlMapping("repo");
-            final YamlMapping storage = yaml.yamlMapping("storage");
-            if (storage == null) {
-                throw new NotImplementedException("Not implemented yet");
-            } else {
-                asto = new YamlStorage(storage).storage();
+            YamlMapping res = yaml.yamlMapping("storage");
+            if (res == null) {
+                res = this.storageYaml(name, uid, yaml.string("storage"));
             }
-            return asto;
+            return new YamlStorage(res).storage();
         } catch (final IOException err) {
             throw new UncheckedIOException(err);
         }
+    }
+
+    /**
+     * Find storage settings by alias, considering two file extensions and two locations.
+     * @param name Repository name
+     * @param uid User name
+     * @param alias Storage settings yaml
+     * @return Yaml storage settings
+     */
+    private YamlMapping storageYaml(final String name, final String uid, final String alias) {
+        final Key repo = new Key.From(this.stn.name(name, uid));
+        final Key yml = new Key.From("_storage.yaml");
+        final Key yaml = new Key.From("_storage.yml");
+        Optional<YamlMapping> res = Optional.empty();
+        final Optional<Key> location = Stream.of(
+            new Key.From(repo, yaml), new Key.From(repo, yml),
+            repo.parent().<Key>map(item -> new Key.From(item, yaml)).orElse(yaml),
+            repo.parent().<Key>map(item -> new Key.From(item, yml)).orElse(yml)
+        ).filter(this.storage::exists).findFirst();
+        if (location.isPresent()) {
+            try {
+                res = Optional.of(
+                    Yaml.createYamlInput(
+                        new String(this.storage.value(location.get()), StandardCharsets.UTF_8)
+                    ).readYamlMapping().yamlMapping("storages").yamlMapping(alias)
+                );
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
+        }
+        return res.orElseThrow(
+            () -> new IllegalStateException(String.format("Storage alias %s not found", alias))
+        );
     }
 }

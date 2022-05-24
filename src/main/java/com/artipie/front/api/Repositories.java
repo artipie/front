@@ -8,6 +8,7 @@ import com.artipie.front.RequestAttr;
 import com.artipie.front.misc.Json2Yaml;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.misc.Yaml2Json;
+import com.artipie.front.settings.RepoData;
 import com.artipie.front.settings.RepoSettings;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -142,18 +143,30 @@ public final class Repositories {
         private final RepoSettings stn;
 
         /**
+         * Repository data.
+         */
+        private final RepoData data;
+
+        /**
          * Ctor.
          * @param stn Repository settings
+         * @param data Repository data
          */
-        public Delete(final RepoSettings stn) {
+        public Delete(final RepoSettings stn, final RepoData data) {
             this.stn = stn;
+            this.data = data;
         }
 
         @Override
         public Object handle(final Request request, final Response response) {
-            this.stn.delete(
+            this.data.remove(
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
+            ).thenAccept(
+                nothing -> this.stn.delete(
+                    REPO_PARAM.parse(request),
+                    RequestAttr.Standard.USER_ID.readOrThrow(request)
+                )
             );
             return "";
         }
@@ -268,11 +281,18 @@ public final class Repositories {
         private final RepoSettings stn;
 
         /**
+         * Repository data.
+         */
+        private final RepoData data;
+
+        /**
          * Ctor.
          * @param stn Repository settings
+         * @param data Repository data
          */
-        public Move(final RepoSettings stn) {
+        public Move(final RepoSettings stn, final RepoData data) {
             this.stn = stn;
+            this.data = data;
         }
 
         @Override
@@ -290,7 +310,9 @@ public final class Repositories {
                 response.status(HttpStatus.BAD_REQUEST_400);
                 return "Field `new_name` is required";
             }
-            this.stn.move(param, uid, nname);
+            this.data.move(param, uid, nname).thenAccept(
+                nothing -> this.stn.move(param, uid, nname)
+            );
             response.status(HttpStatus.OK_200);
             return "";
         }
