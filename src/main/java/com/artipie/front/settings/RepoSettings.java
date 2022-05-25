@@ -34,7 +34,7 @@ public final class RepoSettings {
     private final String layout;
 
     /**
-     * Repositories settings storage.
+     * Repositories configuration storage.
      */
     private final BlockingStorage repos;
 
@@ -158,6 +158,14 @@ public final class RepoSettings {
             res = String.format("%s/%s", uid, name);
         }
         return res;
+    }
+
+    /**
+     * Repositories configuration storage.
+     * @return Repo configs {@link BlockingStorage}
+     */
+    public BlockingStorage repoConfigsStorage() {
+        return this.repos;
     }
 
     /**

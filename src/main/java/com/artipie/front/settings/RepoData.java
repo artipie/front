@@ -10,7 +10,6 @@ import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.asto.blocking.BlockingStorage;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,18 +31,11 @@ public final class RepoData {
     private final RepoSettings stn;
 
     /**
-     * Artipie settings storage.
-     */
-    private final BlockingStorage storage;
-
-    /**
      * Ctor.
      * @param stn Repository settings
-     * @param storage Artipie settings storage
      */
-    public RepoData(final RepoSettings stn, final BlockingStorage storage) {
+    public RepoData(final RepoSettings stn) {
         this.stn = stn;
-        this.storage = storage;
     }
 
     /**
@@ -60,10 +52,11 @@ public final class RepoData {
     }
 
     /**
-     * Remove data from the repository.
+     * Move data when repository is renamed: from location by the old name to location with
+     * new name.
      * @param name Repository name
      * @param uid User name
-     * @param nname New name
+     * @param nname New repository name
      * @return Completable action of the remove operation
      */
     public CompletionStage<Void> move(final String name, final String uid, final String nname) {
@@ -84,6 +77,7 @@ public final class RepoData {
      * @param name Repository name
      * @param uid User name
      * @return Abstract storage
+     * @throws UncheckedIOException On IO errors
      */
     private Storage asto(final String name, final String uid) {
         try {
@@ -92,7 +86,7 @@ public final class RepoData {
             ).readYamlMapping().yamlMapping("repo");
             YamlMapping res = yaml.yamlMapping("storage");
             if (res == null) {
-                res = this.storageYaml(name, uid, yaml.string("storage"));
+                res = this.storageYamlByAlias(name, uid, yaml.string("storage"));
             }
             return new YamlStorage(res).storage();
         } catch (final IOException err) {
@@ -104,10 +98,13 @@ public final class RepoData {
      * Find storage settings by alias, considering two file extensions and two locations.
      * @param name Repository name
      * @param uid User name
-     * @param alias Storage settings yaml
-     * @return Yaml storage settings
+     * @param alias Storage settings yaml by alias
+     * @return Yaml storage settings found by provided alias
+     * @throws IllegalStateException If storage with given alias not found
+     * @throws UncheckedIOException On IO errors
+     * @checkstyle LineLengthCheck (2 lines)
      */
-    private YamlMapping storageYaml(final String name, final String uid, final String alias) {
+    private YamlMapping storageYamlByAlias(final String name, final String uid, final String alias) {
         final Key repo = new Key.From(this.stn.name(name, uid));
         final Key yml = new Key.From("_storage.yaml");
         final Key yaml = new Key.From("_storage.yml");
@@ -116,12 +113,15 @@ public final class RepoData {
             new Key.From(repo, yaml), new Key.From(repo, yml),
             repo.parent().<Key>map(item -> new Key.From(item, yaml)).orElse(yaml),
             repo.parent().<Key>map(item -> new Key.From(item, yml)).orElse(yml)
-        ).filter(this.storage::exists).findFirst();
+        ).filter(this.stn.repoConfigsStorage()::exists).findFirst();
         if (location.isPresent()) {
             try {
                 res = Optional.of(
                     Yaml.createYamlInput(
-                        new String(this.storage.value(location.get()), StandardCharsets.UTF_8)
+                        new String(
+                            this.stn.repoConfigsStorage().value(location.get()),
+                            StandardCharsets.UTF_8
+                        )
                     ).readYamlMapping().yamlMapping("storages").yamlMapping(alias)
                 );
             } catch (final IOException err) {

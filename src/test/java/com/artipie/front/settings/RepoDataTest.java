@@ -62,7 +62,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(new RepoSettings("flat", this.stngs), this.stngs)
+        new RepoData(new RepoSettings("flat", this.stngs))
             .remove(RepoDataTest.REPO, "any").toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are removed",
@@ -79,7 +79,7 @@ class RepoDataTest {
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
         final String nrepo = "new-repo";
-        new RepoData(new RepoSettings("flat", this.stngs), this.stngs)
+        new RepoData(new RepoSettings("flat", this.stngs))
             .move(RepoDataTest.REPO, "any", nrepo).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
@@ -105,7 +105,7 @@ class RepoDataTest {
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
         final String nrepo = "new-repo";
-        new RepoData(new RepoSettings("flat", this.stngs), this.stngs)
+        new RepoData(new RepoSettings("flat", this.stngs))
             .move(RepoDataTest.REPO, "any", nrepo).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
@@ -131,7 +131,7 @@ class RepoDataTest {
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "second.txt"), new byte[]{});
         final String nrepo = "new-repo";
-        new RepoData(new RepoSettings("org", this.stngs), this.stngs)
+        new RepoData(new RepoSettings("org", this.stngs))
             .move(RepoDataTest.REPO, uid, nrepo).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
@@ -155,7 +155,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(new RepoSettings("flat", this.stngs), this.stngs)
+        new RepoData(new RepoSettings("flat", this.stngs))
             .remove(RepoDataTest.REPO, "any").toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
@@ -179,7 +179,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(new RepoSettings("org", this.stngs), this.stngs)
+        new RepoData(new RepoSettings("org", this.stngs))
             .remove(RepoDataTest.REPO, uid).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository is empty",

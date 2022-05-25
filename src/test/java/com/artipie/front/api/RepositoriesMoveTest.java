@@ -74,7 +74,7 @@ class RepositoriesMoveTest {
         final RepoSettings stn = new RepoSettings("flat", this.blsto);
         MatcherAssert.assertThat(
             "Failed to return empty response",
-            new Repositories.Move(stn, new RepoData(stn, this.blsto)).handle(rqs, resp),
+            new Repositories.Move(stn, new RepoData(stn)).handle(rqs, resp),
             new IsAnything<>()
         );
         Mockito.verify(resp).status(HttpStatus.OK_200);
@@ -104,7 +104,7 @@ class RepositoriesMoveTest {
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn("any");
         Mockito.when(rqs.body()).thenReturn("{ }");
         final RepoSettings stn = new RepoSettings("org", this.blsto);
-        new Repositories.Move(stn, new RepoData(stn, this.blsto)).handle(rqs, resp);
+        new Repositories.Move(stn, new RepoData(stn)).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
     }
 
@@ -116,7 +116,7 @@ class RepositoriesMoveTest {
         Mockito.when(rqs.params(Repositories.REPO_PARAM.toString())).thenReturn("my-docker");
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn(jane);
         final RepoSettings stn = new RepoSettings("org", this.blsto);
-        new Repositories.Move(stn, new RepoData(stn, this.blsto)).handle(rqs, resp);
+        new Repositories.Move(stn, new RepoData(stn)).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
     }
 

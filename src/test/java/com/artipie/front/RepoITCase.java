@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 /**
  * Test for repository management APIs.
  * @since 0.1
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RepoITCase {
@@ -48,7 +49,7 @@ public final class RepoITCase {
     }
 
     @Test
-    void canManageRepos() {
+    void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
             "Failed to obtain auth token for Alice", alice, new IsNot<>(Matchers.emptyString())
@@ -89,6 +90,7 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
+        Thread.sleep(3000);
         MatcherAssert.assertThat(
             "Alice failed to check maven-repo exists",
             this.client.head("/api/repositories/maven-repo", alice),

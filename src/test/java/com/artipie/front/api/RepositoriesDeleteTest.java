@@ -73,7 +73,7 @@ class RepositoriesDeleteTest {
         Mockito.when(rqs.attribute(RequestAttr.Standard.USER_ID.attrName())).thenReturn(uid);
         MatcherAssert.assertThat(
             "Failed to process request",
-            new Repositories.Delete(stn, new RepoData(stn, this.blsto))
+            new Repositories.Delete(stn, new RepoData(stn))
                 .handle(rqs, Mockito.mock(Response.class)),
             new IsAnything<>()
         );
