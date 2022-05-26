@@ -12,6 +12,7 @@ import com.artipie.front.settings.ArtipieYamlTest;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -135,6 +136,23 @@ public final class TestService implements BeforeEachCallback, AfterEachCallback 
      */
     public TestService withResource(final String path, final String location) {
         return this.withResource(path, new TestResource(location).asBytes());
+    }
+
+    /**
+     * Add repo config providing temp location for storage config.
+     * Resource is expected to have `%s` to replace with repo storage path (temp location is used).
+     * @param path Relative to temp dir resource path
+     * @param location Resource location
+     * @return Itself
+     */
+    public TestService withRepoConfigAddingStoragePath(final String path, final String location) {
+        return this.withResource(
+            path,
+            String.format(
+                new String(new TestResource(location).asBytes(), StandardCharsets.UTF_8),
+                this.tmp.resolve("data")
+            ).getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     /**

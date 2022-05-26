@@ -16,7 +16,6 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@Disabled
 public final class RepoITCase {
 
     /**
@@ -37,8 +35,8 @@ public final class RepoITCase {
     final TestService service = new TestService()
         .withResource(TestService.CREDS, "RepoITCase/_credentials.yaml")
         .withResource("_api_permissions.yml", "RepoITCase/_api_permissions.yml")
-        .withResource("repos/maven-repo.yaml", "RepoITCase/maven-repo.yaml")
-        .withResource("repos/pypi-repo.yaml", "RepoITCase/pypi-repo.yaml");
+        .withRepoConfigAddingStoragePath("repos/maven-repo.yaml", "RepoITCase/maven-repo.yaml")
+        .withRepoConfigAddingStoragePath("repos/pypi-repo.yaml", "RepoITCase/pypi-repo.yaml");
 
     /**
      * Test http client.
@@ -92,6 +90,7 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
+        Thread.sleep(1000);
         MatcherAssert.assertThat(
             "Alice failed to check maven-repo exists",
             this.client.head("/api/repositories/maven-repo", alice),
