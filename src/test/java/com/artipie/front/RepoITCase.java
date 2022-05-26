@@ -90,7 +90,7 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
-        Thread.sleep(3000);
+        Thread.sleep(10000);
         MatcherAssert.assertThat(
             "Alice failed to check maven-repo exists",
             this.client.head("/api/repositories/maven-repo", alice),
