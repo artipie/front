@@ -19,8 +19,9 @@ import java.util.stream.Collectors;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -75,7 +76,7 @@ class RepositoriesMoveTest {
         MatcherAssert.assertThat(
             "Failed to return empty response",
             new Repositories.Move(stn, new RepoData(stn)).handle(rqs, resp),
-            new IsAnything<>()
+            new IsNot<>(new IsNull<>())
         );
         Mockito.verify(resp).status(HttpStatus.OK_200);
         Thread.sleep(3000);

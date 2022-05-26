@@ -162,8 +162,8 @@ public final class Repositories {
             this.data.remove(
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
-            ).thenAccept(
-                nothing -> this.stn.delete(
+            ).thenRun(
+                () -> this.stn.delete(
                     REPO_PARAM.parse(request),
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 )
@@ -310,8 +310,8 @@ public final class Repositories {
                 response.status(HttpStatus.BAD_REQUEST_400);
                 return "Field `new_name` is required";
             }
-            this.data.move(param, uid, nname).thenAccept(
-                nothing -> this.stn.move(param, uid, nname)
+            this.data.move(param, uid, nname).thenRun(
+                () -> this.stn.move(param, uid, nname)
             );
             response.status(HttpStatus.OK_200);
             return "";

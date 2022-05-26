@@ -16,8 +16,9 @@ import com.artipie.front.settings.RepoSettings;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -75,7 +76,7 @@ class RepositoriesDeleteTest {
             "Failed to process request",
             new Repositories.Delete(stn, new RepoData(stn))
                 .handle(rqs, Mockito.mock(Response.class)),
-            new IsAnything<>()
+            new IsNot<>(new IsNull<>())
         );
         Thread.sleep(3000);
         MatcherAssert.assertThat(
