@@ -105,7 +105,9 @@ to learn more about different repositories settings.
 > **DELETE** /repository/{name} 
 
 Deletes repository called `{name}`, returns status `200` on success, status `404` if repository does
-not exist.
+not exist. Repository data are removed asynchronously, success status does not guarantee, that 
+repo and data were already fully removed. After `delete` call `head` method on the repository 
+to check whether remove operation was complete and repository does not exist.
 
 > **PUT** /repository/{name}/move
 
@@ -116,7 +118,10 @@ Renames repository and moves all the data. Json with the new name is expected in
   "new_name" : "repo_new_name"
 }
 ```
-Returns response status `200` if operation was successful.
+Returns response status `200` if operation was successful. Repository data are moved 
+asynchronously, success status does not guarantee, that rename operation was fully complete. 
+Use `head` method on the repository with the previous name, if such repository does not exist, all
+the data were fully moved to the new repo.
 
 ### Repository permissions API
 

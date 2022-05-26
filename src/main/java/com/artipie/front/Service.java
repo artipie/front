@@ -18,6 +18,7 @@ import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
+import com.artipie.front.settings.RepoData;
 import com.artipie.front.settings.RepoSettings;
 import com.artipie.front.settings.YamlRepoPermissions;
 import com.artipie.front.ui.HbTemplateEngine;
@@ -169,9 +170,15 @@ public final class Service {
                             new Repositories.Get(stn)
                         );
                         this.ignite.head(path.toString(), new Repositories.Head(stn));
-                        this.ignite.delete(path.toString(), new Repositories.Delete(stn));
+                        this.ignite.delete(
+                            path.toString(),
+                            new Repositories.Delete(stn, new RepoData(stn))
+                        );
                         this.ignite.put(path.toString(), new Repositories.Put(stn));
-                        this.ignite.put(path.with("move").toString(), new Repositories.Move(stn));
+                        this.ignite.put(
+                            path.with("move").toString(),
+                            new Repositories.Move(stn, new RepoData(stn))
+                        );
                         final RequestPath repo = this.repoPath();
                         this.ignite.get(
                             repo.with("permissions").toString(),

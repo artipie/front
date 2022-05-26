@@ -16,14 +16,17 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Test for repository management APIs.
  * @since 0.1
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Disabled
 public final class RepoITCase {
 
     /**
@@ -48,7 +51,7 @@ public final class RepoITCase {
     }
 
     @Test
-    void canManageRepos() {
+    void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
             "Failed to obtain auth token for Alice", alice, new IsNot<>(Matchers.emptyString())
