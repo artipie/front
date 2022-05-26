@@ -86,6 +86,11 @@ public final class RepoITCase {
             new IsEqual<>(HttpStatus.CREATED_201)
         );
         MatcherAssert.assertThat(
+            "Aladdin failed to check rpm-repo exists",
+            this.client.head("/api/repositories/rpm-repo", alice),
+            new IsEqual<>(HttpStatus.OK_200)
+        );
+        MatcherAssert.assertThat(
             "Aladdin failed to delete maven-repo",
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
