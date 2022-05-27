@@ -169,14 +169,8 @@ public final class Repositories {
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 )
             ).thenRun(
-                () -> Logger.info(this, "remove complete")
+                () -> Logger.info(this, "Repository fully deleted")
             );
-            Thread.sleep(2000);
-            this.stn.delete(
-                REPO_PARAM.parse(request),
-                RequestAttr.Standard.USER_ID.readOrThrow(request)
-            );
-            Logger.info(this, "removed sync");
             return "";
         }
     }
