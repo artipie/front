@@ -5,6 +5,7 @@
 package com.artipie.front;
 
 import com.artipie.asto.test.TestResource;
+import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -95,6 +96,7 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
+        Logger.info(this, "before sleep");
         Thread.sleep(10000);
         MatcherAssert.assertThat(
             "Alice failed to check maven-repo exists",
