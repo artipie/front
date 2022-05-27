@@ -97,7 +97,8 @@ public final class RepoITCase {
             new IsEqual<>(HttpStatus.OK_200)
         );
         Logger.info(this, "before sleep");
-        Thread.sleep(10000);
+        Thread.sleep(3000);
+        Thread.sleep(1000);
         MatcherAssert.assertThat(
             "Alice failed to check maven-repo exists",
             this.client.head("/api/repositories/maven-repo", alice),
