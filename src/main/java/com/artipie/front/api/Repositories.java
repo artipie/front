@@ -159,7 +159,7 @@ public final class Repositories {
         }
 
         @Override
-        public Object handle(final Request request, final Response response) {
+        public Object handle(final Request request, final Response response) throws InterruptedException {
             this.data.remove(
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
@@ -171,6 +171,12 @@ public final class Repositories {
             ).thenRun(
                 () -> Logger.info(this, "remove complete")
             );
+            Thread.sleep(2000);
+            this.stn.delete(
+                REPO_PARAM.parse(request),
+                RequestAttr.Standard.USER_ID.readOrThrow(request)
+            );
+            Logger.info(this, "removed sync");
             return "";
         }
     }
