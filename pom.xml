@@ -309,6 +309,7 @@ https://github.com/artipie/front/LICENSE.txt
             <executions>
               <execution>
                 <id>default</id>
+                <phase>deploy</phase>
                 <goals>
                   <goal>build</goal>
                   <goal>push</goal>
