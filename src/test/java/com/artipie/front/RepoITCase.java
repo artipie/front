@@ -100,7 +100,6 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
-
         final ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.submit(
             () -> {
