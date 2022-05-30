@@ -18,6 +18,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
@@ -50,6 +51,7 @@ public final class RepoITCase {
     }
 
     @Test
+    @Timeout(20)
     void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
@@ -111,7 +113,7 @@ public final class RepoITCase {
 
     /**
      * As repository and its data are removed asynchronously, we perform the
-     * check several times, waiting a second between the checks. If after 5 checks
+     * check several times, waiting a second between the checks. If after 10 checks
      * repo still exists, {@link IllegalStateException} is thrown.
      * @param alice Token for Alice
      * @throws InterruptedException On interrupt
@@ -119,9 +121,10 @@ public final class RepoITCase {
     private void checkRepoWasRemoved(final String alice) throws InterruptedException {
         for (int ind = 0; ind < 10; ind = ind + 1) {
             Thread.sleep(1000);
-            Logger.info(this, "woke up");
+            Logger.info(this, "Checking if maven-repo still exists ...");
             final int status = this.client.head("/api/repositories/maven-repo", alice);
             if (status == 404) {
+                Logger.info(this, "Repository fully removed");
                 return;
             }
         }
