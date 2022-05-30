@@ -120,7 +120,6 @@ public final class RepoITCase {
      */
     private void checkRepoWasRemoved(final String alice) throws InterruptedException {
         for (int ind = 0; ind < 10; ind = ind + 1) {
-            Thread.sleep(1000);
             Logger.info(this, "Checking if maven-repo still exists ...");
             final int status = this.client.head("/api/repositories/maven-repo", alice);
             if (status == 404) {
