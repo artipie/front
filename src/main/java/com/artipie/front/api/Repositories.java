@@ -159,7 +159,8 @@ public final class Repositories {
         }
 
         @Override
-        public Object handle(final Request request, final Response response) throws InterruptedException {
+        public Object handle(final Request request, final Response response)
+            throws InterruptedException {
             this.data.remove(
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)

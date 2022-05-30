@@ -5,10 +5,12 @@
 package com.artipie.front;
 
 import com.artipie.asto.test.TestResource;
-import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -18,6 +20,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
@@ -50,6 +53,7 @@ public final class RepoITCase {
     }
 
     @Test
+    @Timeout(5)
     void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
@@ -96,19 +100,28 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
-        Logger.info(this, "before sleep");
-        Thread.sleep(3000);
-        Thread.sleep(1000);
-        MatcherAssert.assertThat(
-            "Alice failed to check maven-repo exists",
-            this.client.head("/api/repositories/maven-repo", alice),
-            new IsEqual<>(HttpStatus.NOT_FOUND_404)
+        final ExecutorService executor = Executors.newFixedThreadPool(1);
+        executor.submit(
+            () -> {
+                try {
+                    Thread.sleep(3000);
+                    MatcherAssert.assertThat(
+                        "Alice failed to check maven-repo exists",
+                        this.client.head("/api/repositories/maven-repo", alice),
+                        new IsEqual<>(HttpStatus.NOT_FOUND_404)
+                    );
+                    MatcherAssert.assertThat(
+                        "Alice failed to get repos info",
+                        this.client.get("/api/repositories", alice),
+                        new StringContainsInOrder(Arrays.asList("pypi-repo", "rpm-repo"))
+                    );
+                } catch (final InterruptedException err) {
+                    throw new IllegalStateException(err);
+                }
+            }
         );
-        MatcherAssert.assertThat(
-            "Alice failed to get repos info",
-            this.client.get("/api/repositories", alice),
-            new StringContainsInOrder(Arrays.asList("pypi-repo", "rpm-repo"))
-        );
+        executor.shutdown();
+        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
     }
 
     @AfterEach
