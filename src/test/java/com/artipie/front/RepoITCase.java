@@ -5,6 +5,7 @@
 package com.artipie.front;
 
 import com.artipie.asto.test.TestResource;
+import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -17,7 +18,6 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
@@ -50,7 +50,6 @@ public final class RepoITCase {
     }
 
     @Test
-    @Timeout(10)
     void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
@@ -118,8 +117,9 @@ public final class RepoITCase {
      * @throws InterruptedException On interrupt
      */
     private void checkRepoWasRemoved(final String alice) throws InterruptedException {
-        for (int ind = 0; ind < 5; ind = ind + 1) {
+        for (int ind = 0; ind < 10; ind = ind + 1) {
             Thread.sleep(1000);
+            Logger.info(this, "woke up");
             final int status = this.client.head("/api/repositories/maven-repo", alice);
             if (status == 404) {
                 return;
