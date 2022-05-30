@@ -9,6 +9,8 @@ import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -52,7 +54,7 @@ public final class RepoITCase {
 
     @Test
     @Timeout(50)
-    void canManageRepos() throws InterruptedException {
+    void canManageRepos() throws InterruptedException, ExecutionException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
             "Failed to obtain auth token for Alice", alice, new IsNot<>(Matchers.emptyString())
@@ -118,17 +120,26 @@ public final class RepoITCase {
      * @param alice Token for Alice
      * @throws InterruptedException On interrupt
      */
-    private void checkRepoWasRemoved(final String alice) throws InterruptedException {
-        for (int ind = 0; ind < 40; ind = ind + 1) {
-            Thread.sleep(1000);
-            Logger.info(this, "Checking if maven-repo still exists ...");
-            final int status = this.client.head("/api/repositories/maven-repo", alice);
-            if (status == 404) {
-                Logger.info(this, "Repository fully removed");
-                return;
+    private void checkRepoWasRemoved(final String alice) throws InterruptedException,
+        ExecutionException {
+        CompletableFuture.runAsync(
+            () -> {
+                for (int ind = 0; ind < 40; ind = ind + 1) {
+                    try {
+                        Thread.sleep(1000);
+                        Logger.info(this, "Checking if maven-repo still exists ...");
+                        final int status = this.client.head("/api/repositories/maven-repo", alice);
+                        if (status == 404) {
+                            Logger.info(this, "Repository fully removed");
+                            return;
+                        }
+                    } catch (final InterruptedException err) {
+                        throw new IllegalStateException(err);
+                    }
+                }
+                throw new IllegalStateException("Repository was maven-repo was not removed");
             }
-        }
-        throw new IllegalStateException("Repository was maven-repo was not removed");
+        ).get();
     }
 
 }
