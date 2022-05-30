@@ -51,7 +51,7 @@ public final class RepoITCase {
     }
 
     @Test
-    @Timeout(20)
+    @Timeout(50)
     void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
@@ -119,7 +119,8 @@ public final class RepoITCase {
      * @throws InterruptedException On interrupt
      */
     private void checkRepoWasRemoved(final String alice) throws InterruptedException {
-        for (int ind = 0; ind < 10; ind = ind + 1) {
+        for (int ind = 0; ind < 40; ind = ind + 1) {
+            Thread.sleep(1000);
             Logger.info(this, "Checking if maven-repo still exists ...");
             final int status = this.client.head("/api/repositories/maven-repo", alice);
             if (status == 404) {
