@@ -164,13 +164,13 @@ public final class Repositories {
             this.data.remove(
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
-            ).thenAccept(
-                nothing -> this.stn.delete(
+            ).thenRun(
+                () -> this.stn.delete(
                     REPO_PARAM.parse(request),
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 )
-            ).thenAccept(
-                nothing -> Logger.info(this, "Repository fully deleted")
+            ).thenRun(
+                () -> Logger.info(this, "Repository fully deleted")
             );
             return "";
         }
