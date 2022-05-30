@@ -8,9 +8,6 @@ import com.artipie.asto.test.TestResource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -53,7 +50,7 @@ public final class RepoITCase {
     }
 
     @Test
-    @Timeout(5)
+    @Timeout(10)
     void canManageRepos() throws InterruptedException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
@@ -100,23 +97,7 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
-        final ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.submit(
-            () -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (final InterruptedException err) {
-                    throw new IllegalStateException(err);
-                }
-            }
-        );
-        executor.shutdown();
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
-        MatcherAssert.assertThat(
-            "Alice failed to check maven-repo exists",
-            this.client.head("/api/repositories/maven-repo", alice),
-            new IsEqual<>(HttpStatus.NOT_FOUND_404)
-        );
+        this.checkRepoWasRemoved(alice);
         MatcherAssert.assertThat(
             "Alice failed to get repos info",
             this.client.get("/api/repositories", alice),
@@ -127,6 +108,24 @@ public final class RepoITCase {
     @AfterEach
     void stop() throws IOException {
         this.client.close();
+    }
+
+    /**
+     * As repository and its data are removed asynchronously, we perform the
+     * check several times, waiting a second between the checks. If after 5 checks
+     * repo still exists, {@link IllegalStateException} is thrown.
+     * @param alice Token for Alice
+     * @throws InterruptedException On interrupt
+     */
+    private void checkRepoWasRemoved(final String alice) throws InterruptedException {
+        for (int ind = 0; ind < 5; ind = ind + 1) {
+            Thread.sleep(1000);
+            final int status = this.client.head("/api/repositories/maven-repo", alice);
+            if (status == 404) {
+                return;
+            }
+        }
+        throw new IllegalStateException("Repository was maven-repo was not removed");
     }
 
 }
