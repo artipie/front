@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -138,7 +139,8 @@ public final class RepoITCase {
                     }
                 }
                 throw new IllegalStateException("Repository was maven-repo was not removed");
-            }
+            },
+            Executors.newFixedThreadPool(1)
         ).get();
     }
 
