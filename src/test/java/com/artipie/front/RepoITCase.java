@@ -100,21 +100,12 @@ public final class RepoITCase {
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
+
         final ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.submit(
             () -> {
                 try {
                     Thread.sleep(3000);
-                    MatcherAssert.assertThat(
-                        "Alice failed to check maven-repo exists",
-                        this.client.head("/api/repositories/maven-repo", alice),
-                        new IsEqual<>(HttpStatus.NOT_FOUND_404)
-                    );
-                    MatcherAssert.assertThat(
-                        "Alice failed to get repos info",
-                        this.client.get("/api/repositories", alice),
-                        new StringContainsInOrder(Arrays.asList("pypi-repo", "rpm-repo"))
-                    );
                 } catch (final InterruptedException err) {
                     throw new IllegalStateException(err);
                 }
@@ -122,6 +113,16 @@ public final class RepoITCase {
         );
         executor.shutdown();
         executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
+        MatcherAssert.assertThat(
+            "Alice failed to check maven-repo exists",
+            this.client.head("/api/repositories/maven-repo", alice),
+            new IsEqual<>(HttpStatus.NOT_FOUND_404)
+        );
+        MatcherAssert.assertThat(
+            "Alice failed to get repos info",
+            this.client.get("/api/repositories", alice),
+            new StringContainsInOrder(Arrays.asList("pypi-repo", "rpm-repo"))
+        );
     }
 
     @AfterEach
