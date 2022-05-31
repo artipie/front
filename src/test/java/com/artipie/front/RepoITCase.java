@@ -138,7 +138,7 @@ public final class RepoITCase {
                         throw new IllegalStateException(err);
                     }
                 }
-                throw new IllegalStateException("Repository was maven-repo was not removed");
+                throw new IllegalStateException("Repository maven-repo was not removed");
             },
             Executors.newFixedThreadPool(1)
         ).get();

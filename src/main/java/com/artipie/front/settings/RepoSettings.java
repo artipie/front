@@ -7,6 +7,7 @@ package com.artipie.front.settings;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.api.NotFoundException;
+import com.jcabi.log.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -132,7 +133,9 @@ public final class RepoSettings {
      * @throws NotFoundException If such repository does not exist
      */
     public void delete(final String name, final String uid) {
+        Logger.info(this, "Start delete");
         this.repos.delete(this.key(name, uid));
+        Logger.info(this, "End delete");
     }
 
     /**
