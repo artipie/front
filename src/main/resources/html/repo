@@ -40,13 +40,26 @@ repo:
   </fieldset>
 </form>
 {{#if config}}
-<form id="repo-delete-form" action="/dashboard/api/repos/{{user}}" method="POST">
-    <fieldset>
-        <input name="repo" type="hidden" value="{{name}}"/>
-        <input name="action" type="hidden" value="delete"/>
-        <input id="repo-delete" type="submit" value="Delete"/>
-    </fieldset>
-</form>
+<table border="2px solid black" width="100%">
+    <tr style="width: 100%">
+        <td width="85%">
+            <form id="repo-delete-form" action="/dashboard/api/repos/{{user}}" method="POST">
+                <fieldset>
+                    <input name="repo" type="hidden" value="{{name}}"/>
+                    <input name="action" type="hidden" value="delete"/>
+                    <input id="repo-delete" type="submit" value="Delete"/>
+                </fieldset>
+            </form>
+        </td>
+        <td>
+            <form id="repo-cancel-form" action="/dashboard" method="GET">
+                <fieldset>
+                    <input id="repo-cancel" type="submit" value="Cancel"/>
+                </fieldset>
+            </form>
+        </td>
+    </tr>
+</table>
 {{else}}
 <form id="repo-cancel-form" action="/dashboard" method="GET">
     <fieldset>
