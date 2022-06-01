@@ -49,8 +49,15 @@ public final class EnvCredentials implements Credentials {
     @Override
     public Optional<User> user(final String name) {
         Optional<User> result = Optional.empty();
-        if (Objects.equals(Objects.requireNonNull(name), this.env.get(EnvCredentials.ENV_NAME))
-            && this.env.get(EnvCredentials.ENV_PASS) != null) {
+        if (this.env.get(EnvCredentials.ENV_NAME) != null
+            && this.env.get(EnvCredentials.ENV_PASS) == null) {
+            throw new IllegalStateException(
+                // @checkstyle LineLengthCheck (1 line)
+                "Password is not set: env variable `ARTIPIE_USER_PASS` is required for env credentials"
+            );
+        } else if (
+            Objects.equals(Objects.requireNonNull(name), this.env.get(EnvCredentials.ENV_NAME))
+        ) {
             result = Optional.of(
                 // @checkstyle AnonInnerLengthCheck (30 lines)
                 new User() {

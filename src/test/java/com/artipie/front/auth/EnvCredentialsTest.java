@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,13 +30,11 @@ class EnvCredentialsTest {
     }
 
     @Test
-    void doesNotFindUserWhenPasswordIsAbsent() {
+    void throwsErrWhenPasswordIsAbsent() {
         final String bob = "Bob";
-        MatcherAssert.assertThat(
-            new EnvCredentials(
-                Map.of("ARTIPIE_USER_NAME", bob)
-            ).user(bob).isEmpty(),
-            new IsEqual<>(true)
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> new EnvCredentials(Map.of("ARTIPIE_USER_NAME", bob)).user(bob)
         );
     }
 
