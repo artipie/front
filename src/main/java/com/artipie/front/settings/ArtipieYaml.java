@@ -112,7 +112,7 @@ public final class ArtipieYaml {
     public Credentials credentials() {
         final List<Credentials> res = new ArrayList<>(3);
         this.yamlCredentials().ifPresent(item -> res.add(new YamlCredentials(item)));
-        if (this.envCredsSet()) {
+        if (this.envCredentialsSet()) {
             res.add(new EnvCredentials());
         }
         return new Credentials.Any(res);
@@ -206,7 +206,7 @@ public final class ArtipieYaml {
      * Are credentials from environment configured?
      * @return True if configured
      */
-    private boolean envCredsSet() {
+    private boolean envCredentialsSet() {
         return Optional.ofNullable(
             this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
         ).map(
