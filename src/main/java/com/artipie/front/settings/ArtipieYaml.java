@@ -14,6 +14,7 @@ import com.artipie.asto.SubStorage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.auth.AccessPermissions;
 import com.artipie.front.auth.Credentials;
+import com.artipie.front.auth.EnvCredentials;
 import com.artipie.front.auth.UserPermissions;
 import com.artipie.front.auth.Users;
 import com.artipie.front.auth.YamlCredentials;
@@ -21,8 +22,9 @@ import com.artipie.front.auth.YamlUsers;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Artipie yaml settings.
@@ -36,6 +38,11 @@ public final class ArtipieYaml {
      * Yaml node credentials name.
      */
     public static final String NODE_CREDENTIALS = "credentials";
+
+    /**
+     * Yaml node type.
+     */
+    private static final String NODE_TYPE = "type";
 
     /**
      * YAML file content.
@@ -103,27 +110,12 @@ public final class ArtipieYaml {
      * @return Credentials
      */
     public Credentials credentials() {
-        final Optional<Key> key = this.fileCredentialsKey();
-        Optional<YamlMapping> res = Optional.empty();
-        if (key.isPresent() && this.storage().exists(key.get())) {
-            try {
-                res = Optional.of(
-                    Yaml.createYamlInput(
-                        new String(
-                            this.storage().value(key.get()),
-                            StandardCharsets.UTF_8
-                        )
-                    ).readYamlMapping()
-                );
-            } catch (final IOException err) {
-                throw new UncheckedIOException(err);
-            }
-        } else if (key.isPresent()) {
-            res = Optional.of(Yaml.createYamlMappingBuilder().build());
+        final List<Credentials> res = new ArrayList<>(3);
+        this.yamlCredentials().ifPresent(item -> res.add(new YamlCredentials(item)));
+        if (this.envCredentialsSet()) {
+            res.add(new EnvCredentials());
         }
-        return new YamlCredentials(
-            res.orElseThrow(() -> new NotImplementedException("Not implemented yet"))
-        );
+        return new Credentials.Any(res);
     }
 
     /**
@@ -178,10 +170,49 @@ public final class ArtipieYaml {
             this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
         ).map(
             seq -> seq.values().stream()
-                .filter(node -> "file".equals(node.asMapping().string("type"))).findFirst()
-                .map(YamlNode::asMapping)
+                .filter(node -> "file".equals(node.asMapping().string(ArtipieYaml.NODE_TYPE)))
+                .findFirst().map(YamlNode::asMapping)
         ).orElse(Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_CREDENTIALS)))
         .map(file -> new Key.From(file.string("path")));
+    }
+
+    /**
+     * Obtain credentials from file yaml mapping if file credentials are set.
+     * @return YamlMapping if found
+     */
+    private Optional<YamlMapping> yamlCredentials() {
+        final Optional<Key> key = this.fileCredentialsKey();
+        Optional<YamlMapping> yaml = Optional.empty();
+        if (key.isPresent() && this.storage().exists(key.get())) {
+            try {
+                yaml = Optional.of(
+                    Yaml.createYamlInput(
+                        new String(
+                            this.storage().value(key.get()),
+                            StandardCharsets.UTF_8
+                        )
+                    ).readYamlMapping()
+                );
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
+        } else if (key.isPresent()) {
+            yaml = Optional.of(Yaml.createYamlMappingBuilder().build());
+        }
+        return yaml;
+    }
+
+    /**
+     * Are credentials from environment configured?
+     * @return True if configured
+     */
+    private boolean envCredentialsSet() {
+        return Optional.ofNullable(
+            this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
+        ).map(
+            seq -> seq.values().stream()
+                .anyMatch(node -> "env".equals(node.asMapping().string(ArtipieYaml.NODE_TYPE)))
+        ).orElse(false);
     }
 
     /**
