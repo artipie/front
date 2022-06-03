@@ -15,6 +15,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.front.auth.AccessPermissions;
 import com.artipie.front.auth.Credentials;
 import com.artipie.front.auth.EnvCredentials;
+import com.artipie.front.auth.GithubCredentials;
 import com.artipie.front.auth.UserPermissions;
 import com.artipie.front.auth.Users;
 import com.artipie.front.auth.YamlCredentials;
@@ -112,8 +113,11 @@ public final class ArtipieYaml {
     public Credentials credentials() {
         final List<Credentials> res = new ArrayList<>(3);
         this.yamlCredentials().ifPresent(item -> res.add(new YamlCredentials(item)));
-        if (this.envCredentialsSet()) {
+        if (this.credentialsTypeSet("env")) {
             res.add(new EnvCredentials());
+        }
+        if (this.credentialsTypeSet("github")) {
+            res.add(new GithubCredentials());
         }
         return new Credentials.Any(res);
     }
@@ -203,15 +207,16 @@ public final class ArtipieYaml {
     }
 
     /**
-     * Are credentials from environment configured?
+     * Are credentials with given type set?
+     * @param type Credentials type
      * @return True if configured
      */
-    private boolean envCredentialsSet() {
+    private boolean credentialsTypeSet(final String type) {
         return Optional.ofNullable(
             this.meta().yamlSequence(ArtipieYaml.NODE_CREDENTIALS)
         ).map(
             seq -> seq.values().stream()
-                .anyMatch(node -> "env".equals(node.asMapping().string(ArtipieYaml.NODE_TYPE)))
+                .anyMatch(node -> type.equals(node.asMapping().string(ArtipieYaml.NODE_TYPE)))
         ).orElse(false);
     }
 
