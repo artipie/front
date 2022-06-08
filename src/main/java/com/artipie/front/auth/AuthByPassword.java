@@ -30,6 +30,6 @@ public interface AuthByPassword {
     static AuthByPassword withCredentials(final Credentials cred) {
         return (name, pass) -> cred.user(name)
             .filter(user -> user.validatePassword(pass))
-            .map(ignore -> name);
+            .map(User::uid);
     }
 }
