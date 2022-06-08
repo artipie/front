@@ -37,16 +37,23 @@ class GithubCredentialsTest {
     @Test
     void resolveUserByToken() {
         final String secret = "secret";
-        MatcherAssert.assertThat(
-            new GithubCredentials(
-                // @checkstyle ReturnCountCheck (5 lines)
-                token -> {
-                    if (token.equals(secret)) {
-                        return "User";
-                    }
-                    return "";
+        final User user = new GithubCredentials(
+            // @checkstyle ReturnCountCheck (5 lines)
+            token -> {
+                if (token.equals(secret)) {
+                    return "User";
                 }
-            ).user("github.com/UsEr").orElseThrow().validatePassword(secret),
+                return "";
+            }
+        ).user("github.com/UsEr").orElseThrow();
+        MatcherAssert.assertThat(
+            "User uid should not contain `github.com/` prefix",
+            user.uid(),
+            new IsEqual<>("UsEr")
+        );
+        MatcherAssert.assertThat(
+            "Password is validated",
+            user.validatePassword(secret),
             new IsEqual<>(true)
         );
     }
