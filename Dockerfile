@@ -10,7 +10,7 @@ LABEL maintainer="g4s8.public@gmail.com"
 
 RUN groupadd -r -g 2020 artipie && \
     adduser -M -r -g artipie -u 2021 -s /sbin/nologin artipie && \
-    mkdir -p /etc/artipie /usr/lib/artipie /var/artipie && \
+    mkdir -p /etc/artipie /usr/lib/web-service /var/artipie && \
     chown artipie:artipie -R /etc/artipie /usr/lib/web-service /var/artipie
 USER 2021:2020
 
