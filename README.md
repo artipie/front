@@ -4,17 +4,17 @@
 [![DevOps By Rultor.com](http://www.rultor.com/b/artipie/front)](http://www.rultor.com/p/artipie/front)
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
-[![Javadoc](http://www.javadoc.io/badge/com.artipie/front.svg)](http://www.javadoc.io/doc/com.artipie/front)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/com.artipie/front/blob/master/LICENSE.txt)
-[![codecov](https://codecov.io/gh/artipie/front/branch/master/graph/badge.svg)](https://codecov.io/gh/artipie/front)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/front)](https://hitsofcode.com/view/github/artipie/front)
-[![Maven Central](https://img.shields.io/maven-central/v/com.artipie/front.svg)](https://maven-badges.herokuapp.com/maven-central/com.artipie/front)
 [![PDD status](http://www.0pdd.com/svg?name=artipie/front)](http://www.0pdd.com/p?name=artipie/front)
 
 # Artipie front service
 
-Front web service provides API and UI pages for managing Artipie configuration, such as repositories, users, permissions.
+Front web service provides API and UI pages for managing [Artipie](https://github.com/artipie/artipie) configuration, 
+such as repositories, users, permissions.
 
+If you have any question or suggestions, do not hesitate to create an issue or contact us in
+[Telegram](https://t.me/artipie). Artipie roadmap is available [here](https://github.com/orgs/artipie/projects/3).
 
 ## Public API
 
@@ -390,3 +390,16 @@ users:
 When API request is accepted, request line and method are matched by `endpoint` regular expressions
 to get the list of the permissions required to access the endpoint. Then, we check if the user has 
 any of the required permission to accept or deny the request.
+
+## How to contribute
+
+Fork repository, make changes, send us a pull request. We will review
+your changes and apply them to the `master` branch shortly, provided
+they don't violate our quality standards. To avoid frustration, before
+sending us your pull request please run full Maven build:
+
+```
+$ mvn clean install -Pqulice
+```
+
+To avoid build errors use Maven 3.2+.
