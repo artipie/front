@@ -1,4 +1,6 @@
-<img src="https://www.artipie.com/logo.svg" width="64px" height="64px"/>
+<a href="http://artipie.com"><img src="https://www.artipie.com/logo.svg" width="64px" height="64px"/></a>
+
+[![Join our Telegramm group](https://img.shields.io/badge/Join%20us-Telegram-blue?&logo=telegram&?link=http://right&link=http://t.me/artipie)](http://t.me/artipie)
 
 [![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
 [![DevOps By Rultor.com](http://www.rultor.com/b/artipie/front)](http://www.rultor.com/p/artipie/front)
@@ -13,8 +15,9 @@
 Front web service provides API and UI pages for managing [Artipie](https://github.com/artipie/artipie) configuration, 
 such as repositories, users, permissions.
 
-If you have any question or suggestions, do not hesitate to create an issue or contact us in
-[Telegram](https://t.me/artipie). Artipie roadmap is available [here](https://github.com/orgs/artipie/projects/3).
+If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/http-client/issues/new) or contact us in
+[Telegram](https://t.me/artipie).  
+Artipie [roadmap](https://github.com/orgs/artipie/projects/3).
 
 ## Public API
 
@@ -392,6 +395,8 @@ to get the list of the permissions required to access the endpoint. Then, we che
 any of the required permission to accept or deny the request.
 
 ## How to contribute
+
+Please read [contributing rules](https://github.com/artipie/artipie/blob/master/CONTRIBUTING.md).
 
 Fork repository, make changes, send us a pull request. We will review
 your changes and apply them to the `master` branch shortly, provided
