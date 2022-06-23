@@ -15,7 +15,7 @@
 Front web service provides API and UI pages for managing [Artipie](https://github.com/artipie/artipie) configuration, 
 such as repositories, users, permissions.
 
-If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/http-client/issues/new) or contact us in
+If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/front/issues/new) or contact us in
 [Telegram](https://t.me/artipie).  
 Artipie [roadmap](https://github.com/orgs/artipie/projects/3).
 
