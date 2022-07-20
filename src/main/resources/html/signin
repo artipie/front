@@ -11,5 +11,10 @@
         <input name="submit" type="submit"/>
     </fieldset>
 </form>
+
+Use your GitHub account to login: username is <code>github.com/{username}</code>,
+password is GitHub <a href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">personal access token</a>.
+Or contact us in <a href="https://t.me/artipie">Telegram</a> and we create an account for you.
+
 {{/partial}}
 {{> base}}

@@ -100,9 +100,7 @@ public final class ArtipieYaml {
      */
     public Users users() {
         return new YamlUsers(
-            this.fileCredentialsKey().orElseThrow(
-                () -> new IllegalStateException("Only users from file auth are supported")
-            ), this.storage()
+            this.fileCredentialsKey().orElse(new Key.From("_credentials.yml")), this.storage()
         );
     }
 
