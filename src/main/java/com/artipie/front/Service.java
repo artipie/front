@@ -292,6 +292,9 @@ public final class Service {
                 );
                 this.ignite.get("", new UserPage(stn), engine);
                 this.ignite.get(
+                    new RequestPath().with(Users.USER_PARAM).toString(), new UserPage(stn), engine
+                );
+                this.ignite.get(
                     new RequestPath().with(Users.USER_PARAM)
                         .with(Repositories.REPO_PARAM).toString(),
                     new RepoPage.TemplateView(stn), engine
