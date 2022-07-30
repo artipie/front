@@ -5,9 +5,13 @@
 package com.artipie.front;
 
 import com.artipie.asto.test.TestResource;
+import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -16,8 +20,8 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
@@ -26,7 +30,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@Disabled
 public final class RepoITCase {
 
     /**
@@ -37,8 +40,8 @@ public final class RepoITCase {
     final TestService service = new TestService()
         .withResource(TestService.CREDS, "RepoITCase/_credentials.yaml")
         .withResource("_api_permissions.yml", "RepoITCase/_api_permissions.yml")
-        .withResource("repos/maven-repo.yaml", "RepoITCase/maven-repo.yaml")
-        .withResource("repos/pypi-repo.yaml", "RepoITCase/pypi-repo.yaml");
+        .withRepoConfigAddingStoragePath("repos/maven-repo.yaml", "RepoITCase/maven-repo.yaml")
+        .withRepoConfigAddingStoragePath("repos/pypi-repo.yaml", "RepoITCase/pypi-repo.yaml");
 
     /**
      * Test http client.
@@ -51,7 +54,8 @@ public final class RepoITCase {
     }
 
     @Test
-    void canManageRepos() throws InterruptedException {
+    @Timeout(50)
+    void canManageRepos() throws InterruptedException, ExecutionException {
         final String alice = this.client.token("Alice", "wonderland");
         MatcherAssert.assertThat(
             "Failed to obtain auth token for Alice", alice, new IsNot<>(Matchers.emptyString())
@@ -88,15 +92,16 @@ public final class RepoITCase {
             new IsEqual<>(HttpStatus.CREATED_201)
         );
         MatcherAssert.assertThat(
+            "Aladdin failed to check rpm-repo exists",
+            this.client.head("/api/repositories/rpm-repo", alice),
+            new IsEqual<>(HttpStatus.OK_200)
+        );
+        MatcherAssert.assertThat(
             "Aladdin failed to delete maven-repo",
             this.client.delete("/api/repositories/maven-repo", aladdin),
             new IsEqual<>(HttpStatus.OK_200)
         );
-        MatcherAssert.assertThat(
-            "Alice failed to check maven-repo exists",
-            this.client.head("/api/repositories/maven-repo", alice),
-            new IsEqual<>(HttpStatus.NOT_FOUND_404)
-        );
+        this.checkRepoWasRemoved(alice);
         MatcherAssert.assertThat(
             "Alice failed to get repos info",
             this.client.get("/api/repositories", alice),
@@ -107,6 +112,36 @@ public final class RepoITCase {
     @AfterEach
     void stop() throws IOException {
         this.client.close();
+    }
+
+    /**
+     * As repository and its data are removed asynchronously, we perform the
+     * check several times, waiting a second between the checks. If after 10 checks
+     * repo still exists, {@link IllegalStateException} is thrown.
+     * @param alice Token for Alice
+     * @throws InterruptedException On interrupt
+     */
+    private void checkRepoWasRemoved(final String alice) throws InterruptedException,
+        ExecutionException {
+        CompletableFuture.runAsync(
+            () -> {
+                for (int ind = 0; ind < 40; ind = ind + 1) {
+                    try {
+                        Thread.sleep(1000);
+                        Logger.info(this, "Checking if maven-repo still exists ...");
+                        final int status = this.client.head("/api/repositories/maven-repo", alice);
+                        if (status == 404) {
+                            Logger.info(this, "Repository fully removed");
+                            return;
+                        }
+                    } catch (final InterruptedException err) {
+                        throw new IllegalStateException(err);
+                    }
+                }
+                throw new IllegalStateException("Repository maven-repo was not removed");
+            },
+            Executors.newFixedThreadPool(1)
+        ).get();
     }
 
 }

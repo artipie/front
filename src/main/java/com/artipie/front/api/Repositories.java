@@ -10,6 +10,7 @@ import com.artipie.front.misc.RequestPath;
 import com.artipie.front.misc.Yaml2Json;
 import com.artipie.front.settings.RepoData;
 import com.artipie.front.settings.RepoSettings;
+import com.jcabi.log.Logger;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -158,7 +159,8 @@ public final class Repositories {
         }
 
         @Override
-        public Object handle(final Request request, final Response response) {
+        public Object handle(final Request request, final Response response)
+            throws InterruptedException {
             this.data.remove(
                 REPO_PARAM.parse(request),
                 RequestAttr.Standard.USER_ID.readOrThrow(request)
@@ -167,6 +169,8 @@ public final class Repositories {
                     REPO_PARAM.parse(request),
                     RequestAttr.Standard.USER_ID.readOrThrow(request)
                 )
+            ).thenRun(
+                () -> Logger.info(this, "Repository fully deleted")
             );
             return "";
         }
