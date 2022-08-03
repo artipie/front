@@ -104,8 +104,8 @@ https://github.com/artipie/front/LICENSE.txt
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
-      <artifactId>asto</artifactId>
-      <version>v1.11.0</version>
+      <artifactId>asto-core</artifactId>
+      <version>v1.13.0</version>
     </dependency>
     <dependency>
         <groupId>com.sparkjava</groupId>
