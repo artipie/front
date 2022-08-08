@@ -110,7 +110,7 @@ public final class ArtipieYaml {
      */
     public Credentials credentials() {
         final List<Credentials> res = new ArrayList<>(3);
-        this.yamlCredentials().ifPresent(item -> res.add(new YamlCredentials(item)));
+        this.yamlCredentials().ifPresent(res::add);
         if (this.credentialsTypeSet("env")) {
             res.add(new EnvCredentials());
         }
@@ -180,28 +180,10 @@ public final class ArtipieYaml {
 
     /**
      * Obtain credentials from file yaml mapping if file credentials are set.
-     * @return YamlMapping if found
+     * @return Credentials if found
      */
-    private Optional<YamlMapping> yamlCredentials() {
-        final Optional<Key> key = this.fileCredentialsKey();
-        Optional<YamlMapping> yaml = Optional.empty();
-        if (key.isPresent() && this.storage().exists(key.get())) {
-            try {
-                yaml = Optional.of(
-                    Yaml.createYamlInput(
-                        new String(
-                            this.storage().value(key.get()),
-                            StandardCharsets.UTF_8
-                        )
-                    ).readYamlMapping()
-                );
-            } catch (final IOException err) {
-                throw new UncheckedIOException(err);
-            }
-        } else if (key.isPresent()) {
-            yaml = Optional.of(Yaml.createYamlMappingBuilder().build());
-        }
-        return yaml;
+    private Optional<Credentials> yamlCredentials() {
+        return this.fileCredentialsKey().map(key -> new YamlCredentials(this.storage(), key));
     }
 
     /**
