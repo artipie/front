@@ -4,10 +4,21 @@
  */
 package com.artipie.front.auth;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Key;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.misc.UncheckedScalar;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -21,22 +32,63 @@ import org.apache.commons.codec.digest.DigestUtils;
 public final class YamlCredentials implements Credentials {
 
     /**
-     * Yaml source.
+     * Empty yaml constant.
      */
-    private final YamlMapping mapping;
+    private static final YamlMapping EMPTY_YAML = Yaml.createYamlMappingBuilder().build();
+
+    /**
+     * Cache for credentials settings.
+     */
+    private final LoadingCache<String, YamlMapping> creds;
+
+    /**
+     * New yaml credentials with default ttl 60 seconds.
+     *
+     * @param asto Blocking storage
+     * @param key Credentials key
+     */
+    public YamlCredentials(final BlockingStorage asto, final Key key) {
+        // @checkstyle MagicNumberCheck (1 line)
+        this(asto, key, 60);
+    }
 
     /**
      * New yaml credentials.
      *
-     * @param mapping Yaml
+     * @param asto Blocking storage
+     * @param key Credentials key
+     * @param ttl Time to live in seconds
      */
-    public YamlCredentials(final YamlMapping mapping) {
-        this.mapping = mapping;
+    public YamlCredentials(final BlockingStorage asto, final Key key, final int ttl) {
+        this.creds = CacheBuilder.newBuilder()
+            .expireAfterWrite(ttl, TimeUnit.SECONDS)
+            .build(
+                new CacheLoader<>() {
+                    @Override
+                    public YamlMapping load(final String name) {
+                        final YamlMapping res;
+                        if (asto.exists(key)) {
+                            try {
+                                res = Yaml.createYamlInput(
+                                    new String(asto.value(key), StandardCharsets.UTF_8)
+                                ).readYamlMapping();
+                            } catch (final IOException err) {
+                                throw new UncheckedIOException(err);
+                            }
+                        } else {
+                            res = YamlCredentials.EMPTY_YAML;
+                        }
+                        return res;
+                    }
+                }
+        );
     }
 
     @Override
     public Optional<User> user(final String name) {
-        return Optional.ofNullable(this.mapping.yamlMapping("credentials"))
+        return Optional.ofNullable(
+            new UncheckedScalar<>(() -> this.creds.get("any")).value().yamlMapping("credentials")
+        )
             .flatMap(cred -> Optional.ofNullable(cred.yamlMapping(name)))
             .map(yaml -> new YamlUser(yaml, name));
     }

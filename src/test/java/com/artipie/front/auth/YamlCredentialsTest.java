@@ -7,6 +7,10 @@ package com.artipie.front.auth;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.artipie.asto.Key;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.memory.InMemoryStorage;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -14,6 +18,7 @@ import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -23,12 +28,30 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class YamlCredentialsTest {
 
+    /**
+     * Test credentials key.
+     */
+    private static final Key KEY = new Key.From("creds.yaml");
+
+    /**
+     * Test storage.
+     */
+    private BlockingStorage blsto;
+
+    @BeforeEach
+    void init() {
+        this.blsto = new BlockingStorage(new InMemoryStorage());
+    }
+
     @Test
     void findUser() {
         final var username = "John";
-        final var user = new YamlCredentials(
-            credYaml(PasswordFormat.SIMPLE, new User(username, "plain", "qwerty"))
-        ).user(username);
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(PasswordFormat.SIMPLE, new User(username, "plain", "qwerty"))
+        );
+        final var user = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY)
+            .user(username);
         MatcherAssert.assertThat(
             user.isPresent(), Matchers.is(true)
         );
@@ -37,10 +60,13 @@ public final class YamlCredentialsTest {
     @Test
     void validateShaPass() {
         final var username = "Alice";
-        final var user = new YamlCredentials(
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
             // @checkstyle LineLengthCheck (1 line)
-            credYaml(PasswordFormat.SIMPLE, new User(username, "sha256", "65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5"))
-        ).user(username);
+            credYamlBytes(PasswordFormat.SIMPLE, new User(username, "sha256", "65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5"))
+        );
+        final var user = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY)
+            .user(username);
         MatcherAssert.assertThat(
             user.orElseThrow().validatePassword("qwerty"),
             Matchers.is(true)
@@ -50,9 +76,12 @@ public final class YamlCredentialsTest {
     @Test
     void validatePlainPass() {
         final var username = "Bob";
-        final var user = new YamlCredentials(
-            credYaml(PasswordFormat.SIMPLE, new User(username, "plain", "1234"))
-        ).user(username);
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(PasswordFormat.SIMPLE, new User(username, "plain", "1234"))
+        );
+        final var user = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY)
+            .user(username);
         MatcherAssert.assertThat(
             user.orElseThrow().validatePassword("1234"),
             Matchers.is(true)
@@ -64,9 +93,12 @@ public final class YamlCredentialsTest {
         final var username = "John";
         final var type = "plain";
         final var pass = "zxcvb";
-        final var user = new YamlCredentials(
-            credYaml(PasswordFormat.STRUCT, new User(username, type, pass))
-        ).user(username).get();
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(PasswordFormat.STRUCT, new User(username, type, pass))
+        );
+        final var user = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY)
+            .user(username).get();
         MatcherAssert.assertThat(
             user.validatePassword(pass),
             Matchers.is(true)
@@ -78,8 +110,14 @@ public final class YamlCredentialsTest {
         final var username = "Jane";
         final var admins = "admins";
         final var readers = "readers";
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(
+                PasswordFormat.SIMPLE, new User(username, "plain", "qwerty", admins, readers)
+            )
+        );
         final var groups = new YamlCredentials(
-            credYaml(PasswordFormat.SIMPLE, new User(username, "plain", "qwerty", admins, readers))
+            this.blsto, YamlCredentialsTest.KEY
         ).user(username).orElseThrow().groups();
         MatcherAssert.assertThat(
             groups,
@@ -91,15 +129,59 @@ public final class YamlCredentialsTest {
     void readUserEmail() {
         final var username = "Olga";
         final var email = "olga@example.com";
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(
+                PasswordFormat.SIMPLE,
+                new User(username, "plain", "qwerty", Optional.of(email))
+            )
+        );
         MatcherAssert.assertThat(
-            new YamlCredentials(
-                credYaml(
-                    PasswordFormat.SIMPLE,
-                    new User(username, "plain", "qwerty", Optional.of(email))
-                )
-            ).user(username).orElseThrow().email().get(),
+            new YamlCredentials(this.blsto, YamlCredentialsTest.KEY).user(username)
+                .orElseThrow().email().get(),
             new IsEqual<>(email)
         );
+    }
+
+    @Test
+    void reloadsUsers() throws InterruptedException {
+        final var john = "John";
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(PasswordFormat.SIMPLE, new User(john, "plain", "qwerty"))
+        );
+        final YamlCredentials creds = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY, 1);
+        MatcherAssert.assertThat(
+            creds.user(john).isPresent(),
+            Matchers.is(true)
+        );
+        final var jane = "Jane";
+        this.blsto.save(
+            YamlCredentialsTest.KEY,
+            credYamlBytes(PasswordFormat.SIMPLE, new User(jane, "plain", "qwerty"))
+        );
+        //@checkstyle MagicNumberCheck (1 line)
+        Thread.sleep(1000);
+        MatcherAssert.assertThat(
+            creds.user(john).isEmpty(),
+            Matchers.is(true)
+        );
+        MatcherAssert.assertThat(
+            creds.user(jane).isPresent(),
+            Matchers.is(true)
+        );
+    }
+
+    /**
+     * Credentials YAML.
+     * @param fmt Password format
+     * @param users User list
+     * @return Yaml
+     * @checkstyle MethodsOrderCheck (10 lines)
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static byte[] credYamlBytes(final PasswordFormat fmt, final User... users) {
+        return credYaml(fmt, users).toString().getBytes(StandardCharsets.UTF_8);
     }
 
     /**
