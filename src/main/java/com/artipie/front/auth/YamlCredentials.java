@@ -32,16 +32,24 @@ import org.apache.commons.codec.digest.DigestUtils;
 public final class YamlCredentials implements Credentials {
 
     /**
+     * Empty yaml constant.
+     */
+    private static final YamlMapping EMPTY_YAML = Yaml.createYamlMappingBuilder().build();
+
+    /**
      * Cache for credentials settings.
      */
     private final LoadingCache<String, YamlMapping> creds;
 
     /**
-     * Ctor.
-     * @param creds Credentials
+     * New yaml credentials with default ttl 60 seconds.
+     *
+     * @param asto Blocking storage
+     * @param key Credentials key
      */
-    public YamlCredentials(final LoadingCache<String, YamlMapping> creds) {
-        this.creds = creds;
+    public YamlCredentials(final BlockingStorage asto, final Key key) {
+        // @checkstyle MagicNumberCheck (1 line)
+        this(asto, key, 60);
     }
 
     /**
@@ -49,32 +57,30 @@ public final class YamlCredentials implements Credentials {
      *
      * @param asto Blocking storage
      * @param key Credentials key
+     * @param ttl Time to live in seconds
      */
-    public YamlCredentials(final BlockingStorage asto, final Key key) {
-        this(
-            CacheBuilder.newBuilder()
-                //@checkstyle MagicNumberCheck (1 line)
-                .expireAfterWrite(60, TimeUnit.SECONDS).softValues()
-                .build(
-                    new CacheLoader<>() {
-                        @Override
-                        public YamlMapping load(final String name) {
-                            final YamlMapping res;
-                            if (asto.exists(key)) {
-                                try {
-                                    res = Yaml.createYamlInput(
-                                        new String(asto.value(key), StandardCharsets.UTF_8)
-                                    ).readYamlMapping();
-                                } catch (final IOException err) {
-                                    throw new UncheckedIOException(err);
-                                }
-                            } else {
-                                res = Yaml.createYamlMappingBuilder().build();
+    public YamlCredentials(final BlockingStorage asto, final Key key, final int ttl) {
+        this.creds = CacheBuilder.newBuilder()
+            .expireAfterWrite(ttl, TimeUnit.SECONDS)
+            .build(
+                new CacheLoader<>() {
+                    @Override
+                    public YamlMapping load(final String name) {
+                        final YamlMapping res;
+                        if (asto.exists(key)) {
+                            try {
+                                res = Yaml.createYamlInput(
+                                    new String(asto.value(key), StandardCharsets.UTF_8)
+                                ).readYamlMapping();
+                            } catch (final IOException err) {
+                                throw new UncheckedIOException(err);
                             }
-                            return res;
+                        } else {
+                            res = YamlCredentials.EMPTY_YAML;
                         }
+                        return res;
                     }
-                )
+                }
         );
     }
 

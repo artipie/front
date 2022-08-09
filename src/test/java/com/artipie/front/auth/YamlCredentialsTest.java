@@ -150,7 +150,7 @@ public final class YamlCredentialsTest {
             YamlCredentialsTest.KEY,
             credYamlBytes(PasswordFormat.SIMPLE, new User(john, "plain", "qwerty"))
         );
-        final YamlCredentials creds = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY);
+        final YamlCredentials creds = new YamlCredentials(this.blsto, YamlCredentialsTest.KEY, 1);
         MatcherAssert.assertThat(
             creds.user(john).isPresent(),
             Matchers.is(true)
@@ -161,7 +161,7 @@ public final class YamlCredentialsTest {
             credYamlBytes(PasswordFormat.SIMPLE, new User(jane, "plain", "qwerty"))
         );
         //@checkstyle MagicNumberCheck (1 line)
-        Thread.sleep(1000 * 60);
+        Thread.sleep(1000);
         MatcherAssert.assertThat(
             creds.user(john).isEmpty(),
             Matchers.is(true)
