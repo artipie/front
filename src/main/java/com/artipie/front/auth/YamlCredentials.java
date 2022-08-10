@@ -93,6 +93,11 @@ public final class YamlCredentials implements Credentials {
             .map(yaml -> new YamlUser(yaml, name));
     }
 
+    @Override
+    public void reload() {
+        this.creds.invalidateAll();
+    }
+
     /**
      * Yaml user item.
      * @since 1.0

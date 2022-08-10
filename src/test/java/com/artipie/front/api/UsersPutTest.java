@@ -26,6 +26,7 @@ import spark.Response;
 /**
  * Test for {@link Users.Put}.
  * @since 0.1
+ * @checkstyle ClassDataAbstractionCouplingCheck (100 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UsersPutTest {
@@ -66,9 +67,11 @@ class UsersPutTest {
         final var name = "john";
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
-        new Users.Put(this.users).handle(rqs, resp);
+        final UsersDeleteTest.FakeCreds creds = new UsersDeleteTest.FakeCreds();
+        new Users.Put(this.users, creds).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(
+            "Added user",
             new String(
                 this.asto.value(new Key.From(UsersPutTest.CREDS_YAML)), StandardCharsets.UTF_8
             ),
@@ -92,6 +95,11 @@ class UsersPutTest {
                 )
             )
         );
+        MatcherAssert.assertThat(
+            "Creds were reloaded",
+            creds.wasReloaded(),
+            new IsEqual<>(true)
+        );
     }
 
     @Test
@@ -101,7 +109,8 @@ class UsersPutTest {
         final var name = "Alice";
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
         Mockito.when(rqs.body()).thenReturn(this.rqBody(name));
-        new Users.Put(this.users).handle(rqs, resp);
+        final UsersDeleteTest.FakeCreds creds = new UsersDeleteTest.FakeCreds();
+        new Users.Put(this.users, creds).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CREATED_201);
         MatcherAssert.assertThat(
             new String(
@@ -121,6 +130,11 @@ class UsersPutTest {
                 )
             )
         );
+        MatcherAssert.assertThat(
+            "Creds were reloaded",
+            creds.wasReloaded(),
+            new IsEqual<>(true)
+        );
     }
 
     @ParameterizedTest
@@ -130,8 +144,14 @@ class UsersPutTest {
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn("Alice");
         Mockito.when(rqs.body()).thenReturn(body);
-        new Users.Put(this.users).handle(rqs, resp);
+        final UsersDeleteTest.FakeCreds creds = new UsersDeleteTest.FakeCreds();
+        new Users.Put(this.users, creds).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.BAD_REQUEST_400);
+        MatcherAssert.assertThat(
+            "Creds were not reloaded",
+            creds.wasReloaded(),
+            new IsEqual<>(false)
+        );
     }
 
     @Test
@@ -147,8 +167,14 @@ class UsersPutTest {
         final var resp = Mockito.mock(Response.class);
         final var rqs = Mockito.mock(Request.class);
         Mockito.when(rqs.params(Users.USER_PARAM.toString())).thenReturn(name);
-        new Users.Put(this.users).handle(rqs, resp);
+        final UsersDeleteTest.FakeCreds creds = new UsersDeleteTest.FakeCreds();
+        new Users.Put(this.users, creds).handle(rqs, resp);
         Mockito.verify(resp).status(HttpStatus.CONFLICT_409);
+        MatcherAssert.assertThat(
+            "Creds were not reloaded",
+            creds.wasReloaded(),
+            new IsEqual<>(false)
+        );
     }
 
     /**

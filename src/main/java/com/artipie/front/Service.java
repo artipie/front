@@ -15,6 +15,7 @@ import com.artipie.front.api.Users;
 import com.artipie.front.auth.AccessFilter;
 import com.artipie.front.auth.ApiTokens;
 import com.artipie.front.auth.AuthByPassword;
+import com.artipie.front.auth.Credentials;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.settings.ArtipieYaml;
@@ -140,9 +141,10 @@ public final class Service {
         Logger.info(this, "starting service on port: %d", port);
         this.ignite = spark.Service.ignite().port(port);
         this.ignite.get("/.health", new HealthRoute());
+        final Credentials creds = this.settings.credentials();
         this.ignite.post(
             "/token",
-            new PostToken(AuthByPassword.withCredentials(this.settings.credentials()), this.tkn)
+            new PostToken(AuthByPassword.withCredentials(creds), this.tkn)
         );
         this.ignite.path(
             "/api", () -> {
@@ -261,9 +263,9 @@ public final class Service {
                         );
                         final String path = new RequestPath().with(Users.USER_PARAM).toString();
                         this.ignite.get(path, new Users.GetUser(this.settings.users()));
-                        this.ignite.put(path, new Users.Put(this.settings.users()));
+                        this.ignite.put(path, new Users.Put(this.settings.users(), creds));
                         this.ignite.head(path, new Users.Head(this.settings.users()));
-                        this.ignite.delete(path, new Users.Delete(this.settings.users()));
+                        this.ignite.delete(path, new Users.Delete(this.settings.users(), creds));
                     }
                 );
             }
@@ -276,12 +278,7 @@ public final class Service {
                     "", MimeTypes.Type.APPLICATION_JSON.asString(),
                     new SignInPage(), engine
                 );
-                this.ignite.post(
-                    "",
-                    new PostSignIn(
-                        AuthByPassword.withCredentials(this.settings.credentials())
-                    )
-                );
+                this.ignite.post("", new PostSignIn(AuthByPassword.withCredentials(creds)));
             }
         );
         this.ignite.path(

@@ -4,6 +4,7 @@
  */
 package com.artipie.front.api;
 
+import com.artipie.front.auth.Credentials;
 import com.artipie.front.auth.User;
 import com.artipie.front.misc.RequestPath;
 import java.io.StringReader;
@@ -139,16 +140,24 @@ public final class Users {
         private final com.artipie.front.auth.Users users;
 
         /**
+         * Front service credentials.
+         */
+        private final Credentials creds;
+
+        /**
          * Ctor.
          * @param users Artipie users
+         * @param creds Front service credentials
          */
-        public Delete(final com.artipie.front.auth.Users users) {
+        public Delete(final com.artipie.front.auth.Users users, final Credentials creds) {
             this.users = users;
+            this.creds = creds;
         }
 
         @Override
         public Object handle(final Request request, final Response response) {
             this.users.remove(USER_PARAM.parse(request));
+            this.creds.reload();
             response.status(HttpStatus.OK_200);
             return "";
         }
@@ -203,11 +212,18 @@ public final class Users {
         private final com.artipie.front.auth.Users users;
 
         /**
+         * Front service credentials.
+         */
+        private final Credentials creds;
+
+        /**
          * Ctor.
          * @param users Artipie users
+         * @param creds Front service credentials
          */
-        public Put(final com.artipie.front.auth.Users users) {
+        public Put(final com.artipie.front.auth.Users users, final Credentials creds) {
             this.users = users;
+            this.creds = creds;
         }
 
         @Override
@@ -233,6 +249,7 @@ public final class Users {
                 return "Password field `pass` is required";
             }
             this.users.add(user, name);
+            this.creds.reload();
             response.status(HttpStatus.CREATED_201);
             return "";
         }

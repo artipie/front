@@ -87,4 +87,9 @@ public final class EnvCredentials implements Credentials {
         }
         return result;
     }
+
+    @Override
+    public void reload() {
+        // does nothing
+    }
 }
