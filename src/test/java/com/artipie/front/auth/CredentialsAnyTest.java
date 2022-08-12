@@ -22,10 +22,10 @@ class CredentialsAnyTest {
         final String alice = "Alice";
         MatcherAssert.assertThat(
             new Credentials.Any(
-                name -> Optional.empty(),
-                name -> Optional.empty(),
+                new FakeCreds(),
+                new FakeCreds(),
                 new EnvCredentials(Map.of("ARTIPIE_USER_NAME", alice, "ARTIPIE_USER_PASS", "any")),
-                name -> Optional.empty(),
+                new FakeCreds(),
                 new EnvCredentials(Map.of("ARTIPIE_USER_NAME", "Bob", "ARTIPIE_USER_PASS", "any"))
             ).user(alice).get().uid(),
             new IsEqual<>(alice)
@@ -37,11 +37,28 @@ class CredentialsAnyTest {
         MatcherAssert.assertThat(
             new Credentials.Any(
                 new EnvCredentials(Map.of("ARTIPIE_USER_NAME", "Jane", "ARTIPIE_USER_PASS", "any")),
-                name -> Optional.empty(),
+                new FakeCreds(),
                 new EnvCredentials(Map.of("ARTIPIE_USER_NAME", "Alex", "ARTIPIE_USER_PASS", "any"))
             ).user("Artipie").isEmpty(),
             new IsEqual<>(true)
         );
+    }
+
+    /**
+     * Fake credentials for test.
+     * @since 0.1
+     */
+    private static class FakeCreds implements Credentials {
+
+        @Override
+        public Optional<User> user(final  String name) {
+            return Optional.empty();
+        }
+
+        @Override
+        public void reload() {
+            //does nothing
+        }
     }
 
 }

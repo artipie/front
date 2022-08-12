@@ -21,6 +21,12 @@ public interface Credentials {
     Optional<User> user(String name);
 
     /**
+     * Reload or re-read credentials. Depending on implementation, this
+     * method can do nothing.
+     */
+    void reload();
+
+    /**
      * Decorator of {@link Credentials}, which tries to find user among several
      * {@link Credentials} implementations, returns any user if found, empty optional
      * if user not found.
@@ -53,6 +59,11 @@ public interface Credentials {
         public Optional<User> user(final String name) {
             return this.creds.stream().filter(item -> item.user(name).isPresent()).findFirst()
                 .flatMap(item -> item.user(name));
+        }
+
+        @Override
+        public void reload() {
+            this.creds.forEach(Credentials::reload);
         }
     }
 

@@ -71,6 +71,11 @@ public final class GithubCredentials implements Credentials {
     }
 
     @Override
+    public void reload() {
+        // does nothing
+    }
+
+    @Override
     public String toString() {
         return String.format("%s()", this.getClass().getSimpleName());
     }
