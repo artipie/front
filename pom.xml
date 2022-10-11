@@ -63,6 +63,7 @@ https://github.com/artipie/front/LICENSE.txt
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/front</docker.image.name>
+    <vertx.version>4.3.3</vertx.version>
   </properties>
   <dependencies>
     <dependency>
@@ -230,6 +231,17 @@ https://github.com/artipie/front/LICENSE.txt
       <artifactId>jsonassert</artifactId>
       <version>1.5.0</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <version>${vertx.version}</version>
+      <optional>true</optional>
     </dependency>
   </dependencies>
   <build>
