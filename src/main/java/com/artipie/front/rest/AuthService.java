@@ -4,12 +4,15 @@
  */
 package com.artipie.front.rest;
 
+import com.artipie.front.settings.ArtipieEndpoint;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.web.client.HttpResponse;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Auth-service.
+ *
  * @since 1.0
  */
 public class AuthService extends BaseService {
@@ -20,24 +23,30 @@ public class AuthService extends BaseService {
 
     /**
      * Ctor.
-     * @param opts Configuration of service.
+     * @param endpoint Artipie endpoint configuration.
      */
-    public AuthService(final Opts opts) {
-        super(opts);
+    public AuthService(final ArtipieEndpoint endpoint) {
+        super(endpoint);
     }
 
     /**
      * Obtains JWT-token from auth rest-service.
+     *
      * @param user User.
      * @return JWT-token.
      */
-    public CompletableFuture<Token> getJwtToken(final AuthUser user) {
-        return this.send(HttpMethod.POST, AuthService.TOKEN_PATH, Optional.of(toJsonObject(user)))
-            .thenApply(response -> BaseService.toObject(response.bodyAsJsonObject(), Token.class));
+    public String getJwtToken(final AuthUser user) {
+        final HttpResponse<Buffer> response = this.sendSync(
+            HttpMethod.POST,
+            AuthService.TOKEN_PATH,
+            Optional.of(toJsonObject(user))
+        );
+        return BaseService.toObject(response.bodyAsJsonObject(), Token.class).getToken();
     }
 
     /**
      * Auth-user.
+     *
      * @since 1.0
      */
     public static class AuthUser {
@@ -53,6 +62,7 @@ public class AuthService extends BaseService {
 
         /**
          * Gets name.
+         *
          * @return Name
          */
         public String getName() {
@@ -61,6 +71,7 @@ public class AuthService extends BaseService {
 
         /**
          * Gets password.
+         *
          * @return Password.
          */
         public String getPass() {
@@ -69,6 +80,7 @@ public class AuthService extends BaseService {
 
         /**
          * Sets name.
+         *
          * @param name Name.
          * @return This.
          * @checkstyle HiddenFieldCheck (3 lines)
@@ -80,6 +92,7 @@ public class AuthService extends BaseService {
 
         /**
          * Sets password.
+         *
          * @param pass Password.
          * @return This.
          * @checkstyle HiddenFieldCheck (3 lines)
@@ -92,6 +105,7 @@ public class AuthService extends BaseService {
 
     /**
      * Auth-token rest-service api.
+     *
      * @since 1.0
      */
     public static class Token {
@@ -103,6 +117,7 @@ public class AuthService extends BaseService {
 
         /**
          * Gets token.
+         *
          * @return Token.
          */
         public String getToken() {
@@ -111,6 +126,7 @@ public class AuthService extends BaseService {
 
         /**
          * Sets token.
+         *
          * @param token Token.
          * @checkstyle HiddenFieldCheck (3 lines)
          */

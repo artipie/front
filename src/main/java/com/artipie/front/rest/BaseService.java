@@ -4,6 +4,8 @@
  */
 package com.artipie.front.rest;
 
+import com.artipie.ArtipieException;
+import com.artipie.front.settings.ArtipieEndpoint;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -23,16 +25,16 @@ import java.util.concurrent.CompletableFuture;
  */
 public class BaseService {
     /**
-     * Service configuration.
+     * Artipie endpoint configuration.
      */
-    private final Opts opts;
+    private final ArtipieEndpoint endpoint;
 
     /**
      * Ctor.
-     * @param opts Service configuration.
+     * @param endpoint Artipie endpoint configuration.
      */
-    public BaseService(final Opts opts) {
-        this.opts = opts;
+    public BaseService(final ArtipieEndpoint endpoint) {
+        this.endpoint = endpoint;
     }
 
     /**
@@ -71,8 +73,8 @@ public class BaseService {
         final Optional<JsonObject> body, final Optional<String> token) {
         final HttpRequest<Buffer> request = this.createWebClient().request(
             method,
-            this.opts.port,
-            this.opts.host,
+            this.endpoint.getPort(),
+            this.endpoint.getHost(),
             path
         );
         token.ifPresent(request::bearerTokenAuthentication);
@@ -82,7 +84,38 @@ public class BaseService {
         } else {
             response = request.send();
         }
+        response.onFailure(
+            exc -> {
+                throw new ArtipieException(exc.getMessage());
+            }
+        );
         return response.toCompletionStage().toCompletableFuture();
+    }
+
+    /**
+     * Sends sync http-request.
+     * @param method Http-method.
+     * @param path Path.
+     * @param body Json-body.
+     * @return Http-response.
+     */
+    public HttpResponse<Buffer> sendSync(final HttpMethod method, final String path,
+        final Optional<JsonObject> body) {
+        return this.sendSync(method, path, body, Optional.empty());
+    }
+
+    /**
+     * Sends sync http-request.
+     * @param method Http-method.
+     * @param path Path.
+     * @param body Json-body.
+     * @param token Token.
+     * @return Http-response.
+     * @checkstyle ParameterNumberCheck (4 lines)
+     */
+    public HttpResponse<Buffer> sendSync(final HttpMethod method, final String path,
+        final Optional<JsonObject> body, final Optional<String> token) {
+        return this.send(method, path, body, token).join();
     }
 
     /**
@@ -114,65 +147,11 @@ public class BaseService {
     protected WebClient createWebClient() {
         final WebClientOptions webopts = new WebClientOptions()
             .setUserAgent("artipie-front");
-        if (this.opts.secure) {
+        if (this.endpoint.isSecure()) {
             webopts
                 .setSsl(true)
                 .setTrustAll(true);
         }
         return WebClient.create(Vertx.vertx(), webopts);
-    }
-
-    /**
-     * Configuration of service.
-     * @since 1.0
-     */
-    public static class Opts {
-        /**
-         * Artipie-endpoint host.
-         */
-        private String host;
-
-        /**
-         * Artipie-endpoint port.
-         */
-        private int port;
-
-        /**
-         * Artipie-endpoint is secure.
-         */
-        private boolean secure;
-
-        /**
-         * Sets Artipie-endpoint's host.
-         * @param host Artipie endpoint' host.
-         * @return This.
-         * @checkstyle HiddenFieldCheck (3 lines)
-         */
-        public Opts setHost(final String host) {
-            this.host = host;
-            return this;
-        }
-
-        /**
-         * Sets Artipie-endpoint's port.
-         * @param port Artipie endpoint' port.
-         * @return This.
-         * @checkstyle HiddenFieldCheck (3 lines)
-         */
-        public Opts setPort(final int port) {
-            this.port = port;
-            return this;
-        }
-
-        /**
-         * Sets Artipie-endpoint's is secure.
-         * @param secure Is secure.
-         * @return This.
-         * @checkstyle HiddenFieldCheck (3 lines)
-         */
-        public Opts setSecure(final boolean secure) {
-            this.secure = secure;
-            return this;
-        }
     }
 }

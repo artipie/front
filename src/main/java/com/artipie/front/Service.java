@@ -18,6 +18,9 @@ import com.artipie.front.auth.AuthByPassword;
 import com.artipie.front.auth.Credentials;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
+import com.artipie.front.rest.AuthService;
+import com.artipie.front.rest.RepositoryService;
+import com.artipie.front.settings.ArtipieEndpoint;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoData;
 import com.artipie.front.settings.RepoSettings;
@@ -27,6 +30,7 @@ import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
 import com.artipie.front.ui.UserPage;
+import com.artipie.front.ui.repository.RepositoryPage;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.io.File;
@@ -278,12 +282,20 @@ public final class Service {
                     "", MimeTypes.Type.APPLICATION_JSON.asString(),
                     new SignInPage(), engine
                 );
-                this.ignite.post("", new PostSignIn(this.settings.artipieEnpoint()));
+                final AuthService auth = new AuthService(this.settings.artipieEnpoint());
+                this.ignite.post("", new PostSignIn(auth));
             }
         );
         this.ignite.path(
             "/dashboard",
             () -> {
+                final ArtipieEndpoint endpoint = this.settings.artipieEnpoint();
+                final RepositoryService repository = new RepositoryService(endpoint);
+                this.ignite.path(
+                    "/repository", () -> {
+                        this.ignite.get("/list", new RepositoryPage(repository), engine);
+                    }
+                );
                 final RepoSettings stn = new RepoSettings(
                     this.settings.layout(), this.settings.repoConfigsStorage()
                 );
