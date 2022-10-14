@@ -4,10 +4,14 @@
  */
 package com.artipie.front.rest;
 
+import com.artipie.ArtipieException;
 import com.artipie.front.settings.ArtipieEndpoint;
-import io.vertx.core.http.HttpMethod;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Repository-service.
@@ -35,13 +39,31 @@ public class RepositoryService extends BaseService {
      * @return List of repository names.
      */
     public List<String> list(final String token) {
-        return this.sendSync(
-            HttpMethod.GET, RepositoryService.LIST_PATH, Optional.empty(),
-            Optional.ofNullable(token)
-        )
-        .bodyAsJsonArray()
-        .stream()
-        .map(Object::toString)
-        .toList();
+        final java.net.http.HttpResponse<String> response;
+        try {
+            response = HttpClient.newBuilder()
+                .build()
+                .send(
+                    HttpRequest.newBuilder()
+                        .uri(uri(RepositoryService.LIST_PATH))
+                        .GET()
+                        .header("Authorization", String.format("Bearer %s", token))
+                        .build(),
+                    java.net.http.HttpResponse.BodyHandlers.ofString()
+                );
+        } catch (final IOException | InterruptedException | URISyntaxException exc) {
+            throw new ArtipieException(exc);
+        }
+        // @checkstyle MagicNumberCheck (1 line)
+        if (response.statusCode() != 200) {
+            throw new ArtipieException(
+                String.format("Expected 200 result code, but received %s", response.statusCode())
+            );
+        }
+        try {
+            return List.of(this.mapper().readValue(response.body(), String[].class));
+        } catch (final JsonProcessingException exc) {
+            throw new ArtipieException(exc);
+        }
     }
 }

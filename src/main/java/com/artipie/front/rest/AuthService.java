@@ -4,11 +4,13 @@
  */
 package com.artipie.front.rest;
 
+import com.artipie.ArtipieException;
 import com.artipie.front.settings.ArtipieEndpoint;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.ext.web.client.HttpResponse;
-import java.util.Optional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 
 /**
  * Auth-service.
@@ -36,12 +38,35 @@ public class AuthService extends BaseService {
      * @return JWT-token.
      */
     public String getJwtToken(final AuthUser user) {
-        final HttpResponse<Buffer> response = this.sendSync(
-            HttpMethod.POST,
-            AuthService.TOKEN_PATH,
-            Optional.of(toJsonObject(user))
-        );
-        return BaseService.toObject(response.bodyAsJsonObject(), Token.class).getToken();
+        final java.net.http.HttpResponse<String> response;
+        try {
+            response = HttpClient.newBuilder()
+                .build()
+                .send(
+                    HttpRequest.newBuilder()
+                        .uri(uri(AuthService.TOKEN_PATH))
+                        .POST(
+                            HttpRequest.BodyPublishers.ofString(
+                                this.mapper().writeValueAsString(user)
+                            )
+                        )
+                        .build(),
+                    java.net.http.HttpResponse.BodyHandlers.ofString()
+                );
+        } catch (final IOException | InterruptedException | URISyntaxException exc) {
+            throw new ArtipieException(exc);
+        }
+        // @checkstyle MagicNumberCheck (1 line)
+        if (response.statusCode() != 200) {
+            throw new ArtipieException(
+                String.format("Expected 200 result code, but received %s", response.statusCode())
+            );
+        }
+        try {
+            return this.mapper().readValue(response.body(), Token.class).getToken();
+        } catch (final JsonProcessingException exp) {
+            throw new ArtipieException(exp);
+        }
     }
 
     /**
