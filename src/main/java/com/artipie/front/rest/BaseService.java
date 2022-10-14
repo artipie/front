@@ -4,19 +4,32 @@
  */
 package com.artipie.front.rest;
 
+import com.artipie.ArtipieException;
 import com.artipie.front.settings.ArtipieEndpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpResponse;
 
 /**
  * Base rest-service.
  * @since 1.0
  */
+@SuppressWarnings({"PMD.DataClass", "PMD.AvoidFieldNameMatchingMethodName"})
 public class BaseService {
     /**
+     * Authorization header.
+     */
+    public static final String AUTHORIZATION = "Authorization";
+
+    /**
+     * Authorization header.
+     */
+    public static final int SUCCESS = 200;
+
+    /**
      * Json object mapper.
-     * @checkstyle AvoidFieldNameMatchingMethodName (2 lines)
+     * @checkstyle AvoidFieldNameMatchingMethodName (5 lines)
      */
     private final ObjectMapper mapper;
 
@@ -64,5 +77,31 @@ public class BaseService {
      */
     public URI uri(final String path) throws URISyntaxException {
         return new URI(String.format("%s/%s", this.getArtipieUrl(), path));
+    }
+
+    /**
+     * Bearer for authorization header.
+     * @param token Token.
+     * @return Bearer for authorization header
+     */
+    protected static String bearer(final String token) {
+        return String.format("Bearer %s", token);
+    }
+
+    /**
+     * Checks response status.
+     * @param expected Expected status code.
+     * @param response Response.
+     * @throws ArtipieException In case mismatch expected status code in response.
+     */
+    protected static void checkStatus(final int expected, final HttpResponse<String> response)
+        throws ArtipieException {
+        if (response.statusCode() != expected) {
+            throw new ArtipieException(
+                String.format(
+                    "Expected %s result code, but received %s", expected, response.statusCode()
+                )
+            );
+        }
     }
 }

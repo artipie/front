@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class RepositoryService extends BaseService {
      * @return List of repository names.
      */
     public List<String> list(final String token) {
-        final java.net.http.HttpResponse<String> response;
+        final HttpResponse<String> response;
         try {
             response = HttpClient.newBuilder()
                 .build()
@@ -47,19 +48,44 @@ public class RepositoryService extends BaseService {
                     HttpRequest.newBuilder()
                         .uri(uri(RepositoryService.LIST_PATH))
                         .GET()
-                        .header("Authorization", String.format("Bearer %s", token))
+                        .header(BaseService.AUTHORIZATION, bearer(token))
                         .build(),
-                    java.net.http.HttpResponse.BodyHandlers.ofString()
+                    HttpResponse.BodyHandlers.ofString()
                 );
         } catch (final IOException | InterruptedException | URISyntaxException exc) {
             throw new ArtipieException(exc);
         }
-        // @checkstyle MagicNumberCheck (1 line)
-        if (response.statusCode() != 200) {
-            throw new ArtipieException(
-                String.format("Expected 200 result code, but received %s", response.statusCode())
-            );
+        checkStatus(BaseService.SUCCESS, response);
+        try {
+            return List.of(this.mapper().readValue(response.body(), String[].class));
+        } catch (final JsonProcessingException exc) {
+            throw new ArtipieException(exc);
         }
+    }
+
+    /**
+     * Obtains list of repository names by user's name.
+     * @param token Token.
+     * @param uname User name.
+     * @return List of repository names.
+     */
+    public List<String> list(final String token, final String uname) {
+        final HttpResponse<String> response;
+        try {
+            response = HttpClient.newBuilder()
+                .build()
+                .send(
+                    HttpRequest.newBuilder()
+                        .uri(uri(String.format("%s/%s", RepositoryService.LIST_PATH, uname)))
+                        .GET()
+                        .header(BaseService.AUTHORIZATION, bearer(token))
+                        .build(),
+                    HttpResponse.BodyHandlers.ofString()
+                );
+        } catch (final IOException | InterruptedException | URISyntaxException exc) {
+            throw new ArtipieException(exc);
+        }
+        checkStatus(BaseService.SUCCESS, response);
         try {
             return List.of(this.mapper().readValue(response.body(), String[].class));
         } catch (final JsonProcessingException exc) {

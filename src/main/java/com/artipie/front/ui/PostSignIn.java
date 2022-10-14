@@ -56,6 +56,7 @@ public final class PostSignIn implements Route {
                     .setPass(req.queryParamOrDefault("password", ""))
             );
             req.session().attribute("uid", "");
+            req.session().attribute("uname", req.queryParamOrDefault("username", ""));
             req.session().attribute("token", token);
             rsp.redirect("/dashboard/repository/list");
             result = "OK";

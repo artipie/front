@@ -10,19 +10,19 @@ import com.artipie.front.ui.HbPage;
 import java.util.Map;
 
 /**
- * Repository list page.
+ * List of repositories page.
  *
  * @checkstyle AvoidDuplicateLiterals (500 lines)
  * @since 1.0
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class RepositoryPage extends RouteWrap.TemplateViewRoute {
+public final class RepoList extends RouteWrap.TemplateViewRoute {
     /**
-     * Repository list page.
+     * List of repositories page.
      *
      * @param repository Repository service.
      */
-    public RepositoryPage(final RepositoryService repository) {
+    public RepoList(final RepositoryService repository) {
         super(
             new HbPage(
                 "repository/list",

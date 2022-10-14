@@ -30,7 +30,8 @@ import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
 import com.artipie.front.ui.UserPage;
-import com.artipie.front.ui.repository.RepositoryPage;
+import com.artipie.front.ui.repository.RepoList;
+import com.artipie.front.ui.repository.org.RepoListByUser;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.io.File;
@@ -293,7 +294,10 @@ public final class Service {
                 final RepositoryService repository = new RepositoryService(endpoint);
                 this.ignite.path(
                     "/repository", () -> {
-                        this.ignite.get("/list", new RepositoryPage(repository), engine);
+                        this.ignite.get("/list", new RepoList(repository), engine);
+                        if ("org".equals(this.settings.layout())) {
+                            this.ignite.get("/list/:uname", new RepoListByUser(repository), engine);
+                        }
                     }
                 );
                 final RepoSettings stn = new RepoSettings(
