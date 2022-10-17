@@ -31,66 +31,20 @@ public class AuthService extends BaseService {
     /**
      * Obtains JWT-token from auth rest-service.
      *
-     * @param user User.
+     * @param name User name.
+     * @param password User password.
      * @return JWT-token.
      */
-    public String getJwtToken(final AuthUser user) {
+    public String getJwtToken(final String name, final String password) {
         final HttpResponse<String> response  = this.httpPost(
             AuthService.TOKEN_PATH,
             () ->
                 Json.createObjectBuilder()
-                    .add("name", user.name())
-                    .add("pass", user.pass())
+                    .add("name", name)
+                    .add("pass", password)
                     .build().toString()
         );
         checkStatus(HttpServletResponse.SC_OK, response);
         return BaseService.jsonObject(response).getString("token");
-    }
-
-    /**
-     * Auth-user.
-     *
-     * @since 1.0
-     */
-    public static class AuthUser {
-        /**
-         * Name.
-         */
-        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
-        private final String name;
-
-        /**
-         * Password.
-         */
-        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
-        private final String pass;
-
-        /**
-         * Ctor.
-         * @param name User name.
-         * @param pass User password.
-         */
-        public AuthUser(final String name, final String pass) {
-            this.name = name;
-            this.pass = pass;
-        }
-
-        /**
-         * Gets name.
-         *
-         * @return Name
-         */
-        public String name() {
-            return this.name;
-        }
-
-        /**
-         * Gets password.
-         *
-         * @return Password.
-         */
-        public String pass() {
-            return this.pass;
-        }
     }
 }
