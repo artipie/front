@@ -4,7 +4,8 @@
  */
 package com.artipie.front.ui;
 
-import com.artipie.front.auth.AuthByPassword;
+import com.artipie.ArtipieException;
+import com.artipie.front.rest.AuthService;
 import java.util.Objects;
 import org.eclipse.jetty.http.HttpStatus;
 import spark.Request;
@@ -14,22 +15,23 @@ import spark.Spark;
 
 /**
  * Signin form POST handler.
- * @since 1.0
+ *
  * @checkstyle AvoidDuplicateLiterals (500 lines)
+ * @since 1.0
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PostSignIn implements Route {
-
     /**
-     * Password authenticator.
+     * Auth service.
      */
-    private final AuthByPassword auth;
+    private final AuthService auth;
 
     /**
      * New signin form processor.
-     * @param auth Password auth
+     *
+     * @param auth Auth service.
      */
-    public PostSignIn(final AuthByPassword auth) {
+    public PostSignIn(final AuthService auth) {
         this.auth = auth;
     }
 
@@ -46,17 +48,20 @@ public final class PostSignIn implements Route {
         if (!valid) {
             Spark.halt(HttpStatus.BAD_REQUEST_400, "CRSF validation failed");
         }
-        final var uid = this.auth.authenticate(
-            req.queryParamOrDefault("username", ""),
-            req.queryParamOrDefault("password", "")
-        );
-        uid.ifPresentOrElse(
-            val -> {
-                req.session().attribute("uid", val);
-                rsp.redirect("/dashboard");
-            },
-            () -> Spark.halt(HttpStatus.UNAUTHORIZED_401, "bad credentials")
-        );
-        return "OK";
+        String result = null;
+        try {
+            final String token = this.auth.getJwtToken(
+                req.queryParamOrDefault("username", ""),
+                req.queryParamOrDefault("password", "")
+            );
+            req.session().attribute("uid", "");
+            req.session().attribute("uname", req.queryParamOrDefault("username", ""));
+            req.session().attribute("token", token);
+            rsp.redirect("/dashboard/repository/list");
+            result = "OK";
+        } catch (final ArtipieException exception) {
+            Spark.halt(HttpStatus.UNAUTHORIZED_401, "bad credentials");
+        }
+        return result;
     }
 }

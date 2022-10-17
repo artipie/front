@@ -46,6 +46,26 @@ public final class ArtipieYaml {
     private static final String NODE_TYPE = "type";
 
     /**
+     * Yaml node artipie endpoint.
+     */
+    private static final String NODE_ENDPOINT = "artipie_endpoint";
+
+    /**
+     * Yaml node host.
+     */
+    private static final String NODE_HOST = "host";
+
+    /**
+     * Yaml node port.
+     */
+    private static final String NODE_PORT = "port";
+
+    /**
+     * Yaml node secure.
+     */
+    private static final String NODE_SECURE = "secure";
+
+    /**
      * YAML file content.
      */
     private final YamlMapping content;
@@ -138,6 +158,23 @@ public final class ArtipieYaml {
         return this.apiPermissions("users")
             .<UserPermissions>map(UserPermissions.FromYaml::new)
             .orElse(UserPermissions.STUB);
+    }
+
+    /**
+     * Artipie endpoint.
+     * @return Artipie enpoint configuration.
+     */
+    public ArtipieEndpoint artipieEnpoint() {
+        return Optional.ofNullable(this.meta().yamlMapping(ArtipieYaml.NODE_ENDPOINT))
+            .map(
+                yaml ->
+                    new ArtipieEndpoint(
+                        yaml.string(ArtipieYaml.NODE_HOST),
+                        Integer.parseInt(yaml.string(ArtipieYaml.NODE_PORT)),
+                        Boolean.parseBoolean(yaml.string(ArtipieYaml.NODE_SECURE))
+                    ))
+            // @checkstyle MagicNumberCheck (1 line)
+            .orElse(new ArtipieEndpoint("localhost", 8086, false));
     }
 
     @Override
