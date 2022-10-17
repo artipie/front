@@ -6,7 +6,11 @@ package com.artipie.front.rest;
 
 import com.artipie.front.settings.ArtipieEndpoint;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
+import javax.json.JsonArray;
+import javax.json.JsonValue;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Repository-service.
@@ -35,8 +39,8 @@ public class RepositoryService extends BaseService {
      */
     public List<String> list(final String token) {
         final HttpResponse<String> response = this.httpGet(token, RepositoryService.LIST_PATH);
-        checkStatus(BaseService.SUCCESS, response);
-        return List.of(this.jsonToObject(response, String[].class));
+        checkStatus(HttpServletResponse.SC_OK, response);
+        return RepositoryService.listOfStrings(response);
     }
 
     /**
@@ -48,7 +52,22 @@ public class RepositoryService extends BaseService {
     public List<String> list(final String token, final String uname) {
         final HttpResponse<String> response  =
             this.httpGet(token, String.format("%s/%s", RepositoryService.LIST_PATH, uname));
-        checkStatus(BaseService.SUCCESS, response);
-        return List.of(this.jsonToObject(response, String[].class));
+        checkStatus(HttpServletResponse.SC_OK, response);
+        return RepositoryService.listOfStrings(response);
+    }
+
+    /**
+     * Reads response body and convert it to List of strings.
+     * Expects json-body as array of strings.
+     * @param res Response with json-body.
+     * @return List of string.
+     */
+    private static List<String> listOfStrings(final HttpResponse<String> res) {
+        final JsonArray array = BaseService.jsonArray(res);
+        final List<String> result = new ArrayList<>(array.size());
+        for (final JsonValue item : array) {
+            result.add(item.toString());
+        }
+        return result;
     }
 }

@@ -63,7 +63,6 @@ https://github.com/artipie/front/LICENSE.txt
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/front</docker.image.name>
-    <jackson.version>2.13.4</jackson.version>
   </properties>
   <dependencies>
     <dependency>
@@ -231,17 +230,6 @@ https://github.com/artipie/front/LICENSE.txt
       <artifactId>jsonassert</artifactId>
       <version>1.5.0</version>
       <scope>test</scope>
-    </dependency>
-    <!-- Jackson -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
   </dependencies>
   <build>

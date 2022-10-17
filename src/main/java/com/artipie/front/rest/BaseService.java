@@ -6,9 +6,8 @@ package com.artipie.front.rest;
 
 import com.artipie.ArtipieException;
 import com.artipie.front.settings.ArtipieEndpoint;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -16,6 +15,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Supplier;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
 /**
  * Base rest-service.
@@ -29,20 +32,9 @@ public class BaseService {
     public static final String AUTHORIZATION = "Authorization";
 
     /**
-     * Authorization header.
-     */
-    public static final int SUCCESS = 200;
-
-    /**
      * Http request timeout.
      */
     private static final Duration TIMEOUT = Duration.of(1, ChronoUnit.MINUTES);
-
-    /**
-     * Json object mapper.
-     * @checkstyle AvoidFieldNameMatchingMethodName (5 lines)
-     */
-    private final ObjectMapper mapper;
 
     /**
      * Artipie rest URL.
@@ -54,37 +46,7 @@ public class BaseService {
      * @param endpoint Artipie endpoint configuration.
      */
     public BaseService(final ArtipieEndpoint endpoint) {
-        this.mapper = new ObjectMapper();
-        this.artipieurl = String.format(
-            "%s://%s:%s",
-            // @checkstyle AvoidInlineConditionalsCheck (1 line)
-            endpoint.isSecure() ? "https" : "http",
-            endpoint.getHost(),
-            endpoint.getPort()
-        );
-    }
-
-    /**
-     * Gets json object mapper.
-     * @return Json object mapper.
-     */
-    protected ObjectMapper mapper() {
-        return this.mapper;
-    }
-
-    /**
-     * Converts json response body to concrete object of specified type.
-     * @param response Response.
-     * @param clazz Expected type of resulting object.
-     * @param <T> Expected type of resulting object.
-     * @return Object of specified type
-     */
-    protected <T> T jsonToObject(final HttpResponse<String> response, final Class<T> clazz) {
-        try {
-            return this.mapper().readValue(response.body(), clazz);
-        } catch (final JsonProcessingException exc) {
-            throw new ArtipieException(exc);
-        }
+        this.artipieurl = endpoint.url();
     }
 
     /**
@@ -171,15 +133,15 @@ public class BaseService {
     /**
      * Invokes POST http request.
      * @param path Path in URL.
-     * @param object Sending object.
+     * @param payload Payload supplier.
      * @return Http response.
      */
-    protected HttpResponse<String> httpPost(final String path, final Object object) {
+    protected HttpResponse<String> httpPost(final String path, final Supplier<String> payload) {
         try {
             return HttpClient.newBuilder()
                 .build()
                 .send(
-                    this.createPostRequest(path, object),
+                    this.createPostRequest(path, payload),
                     HttpResponse.BodyHandlers.ofString()
                 );
         } catch (final IOException | InterruptedException exc) {
@@ -191,16 +153,16 @@ public class BaseService {
      * Invokes POST http request.
      * @param token JWT token.
      * @param path Path in URL.
-     * @param object Sending object.
+     * @param payload Payload supplier.
      * @return Http response.
      */
     protected HttpResponse<String> httpPost(final String token, final String path,
-        final Object object) {
+        final Supplier<String> payload) {
         try {
             return HttpClient.newBuilder()
                 .build()
                 .send(
-                    this.createPostRequest(token, path, object),
+                    this.createPostRequest(token, path, payload),
                     HttpResponse.BodyHandlers.ofString()
                 );
         } catch (final IOException | InterruptedException exc) {
@@ -247,21 +209,17 @@ public class BaseService {
     /**
      * Creates POST http request.
      * @param path Path in URL.
-     * @param object Sending object.
+     * @param payload Payload supplier.
      * @return Http request.
      */
-    protected HttpRequest createPostRequest(final String path, final Object object) {
+    protected HttpRequest createPostRequest(final String path, final Supplier<String> payload) {
         try {
             return HttpRequest.newBuilder()
                 .uri(this.uri(path))
-                .POST(
-                    HttpRequest.BodyPublishers.ofString(
-                        this.mapper().writeValueAsString(object)
-                    )
-                )
+                .POST(HttpRequest.BodyPublishers.ofString(payload.get()))
                 .timeout(BaseService.TIMEOUT)
                 .build();
-        } catch (final JsonProcessingException | URISyntaxException exc) {
+        } catch (final URISyntaxException exc) {
             throw new ArtipieException(exc);
         }
     }
@@ -270,24 +228,38 @@ public class BaseService {
      * Creates POST http request.
      * @param token JWT token.
      * @param path Path in URL.
-     * @param object Sending object.
+     * @param payload Payload supplier.
      * @return Http request.
      */
     protected HttpRequest createPostRequest(final String token, final String path,
-        final Object object) {
+        final Supplier<String> payload) {
         try {
             return HttpRequest.newBuilder()
                 .uri(this.uri(path))
-                .POST(
-                    HttpRequest.BodyPublishers.ofString(
-                        this.mapper().writeValueAsString(object)
-                    )
-                )
+                .POST(HttpRequest.BodyPublishers.ofString(payload.get()))
                 .header(BaseService.AUTHORIZATION, bearer(token))
                 .timeout(BaseService.TIMEOUT)
                 .build();
-        } catch (final JsonProcessingException | URISyntaxException exc) {
+        } catch (final URISyntaxException exc) {
             throw new ArtipieException(exc);
         }
+    }
+
+    /**
+     * Reads response body as json-object.
+     * @param response Response.
+     * @return JsonObject.
+     */
+    protected static JsonObject jsonObject(final HttpResponse<String> response) {
+        return Json.createReader(new StringReader(response.body())).readObject();
+    }
+
+    /**
+     * Reads response body as json-array.
+     * @param response Response.
+     * @return JsonArray.
+     */
+    protected static JsonArray jsonArray(final HttpResponse<String> response) {
+        return Json.createReader(new StringReader(response.body())).readArray();
     }
 }

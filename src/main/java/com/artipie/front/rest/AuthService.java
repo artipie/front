@@ -6,6 +6,8 @@ package com.artipie.front.rest;
 
 import com.artipie.front.settings.ArtipieEndpoint;
 import java.net.http.HttpResponse;
+import javax.json.Json;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Auth-service.
@@ -33,9 +35,16 @@ public class AuthService extends BaseService {
      * @return JWT-token.
      */
     public String getJwtToken(final AuthUser user) {
-        final HttpResponse<String> response  = this.httpPost(AuthService.TOKEN_PATH, user);
-        checkStatus(BaseService.SUCCESS, response);
-        return jsonToObject(response, Token.class).getToken();
+        final HttpResponse<String> response  = this.httpPost(
+            AuthService.TOKEN_PATH,
+            () ->
+                Json.createObjectBuilder()
+                    .add("name", user.name())
+                    .add("pass", user.pass())
+                    .build().toString()
+        );
+        checkStatus(HttpServletResponse.SC_OK, response);
+        return BaseService.jsonObject(response).getString("token");
     }
 
     /**
@@ -47,19 +56,31 @@ public class AuthService extends BaseService {
         /**
          * Name.
          */
-        private String name;
+        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+        private final String name;
 
         /**
          * Password.
          */
-        private String pass;
+        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+        private final String pass;
+
+        /**
+         * Ctor.
+         * @param name User name.
+         * @param pass User password.
+         */
+        public AuthUser(final String name, final String pass) {
+            this.name = name;
+            this.pass = pass;
+        }
 
         /**
          * Gets name.
          *
          * @return Name
          */
-        public String getName() {
+        public String name() {
             return this.name;
         }
 
@@ -68,64 +89,8 @@ public class AuthService extends BaseService {
          *
          * @return Password.
          */
-        public String getPass() {
+        public String pass() {
             return this.pass;
-        }
-
-        /**
-         * Sets name.
-         *
-         * @param name Name.
-         * @return This.
-         * @checkstyle HiddenFieldCheck (3 lines)
-         */
-        public AuthUser setName(final String name) {
-            this.name = name;
-            return this;
-        }
-
-        /**
-         * Sets password.
-         *
-         * @param pass Password.
-         * @return This.
-         * @checkstyle HiddenFieldCheck (3 lines)
-         */
-        public AuthUser setPass(final String pass) {
-            this.pass = pass;
-            return this;
-        }
-    }
-
-    /**
-     * Auth-token rest-service api.
-     *
-     * @since 1.0
-     */
-    public static class Token {
-        /**
-         * JWT-token.
-         */
-        @SuppressWarnings("PMD.AvoidFieldNameMatchingTypeName")
-        private String token;
-
-        /**
-         * Gets token.
-         *
-         * @return Token.
-         */
-        public String getToken() {
-            return this.token;
-        }
-
-        /**
-         * Sets token.
-         *
-         * @param token Token.
-         * @checkstyle HiddenFieldCheck (3 lines)
-         */
-        public void setToken(final String token) {
-            this.token = token;
         }
     }
 }

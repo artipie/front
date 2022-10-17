@@ -51,9 +51,10 @@ public final class PostSignIn implements Route {
         String result = null;
         try {
             final String token = this.auth.getJwtToken(
-                new AuthService.AuthUser()
-                    .setName(req.queryParamOrDefault("username", ""))
-                    .setPass(req.queryParamOrDefault("password", ""))
+                new AuthService.AuthUser(
+                    req.queryParamOrDefault("username", ""),
+                    req.queryParamOrDefault("password", "")
+                )
             );
             req.session().attribute("uid", "");
             req.session().attribute("uname", req.queryParamOrDefault("username", ""));

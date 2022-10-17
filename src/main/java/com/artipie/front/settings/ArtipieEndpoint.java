@@ -37,26 +37,16 @@ public class ArtipieEndpoint {
     }
 
     /**
-     * Obtains endpoint's host.
-     * @return Host.
+     * Url of endpoint.
+     * @return Url string representation of endpoint.
      */
-    public String getHost() {
-        return this.host;
-    }
-
-    /**
-     * Obtains endpoint's port.
-     * @return Port
-     */
-    public int getPort() {
-        return this.port;
-    }
-
-    /**
-     * Checks whether endpoint is secure.
-     * @return True if endpoint is secure.
-     */
-    public boolean isSecure() {
-        return this.secure;
+    public String url() {
+        return String.format(
+            "%s://%s:%s",
+            // @checkstyle AvoidInlineConditionalsCheck (1 line)
+            this.secure ? "https" : "http",
+            this.host,
+            this.port
+        );
     }
 }
