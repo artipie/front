@@ -1,0 +1,26 @@
+To publish your PHP Composer package create package description JSON file my-package.json with the following content:
+<pre>
+{
+  "name": "my-org/my-package",
+  "version": "1.0.0",
+  "dist": {
+    "url": "https://www.my-org.com/files/my-package.1.0.0.zip",
+    "type": "zip"
+  }
+}
+</pre>
+And add it to repository using PUT request:
+<pre>
+$ curl -X PUT -T 'my-package.json' "http://localhost:8080/my-php"
+</pre>
+To use this library in your project add requirement and repository to composer.json:
+<pre>
+{
+    "repositories": [
+         {"type": "composer", "url": "http://localhost:8080/my-php"}
+    ],
+    "require": {
+        "my-org/my-package": "1.0.0"
+    }
+}
+</pre>

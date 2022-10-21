@@ -1,0 +1,9 @@
+To install chart from Artipie, add repository url to helm and run <code>helm install</code>:
+<pre>
+helm repo add artipie https://central.artipie.com/{{user}}/{{repo}}
+helm install my_chart artipie
+</pre>
+To upload chart, perform <code>POST</code> request:
+<pre>
+    curl -i -X POST --data-binary "@my-chart.tgz" https://central.artipie.com/{{user}}/{{repo}}
+</pre>

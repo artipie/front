@@ -27,11 +27,15 @@ import com.artipie.front.settings.RepoSettings;
 import com.artipie.front.settings.YamlRepoPermissions;
 import com.artipie.front.ui.HbTemplateEngine;
 import com.artipie.front.ui.PostSignIn;
-import com.artipie.front.ui.RepoPage;
 import com.artipie.front.ui.SignInPage;
-import com.artipie.front.ui.UserPage;
+import com.artipie.front.ui.repository.RepoAddConfig;
+import com.artipie.front.ui.repository.RepoAddInfo;
+import com.artipie.front.ui.repository.RepoEdit;
 import com.artipie.front.ui.repository.RepoList;
-import com.artipie.front.ui.repository.org.RepoListByUser;
+import com.artipie.front.ui.repository.RepoRemove;
+import com.artipie.front.ui.repository.RepoSave;
+import com.artipie.front.ui.repository.RepositoryInfo;
+import com.artipie.front.ui.repository.RepositoryTemplate;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.io.File;
@@ -290,35 +294,61 @@ public final class Service {
         this.ignite.path(
             "/dashboard",
             () -> {
-                final ArtipieEndpoint endpoint = this.settings.artipieEnpoint();
-                final RepositoryService repository = new RepositoryService(endpoint);
-                this.ignite.path(
-                    "/repository", () -> {
-                        this.ignite.get("/list", new RepoList(repository), engine);
-                        if ("org".equals(this.settings.layout())) {
-                            this.ignite.get("/list/:uname", new RepoListByUser(repository), engine);
-                        }
+                this.ignite.get(
+                    "",
+                    (req, res) -> {
+                        res.redirect("/dashboard/repository/list");
+                        return "Ok";
                     }
                 );
-                final RepoSettings stn = new RepoSettings(
-                    this.settings.layout(), this.settings.repoConfigsStorage()
-                );
-                this.ignite.get("", new UserPage(stn), engine);
-                this.ignite.get(
-                    new RequestPath().with(Users.USER_PARAM).toString(), new UserPage(stn), engine
-                );
-                this.ignite.get(
-                    new RequestPath().with(Users.USER_PARAM)
-                        .with(Repositories.REPO_PARAM).toString(),
-                    new RepoPage.TemplateView(stn), engine
-                );
-                this.ignite.post(
-                    new RequestPath().with("api").with("repos").with(Users.USER_PARAM).toString(),
-                    new RepoPage.Post(stn)
-                );
-                this.ignite.get(
-                    new RequestPath().with("api").with("repos").with(Users.USER_PARAM).toString(),
-                    new RepoPage.Get()
+                final ArtipieEndpoint endpoint = this.settings.artipieEnpoint();
+                final RepositoryService repository = new RepositoryService(endpoint);
+                final RepositoryInfo info = new RepositoryInfo();
+                final RepositoryTemplate template = new RepositoryTemplate();
+                this.ignite.path(
+                    "/repository", () -> {
+                        final String layout = this.settings.layout();
+                        this.ignite.get("/list", new RepoList(repository, layout), engine);
+                        if ("flat".equals(layout)) {
+                            this.ignite.get(
+                                "/edit/:repo",
+                                new RepoEdit(repository, layout, info),
+                                engine
+                            );
+                            this.ignite.post(
+                                "/update/:repo",
+                                new RepoSave(repository, layout),
+                                engine
+                            );
+                            this.ignite.post(
+                                "/remove/:repo",
+                                new RepoRemove(repository, layout),
+                                engine
+                            );
+                        } else {
+                            this.ignite.get(
+                                "/edit/:user/:repo",
+                                new RepoEdit(repository, layout, info),
+                                engine
+                            );
+                            this.ignite.post(
+                                "/update/:user/:repo",
+                                new RepoSave(repository, layout),
+                                engine
+                            );
+                            this.ignite.post(
+                                "/remove/:user/:repo",
+                                new RepoRemove(repository, layout),
+                                engine
+                            );
+                        }
+                        this.ignite.get("/add/info", new RepoAddInfo(), engine);
+                        this.ignite.get(
+                            "/add/config",
+                            new RepoAddConfig(layout, info, template),
+                            engine
+                        );
+                    }
                 );
             }
         );

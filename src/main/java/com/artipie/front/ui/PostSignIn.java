@@ -4,8 +4,8 @@
  */
 package com.artipie.front.ui;
 
-import com.artipie.ArtipieException;
 import com.artipie.front.rest.AuthService;
+import io.vavr.Tuple3;
 import java.util.Objects;
 import org.eclipse.jetty.http.HttpStatus;
 import spark.Request;
@@ -49,18 +49,22 @@ public final class PostSignIn implements Route {
             Spark.halt(HttpStatus.BAD_REQUEST_400, "CRSF validation failed");
         }
         String result = null;
-        try {
-            final String token = this.auth.getJwtToken(
-                req.queryParamOrDefault("username", ""),
-                req.queryParamOrDefault("password", "")
-            );
+        final Tuple3<Integer, String, String> res = this.auth.getJwtToken(
+            req.queryParamOrDefault("username", ""),
+            req.queryParamOrDefault("password", "")
+        );
+        if (res._3 == null) {
             req.session().attribute("uid", "");
             req.session().attribute("uname", req.queryParamOrDefault("username", ""));
-            req.session().attribute("token", token);
-            rsp.redirect("/dashboard/repository/list");
+            req.session().attribute("token", res._2);
+            rsp.redirect("/dashboard");
             result = "OK";
-        } catch (final ArtipieException exception) {
-            Spark.halt(HttpStatus.UNAUTHORIZED_401, "bad credentials");
+        } else {
+            if (res._1 == HttpStatus.UNAUTHORIZED_401) {
+                Spark.halt(HttpStatus.UNAUTHORIZED_401, "bad credentials");
+            } else {
+                Spark.halt(res._1, res._3);
+            }
         }
         return result;
     }

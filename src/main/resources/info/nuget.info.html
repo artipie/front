@@ -1,0 +1,21 @@
+To install or publish <code>NuGet</code> package into Artipie, specify repository url
+and credentials in <code>NuGet.Config</code> xml file:
+<pre>
+    &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        &lt;configuration&gt;
+            &lt;packageSources&gt;
+                &lt;add key=&quot;artipie-repo&quot; value=&quot;https://central.artipie.com/{{user}}/{{repo}}/index.json&quot; /&gt;
+            &lt;/packageSources&gt;
+            &lt;packageSourceCredentials&gt;
+                &lt;artipie-nuget-test&gt;
+                    &lt;add key=&quot;Username&quot; value=&quot;{{user}}&quot;/&gt;
+                    &lt;add key=&quot;ClearTextPassword&quot; value=&quot;****&quot;/&gt;
+                &lt;/artipie-nuget-test&gt;
+            &lt;/packageSourceCredentials&gt;
+        &lt;/configuration&gt;
+</pre>
+Then use this configuration when installing or publishing <code>NuGet</code> packages:
+<pre>
+nuget push ./nuget-package -ConfigFile ./NuGet.Config -Verbosity detailed -Source artipie-repo
+nuget install Newtonsoft.Json -Version 12.0.3 -NoCache -ConfigFile ./NuGet.Config -Source artipie-repo
+</pre>

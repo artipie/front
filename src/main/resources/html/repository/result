@@ -1,0 +1,18 @@
+{{#partial "content"}}
+
+{{#unless error}}
+  {{#if result._2}}
+    <div>{{result._2}}</div>
+    {{#if redirectUrl}}
+      <a href="{{redirectUrl}}">{{redirectMessage}}</a>
+    {{/if}}
+  {{else}}
+    <div><span class="firebrick">Error:&nbsp;</span>{{result._3}}</div>
+    <div><span class="firebrick">Status cde:&nbsp;</span>{{result._1}}</div>
+  {{/if}}
+{{else}}
+  <div><span class="firebrick">Error:&nbsp;</span>{{error}}</div>
+{{/unless}}
+
+{{/partial}}
+{{> base}}

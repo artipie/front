@@ -1,0 +1,9 @@
+To use <code>go</code> repository declare the following environment variables:
+<pre>
+export GO111MODULE=on
+export GOPROXY="central.artipie.com/{{user}}/{{repo}}"
+</pre>
+Now you can install packages directly from Artipie:
+<pre>
+go get -x -insecure golang.org/x/time
+</pre>
