@@ -1,0 +1,57 @@
+{{#partial "content"}}
+<script>
+function repoRemove() {
+  if(confirm("You want to remove repository. Are you sure?")) {
+    document.forms["repo-remove-form"].submit();
+  }
+}
+</script>
+<p>
+  This is <a href="https://yaml.org/">YAML</a> config of your repository <code>{{rname}}</code>
+  (read this <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a> file to get help):
+</p>
+{{#unless error}}
+  {{#if result._2}}
+    <table border="2px solid black">
+      <tr>
+        <td colspan="3">
+          <form id="config-form" action="/dashboard/repository/update/{{rname}}" method="POST">
+            <fieldset>
+              <textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;">
+{{result._2}}
+              </textarea>
+              <input name="action" type="hidden" value="update"/>
+              <input id="config-submit" type="submit" value="Update"/>
+            </fieldset>
+          </form>
+        </td>
+      <tr>
+      <tr>
+        <td>
+          <form id="repo-remove-form" action="/dashboard/repository/remove/{{rname}}" method="POST" onsubmit="return false;">
+            <fieldset>
+              <input id="repo-delete" type="submit" value="Remove" onclick="repoRemove();"/>
+            </fieldset>
+          </form>
+        </td>
+        <td>
+          <form id="repo-cancel-form" action="/dashboard/repository/list" method="GET">
+            <fieldset>
+              <input id="repo-cancel" type="submit" value="Cancel"/>
+            </fieldset>
+          </form>
+        </td>
+        <td width="90%"/>
+      </tr>
+    </table>
+    {{{info}}}
+  {{else}}
+    <div><span class="firebrick">Error:&nbsp;</span>{{result._3}}</div>
+    <div><span class="firebrick">Status cde:&nbsp;</span>{{result._1}}</div>
+  {{/if}}
+{{else}}
+  <div><span class="firebrick">Error:&nbsp;</span>{{error}}</div>
+{{/unless}}
+
+{{/partial}}
+{{> base}}

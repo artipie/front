@@ -1,0 +1,9 @@
+To publish your packages with <a href="https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives">twine</a>
+specify Artipie repository url with <code>--repository-url</code> option
+<pre>
+$ twine upload --repository-url http://central.artipie.com/{{user}}/{{repo}}/ -u {{user}} -p password myproject/dist/*
+</pre>
+To install package with <code>pip install</code> specify Artipie repository url with <code>--index-url</code> option:
+<pre>
+$ pip install --index-url http://{{user}}:password@central.artipie.com/{{user}}/{{repo}}/ myproject
+</pre>

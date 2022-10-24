@@ -1,0 +1,18 @@
+<p>Maven proxy repository proxies all request to remote Maven repository appling authentication
+and saves artifacts in Artipie storage cache.</p>
+<p>To use it as a mirror for Apache central, add this configuration to your
+<code>~/.m2/settings.xml</code>:
+<pre>
+&lt;settings&gt;
+  [...]
+  &lt;mirrors&gt;
+    &lt;mirror&gt;
+      &lt;id&gt;artipie-mirror&lt;/id&gt;
+      &lt;name&gt;Artipie Mirror Repository&lt;/name&gt;
+      &lt;url&gt;https://central.artipie.com/{{user}}/{{repo}}&lt;/url&gt;
+      &lt;mirrorOf&gt;central&lt;/mirrorOf&gt;
+    &lt;/mirror&gt;
+  &lt;/mirrors&gt;
+&lt;/settings&gt;
+</pre>
+</p>

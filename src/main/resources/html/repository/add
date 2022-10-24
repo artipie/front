@@ -1,0 +1,27 @@
+{{#partial "content"}}
+
+<p>
+  This is <a href="https://yaml.org/">YAML</a> config of your repository <code>{{rname}}</code>
+  (read this <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a> file to get help):
+</p>
+{{#unless error}}
+  {{#if result._2}}
+    <form id="config-form" action="/dashboard/repository/view/{{rname}}" method="POST">
+      <fieldset>
+        <textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;">
+{{result._2}}
+        </textarea>
+        <input name="action" type="hidden" value="update"/>
+        <input id="config-submit" type="submit" value="Update"/>
+      </fieldset>
+    </form>
+  {{else}}
+    <div><span class="firebrick">Error:&nbsp;</span>{{result._3}}</div>
+    <div><span class="firebrick">Status cde:&nbsp;</span>{{result._1}}</div>
+  {{/if}}
+{{else}}
+  <div><span class="firebrick">Error:&nbsp;</span>{{error}}</div>
+{{/unless}}
+
+{{/partial}}
+{{> base}}

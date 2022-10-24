@@ -1,0 +1,18 @@
+To install conda packages from Artipie, add repository to conda channels settings to <code>/root/.condarc</code> file (check
+<a href="https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">documentation</a> for more details):
+<pre>
+channels:
+  - http://central.artipie.com/{{user}}/{{repo}}
+</pre>
+Set Artipie repository url for upload to anaconda config:
+<pre>
+anaconda config --set url "http://central.artipie.com/{{user}}/{{repo}}" -s
+</pre>
+You can also set automatic upload after building package:
+<pre>
+conda config --set anaconda_upload yes
+</pre>
+
+Now you can install packages from Artipie anaconda repository using <code>conda install</code>
+command and build and upload packages with <code>conda build</code>, or, if the package is already build,
+use <code>anaconda upload</code> command to publish package to Artipie.

@@ -1,0 +1,23 @@
+{{#partial "content"}}
+
+<p>
+  This is <a href="https://yaml.org/">YAML</a> config
+  of your repository <code>{{rname}}</code>
+  (read this
+  <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a>
+  file to get help):
+</p>
+
+<form id="config-form" action="/dashboard/repository/update/{{rname}}" method="POST">
+  <fieldset>
+<textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;">
+{{template}}
+</textarea>
+    <input id="config-submit" type="submit" value="Add"/>
+  </fieldset>
+</form>
+
+{{{info}}}
+
+{{/partial}}
+{{> base}}

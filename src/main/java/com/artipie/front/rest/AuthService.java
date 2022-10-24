@@ -5,9 +5,9 @@
 package com.artipie.front.rest;
 
 import com.artipie.front.settings.ArtipieEndpoint;
-import java.net.http.HttpResponse;
+import io.vavr.Tuple3;
+import java.util.Optional;
 import javax.json.Json;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Auth-service.
@@ -29,22 +29,23 @@ public class AuthService extends BaseService {
     }
 
     /**
-     * Obtains JWT-token from auth rest-service.
-     *
+     * Obtain JWT-token from auth rest-service.
      * @param name User name.
      * @param password User password.
-     * @return JWT-token.
+     * @return Tuple3 of 'Status code, JWT-token, Error message'.
      */
-    public String getJwtToken(final String name, final String password) {
-        final HttpResponse<String> response  = this.httpPost(
-            AuthService.TOKEN_PATH,
-            () ->
-                Json.createObjectBuilder()
-                    .add("name", name)
-                    .add("pass", password)
-                    .build().toString()
+    public Tuple3<Integer, String, String> getJwtToken(final String name, final String password) {
+        return BaseService.handle(
+            this.httpPost(
+                Optional.empty(),
+                AuthService.TOKEN_PATH,
+                () ->
+                    Json.createObjectBuilder()
+                        .add("name", name)
+                        .add("pass", password)
+                        .build().toString()
+            ),
+            res -> BaseService.jsonObject(res).getString("token")
         );
-        checkStatus(HttpServletResponse.SC_OK, response);
-        return BaseService.jsonObject(response).getString("token");
     }
 }

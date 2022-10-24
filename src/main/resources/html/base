@@ -18,12 +18,33 @@
         </ul>
       </nav>
     </header>
-    <section>
-      <article>
-        {{#block "content"}}
-        {{/block}}
-      </article>
-    </section>
+    <table>
+    <tr>
+      <td>
+        <ul id="navMenu">
+          <li><a href="/dashboard/repository/list">Repositories</a>
+            <ul>
+                <li><a href="/dashboard/repository/add/info">Create</a></li>
+            </ul>
+          </li>
+          <li>Artipie
+            <ul>
+                <li><a href="https://github.com/artipie">Github</a></li>
+                <li><a href="https://github.com/artipie/artipie/wiki">Wiki</a></li>
+            </ul>
+          </li>
+        </ul>
+      </td>
+      <td>
+        <section style="width:90%">
+          <article>
+            {{#block "content"}}
+            {{/block}}
+          </article>
+        </section>
+      </td>
+    </tr>
+    </table>
     <footer>
       <nav>
         <ul>
