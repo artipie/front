@@ -287,8 +287,13 @@ public final class Service {
                     "", MimeTypes.Type.APPLICATION_JSON.asString(),
                     new SignInPage(), engine
                 );
-                final AuthService auth = new AuthService(this.settings.artipieEnpoint());
-                this.ignite.post("", new PostSignIn(auth));
+                this.ignite.post(
+                    "",
+                    new PostSignIn(
+                        new AuthService(this.settings.artipieEnpoint()),
+                        AuthByPassword.withCredentials(creds)
+                    )
+                );
             }
         );
         this.ignite.path(
