@@ -1,24 +1,14 @@
 {{#partial "content"}}
-
-{{#unless error}}
-  {{#if result._2}}
-    <p>
-      Your repositories:
-    </p>
-    <ul>
-    {{#result._2}}
-      <li>
-        <a href="/dashboard/repository/edit/{{this}}">{{this}}</a>
-      </li>
-    {{/result._2}}
-    </ul>
-  {{else}}
-    <h1>Error response: {{result._3}}</h1>
-    <h1>Status code: {{result._1}}</h1>
-  {{/if}}
-{{else}}
-  <h1>Error: {{error}}</h1>
-{{/unless}}
+<p>
+  Your repositories:
+</p>
+<ul>
+{{#repos}}
+  <li>
+    <a href="/dashboard/repository/edit/{{this}}">{{this}}</a>
+  </li>
+{{/repos}}
+</ul>
 
 <p>
   <span class="firebrick">DISCLAIMER</span>:

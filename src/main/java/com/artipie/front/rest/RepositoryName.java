@@ -4,6 +4,7 @@
  */
 package com.artipie.front.rest;
 
+import com.artipie.front.Layout;
 import spark.Request;
 
 /**
@@ -38,7 +39,7 @@ public interface RepositoryName {
         /**
          * Layout.
          */
-        private final String layout;
+        private final Layout layout;
 
         /**
          * Ctor.
@@ -46,7 +47,7 @@ public interface RepositoryName {
          * @param request Request
          * @param layout Layout
          */
-        public FromRequest(final Request request, final String layout) {
+        public FromRequest(final Request request, final Layout layout) {
             this.request = request;
             this.layout = layout;
         }
@@ -63,14 +64,14 @@ public interface RepositoryName {
         @Override
         public String toString() {
             final String reponame;
-            if ("flat".equals(this.layout)) {
+            if (this.layout == Layout.FLAT) {
                 reponame = new Flat(
                     this.request.params(RepositoryName.REPO)
                 ).toString();
             } else {
                 reponame = new Org(
                     this.request.params(RepositoryName.REPO),
-                    this.request.session().attribute("uname")
+                    this.request.session().attribute("uid")
                 ).toString();
             }
             return reponame;

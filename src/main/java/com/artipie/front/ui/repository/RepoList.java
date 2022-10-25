@@ -4,10 +4,10 @@
  */
 package com.artipie.front.ui.repository;
 
+import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryService;
 import com.artipie.front.ui.HbPage;
-import io.vavr.Tuple3;
 import java.util.List;
 import java.util.Map;
 
@@ -25,23 +25,22 @@ public final class RepoList extends RouteWrap.TemplateViewRoute {
      * @param repository Repository service.
      * @param layout Layout.
      */
-    public RepoList(final RepositoryService repository, final String layout) {
+    public RepoList(final RepositoryService repository, final Layout layout) {
         super(
             new HbPage(
                 "repository/list",
                 req -> {
-                    final String uname = req.session().attribute("uname");
+                    final String uid = req.session().attribute("uid");
                     final String token = req.session().attribute("token");
-                    final Tuple3<Integer, List<String>, String> result;
+                    final List<String> repos;
                     if ("flat".equals(layout)) {
-                        result = repository.list(token);
+                        repos = repository.list(token);
                     } else {
-                        result = repository.list(token, uname);
+                        repos = repository.list(token, uid);
                     }
                     return Map.of(
                         "title", "Repository list",
-                        "result", result,
-                        "error", ""
+                        "repos", repos
                     );
                 }
             )

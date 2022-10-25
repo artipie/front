@@ -5,10 +5,9 @@
 package com.artipie.front.rest;
 
 import com.artipie.ArtipieException;
+import com.artipie.front.RestException;
 import com.artipie.front.misc.Json2Yaml;
-import com.artipie.front.settings.ArtipieEndpoint;
 import com.google.common.net.HttpHeaders;
-import io.vavr.Tuple3;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -45,22 +44,22 @@ public class BaseService {
     /**
      * Artipie rest URL.
      */
-    private final String artipieurl;
+    private final String rest;
 
     /**
      * Ctor.
-     * @param endpoint Artipie endpoint configuration.
+     * @param rest Artipie rest endpoint.
      */
-    public BaseService(final ArtipieEndpoint endpoint) {
-        this.artipieurl = endpoint.url();
+    public BaseService(final String rest) {
+        this.rest = rest;
     }
 
     /**
      * Gets artipie rest URL.
      * @return Artipie rest URL.
      */
-    protected String getArtipieUrl() {
-        return this.artipieurl;
+    protected String rest() {
+        return this.rest;
     }
 
     /**
@@ -70,7 +69,7 @@ public class BaseService {
      * @throws URISyntaxException if there is syntax error.
      */
     protected URI uri(final String path) throws URISyntaxException {
-        return new URI(String.format("%s/%s", this.getArtipieUrl(), path));
+        return new URI(String.format("%s/%s", this.rest(), path));
     }
 
     /**
@@ -290,41 +289,41 @@ public class BaseService {
     }
 
     /**
-     * Check response result code and forms triple-tuple:
-     *   1. response status code.
-     *   2. resulting content in case success result code
-     *   3. error message based on response content in case receiveing of error in status code.
+     * If status code is successful http response (200)
+     * then converts http-response by mapping function to content of specified type,
+     * Otherwise throws RestException with resulting status code and http response body.
+     *
      * @param response Response.
-     * @param map Map-function to form resulting content in case successful status code.
-     * @param <V> Type of resulting of map-function.
-     * @return Triple-tuple.
+     * @param map Map-function that forms returning content in case expected status code.
+     * @param <V> Type of resulting content of map-function.
+     * @return Content of specified type in case success result code.
+     * @throws RestException with response status code and response body
+     *  in case unexpected status code.
      */
-    protected static <V> Tuple3<Integer, V, String> handle(final HttpResponse<String> response,
-        final Function<HttpResponse<String>, V> map) {
+    protected static <V> V handle(final HttpResponse<String> response,
+        final Function<HttpResponse<String>, V> map) throws RestException {
         return handle(HttpServletResponse.SC_OK, response, map);
     }
 
     /**
-     * Check response result code and forms triple-tuple:
-     *   1. response status code.
-     *   2. resulting content in case success result code
-     *   3. error message based on response content in case receiveing of error in status code.
+     * If status code has expected value
+     * then converts http-response by mapping function to content of specified type,
+     * Otherwise throws RestException with resulting status code and http response body.
+     *
      * @param success Expected success result code.
      * @param response Response.
-     * @param map Map-function to form resulting content in case successful status code.
-     * @param <V> Type of resulting of map-function.
-     * @return Triple-tuple.
+     * @param map Map-function that forms returning content in case expected status code.
+     * @param <V> Type of resulting content of map-function.
+     * @return Content of specified type in case success result code.
+     * @throws RestException with response status code and response body
+     *  in case unexpected status code.
      */
-    protected static <V> Tuple3<Integer, V, String> handle(final int success,
-        final HttpResponse<String> response, final Function<HttpResponse<String>, V> map) {
-        V content = null;
-        String error = null;
+    protected static <V> V handle(final int success, final HttpResponse<String> response,
+        final Function<HttpResponse<String>, V> map) throws RestException {
         if (success == response.statusCode()) {
-            content = map.apply(response);
-        } else {
-            error = response.body();
+            return map.apply(response);
         }
-        return new Tuple3<>(response.statusCode(), content, error);
+        throw new RestException(response.statusCode(), response.body());
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 package com.artipie.front.ui.repository;
 
+import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryName;
 import com.artipie.front.rest.RepositoryService;
@@ -24,7 +25,7 @@ public final class RepoRemove extends RouteWrap.TemplateViewRoute {
      * @param repository Repository service.
      * @param layout Layout.
      */
-    public RepoRemove(final RepositoryService repository, final String layout) {
+    public RepoRemove(final RepositoryService repository, final Layout layout) {
         super(
             new HbPage(
                 "repository/result",
@@ -32,9 +33,7 @@ public final class RepoRemove extends RouteWrap.TemplateViewRoute {
                     final RepositoryName rname = new RepositoryName.FromRequest(req, layout);
                     return Map.of(
                         "title", String.format("Repository %s", rname),
-                        "rname", rname,
                         "result", repository.remove(req.session().attribute("token"), rname),
-                        "error", "",
                         "redirectUrl", "/dashboard/repository/list",
                         "redirectMessage", "Continue"
                     );

@@ -90,7 +90,9 @@ public final class TestService implements BeforeEachCallback, AfterEachCallback 
                     ),
                     this.layout
                 )
-            )
+            ),
+            "http://localhost:8086",
+            Layout.FLAT
         );
         this.prt = TestService.randomFreePort();
         this.service.start(this.prt);

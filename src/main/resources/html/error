@@ -1,0 +1,6 @@
+{{#partial "content"}}
+<div><span class="firebrick">Error:&nbsp;</span>{{errorMessage}}</div>
+<div><span class="firebrick">Details:&nbsp;</span></div>
+<div>{{stackTrace}}</div>
+{{/partial}}
+{{> base}}
