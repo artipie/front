@@ -4,6 +4,7 @@
  */
 package com.artipie.front.ui.repository;
 
+import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryName;
 import com.artipie.front.rest.RepositoryService;
@@ -24,7 +25,7 @@ public final class RepoSave extends RouteWrap.TemplateViewRoute {
      * @param repository Repository service.
      * @param layout Layout.
      */
-    public RepoSave(final RepositoryService repository, final String layout) {
+    public RepoSave(final RepositoryService repository, final Layout layout) {
         super(
             new HbPage(
                 "repository/result",
@@ -32,13 +33,11 @@ public final class RepoSave extends RouteWrap.TemplateViewRoute {
                     final RepositoryName rname = new RepositoryName.FromRequest(req, layout);
                     return Map.of(
                         "title", String.format("Repository %s", rname),
-                        "rname", rname,
                         "result", repository.save(
                             req.session().attribute("token"),
                             rname,
                             req.queryParams("config")
                         ),
-                        "error", "",
                         "redirectUrl", String.format("/dashboard/repository/edit/%s", rname),
                         "redirectMessage", "Continue"
                     );

@@ -23,8 +23,7 @@ public final class RepoAddInfo extends RouteWrap.TemplateViewRoute {
             new HbPage(
                 "repository/add_info",
                 req -> Map.of(
-                    "title", "Add repository",
-                    "uname", req.session().attribute("uname")
+                    "title", "Add repository"
                 )
             )
         );

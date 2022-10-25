@@ -4,6 +4,7 @@
  */
 package com.artipie.front.ui.repository;
 
+import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryName;
 import com.artipie.front.ui.HbPage;
@@ -22,7 +23,7 @@ public final class RepoAddConfig extends RouteWrap.TemplateViewRoute {
      * @param info Infor template
      * @param template Repository template
      */
-    public RepoAddConfig(final String layout, final RepositoryInfo info,
+    public RepoAddConfig(final Layout layout, final RepositoryInfo info,
         final RepositoryTemplate template) {
         super(
             new HbPage(
@@ -30,22 +31,20 @@ public final class RepoAddConfig extends RouteWrap.TemplateViewRoute {
                 req -> {
                     final String name = req.queryParams("name");
                     final String type = req.queryParams("type");
-                    final String user = req.session().attribute("uname");
+                    final String uid = req.session().attribute("uid");
                     final String rname;
-                    if ("flat".equals(layout)) {
+                    if (layout == Layout.FLAT) {
                         rname = new RepositoryName.Flat(name).toString();
                     } else {
-                        rname = new RepositoryName.Org(name, user).toString();
+                        rname = new RepositoryName.Org(name, uid).toString();
                     }
                     return Map.of(
                         "title", "Add repository",
-                        "uname", user,
                         "rname", rname,
-                        "type", type,
                         "info", info.render(
                             type,
                             Map.of(
-                                "user", user,
+                                "user", uid,
                                 "repo", name,
                                 "type", type
                             )
@@ -53,7 +52,7 @@ public final class RepoAddConfig extends RouteWrap.TemplateViewRoute {
                         "template", template.render(
                             type,
                             Map.of(
-                                "user", user,
+                                "user", uid,
                                 "repo", name,
                                 "type", type
                             )

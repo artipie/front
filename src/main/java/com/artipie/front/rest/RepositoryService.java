@@ -5,8 +5,6 @@
 package com.artipie.front.rest;
 
 import com.artipie.front.misc.Yaml2Json;
-import com.artipie.front.settings.ArtipieEndpoint;
-import io.vavr.Tuple3;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +33,18 @@ public class RepositoryService extends BaseService {
     /**
      * Ctor.
      *
-     * @param endpoint Artipie endpoint configuration.
+     * @param rest Artipie rest endpoint.
      */
-    public RepositoryService(final ArtipieEndpoint endpoint) {
-        super(endpoint);
+    public RepositoryService(final String rest) {
+        super(rest);
     }
 
     /**
      * Obtain list of repository names.
      * @param token Token.
-     * @return Tuple3 of 'Status code, List of repository names, Error message'
+     * @return List of repository names.
      */
-    public Tuple3<Integer, List<String>, String> list(final String token) {
+    public List<String> list(final String token) {
         return BaseService.handle(
             this.httpGet(Optional.of(token), RepositoryService.LIST_PATH),
             RepositoryService::listOfStrings
@@ -57,9 +55,9 @@ public class RepositoryService extends BaseService {
      * Obtain list of repository names by user's name.
      * @param token Token.
      * @param uname User name.
-     * @return Tuple3 of 'Status code, List of repository names, Error message'
+     * @return List of repository names.
      */
-    public Tuple3<Integer, List<String>, String> list(final String token, final String uname) {
+    public List<String> list(final String token, final String uname) {
         return BaseService.handle(
             this.httpGet(
                 Optional.of(token),
@@ -73,9 +71,9 @@ public class RepositoryService extends BaseService {
      * Obtain repository content.
      * @param token Token.
      * @param rname Repository name.
-     * @return Tuple3 of 'Status code, Repository content, Error message'
+     * @return Repository content.
      */
-    public Tuple3<Integer, String, String> repo(final String token, final RepositoryName rname) {
+    public String repo(final String token, final RepositoryName rname) {
         return BaseService.handle(
             this.httpGet(
                 Optional.of(token),
@@ -90,9 +88,9 @@ public class RepositoryService extends BaseService {
      * @param token Token.
      * @param rname Repository name.
      * @param config Repository config.
-     * @return Tuple3 of 'Status code, Resulting message, Error message'
+     * @return Resulting message
      */
-    public Tuple3<Integer, String, String> save(final String token, final RepositoryName rname,
+    public String save(final String token, final RepositoryName rname,
         final String config) {
         return BaseService.handle(
             this.httpPut(
@@ -108,9 +106,9 @@ public class RepositoryService extends BaseService {
      * Remove repository.
      * @param token Token.
      * @param rname Repository name.
-     * @return Tuple3 of 'Status code, Resulting message, Error message'
+     * @return Resulting message
      */
-    public Tuple3<Integer, String, String> remove(final String token, final RepositoryName rname) {
+    public String remove(final String token, final RepositoryName rname) {
         return BaseService.handle(
             this.httpDelete(
                 Optional.of(token),

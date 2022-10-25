@@ -20,7 +20,6 @@ import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.misc.RequestPath;
 import com.artipie.front.rest.AuthService;
 import com.artipie.front.rest.RepositoryService;
-import com.artipie.front.settings.ArtipieEndpoint;
 import com.artipie.front.settings.ArtipieYaml;
 import com.artipie.front.settings.RepoData;
 import com.artipie.front.settings.RepoSettings;
@@ -40,6 +39,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import javax.json.Json;
 import javax.json.JsonException;
@@ -51,9 +52,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;
 import spark.ExceptionHandler;
+import spark.ModelAndView;
 
 /**
  * Front service.
@@ -81,6 +84,20 @@ public final class Service {
         .hasArg(true).desc("The path to artipie configuration file").required(true).build();
 
     /**
+     * Name for argument artipie rest endpoint.
+     */
+    private static final Option REST = new Option(
+        "r", "rest", true, "The artipie rest endpoint. Default value http://localhost:8086"
+    );
+
+    /**
+     * Name for argument artipie layout.
+     */
+    private static final Option LAYOUT = new Option(
+        "l", "layout", true, "The artipie layout. Default value is flat"
+    );
+
+    /**
      * Api tokens.
      */
     private final ApiTokens tkn;
@@ -92,18 +109,40 @@ public final class Service {
     private final ArtipieYaml settings;
 
     /**
+     * Artipie rest endpoint.
+     */
+    private final String rest;
+
+    /**
+     * Artipie layout.
+     */
+    private final Layout layout;
+
+    /**
      * Spark service instance.
      */
     private volatile spark.Service ignite;
 
     /**
+     * Template engine.
+     */
+    private final HbTemplateEngine engine;
+
+    /**
      * Service constructor.
      * @param tkn Api tokens
      * @param settings Artipie configuration
+     * @param rest Artipie rest
+     * @param layout Artipie layout
+     * @checkstyle ParameterNumberCheck (7 lines)
      */
-    Service(final ApiTokens tkn, final ArtipieYaml settings) {
+    Service(final ApiTokens tkn, final ArtipieYaml settings, final String rest,
+        final Layout layout) {
         this.tkn = tkn;
         this.settings = settings;
+        this.rest = rest;
+        this.layout = layout;
+        this.engine = new HbTemplateEngine("/html");
     }
 
     /**
@@ -116,6 +155,8 @@ public final class Service {
         final Options options = new Options();
         options.addOption(Service.PORT);
         options.addOption(Service.CONFIG);
+        options.addOption(Service.REST);
+        options.addOption(Service.LAYOUT);
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd;
         try {
@@ -125,7 +166,19 @@ public final class Service {
                 new ArtipieYaml(
                     Yaml.createYamlInput(new File(cmd.getOptionValue(Service.CONFIG)))
                         .readYamlMapping()
-                )
+                ),
+                cmd.getOptionValue(Service.REST, "http://localhost:8086"),
+                Optional.ofNullable(cmd.getOptionValue(Service.LAYOUT))
+                    .map(
+                        value -> {
+                            final Layout result;
+                            if (Layout.FLAT.toString().equals(value)) {
+                                result = Layout.FLAT;
+                            } else {
+                                result = Layout.ORG;
+                            }
+                            return result;
+                        }).orElse(Layout.FLAT)
             );
             service.start(Integer.parseInt(cmd.getOptionValue(Service.PORT, "8080")));
             Runtime.getRuntime().addShutdownHook(new Thread(service::stop, "shutdown"));
@@ -279,20 +332,18 @@ public final class Service {
                 );
             }
         );
-        final var engine = new HbTemplateEngine("/html");
         this.ignite.path(
             "/signin",
             () -> {
                 this.ignite.get(
-                    "", MimeTypes.Type.APPLICATION_JSON.asString(),
-                    new SignInPage(), engine
+                    "",
+                    MimeTypes.Type.APPLICATION_JSON.asString(),
+                    new SignInPage(),
+                    this.engine
                 );
                 this.ignite.post(
                     "",
-                    new PostSignIn(
-                        new AuthService(this.settings.artipieEnpoint()),
-                        AuthByPassword.withCredentials(creds)
-                    )
+                    new PostSignIn(new AuthService(this.rest))
                 );
             }
         );
@@ -306,52 +357,54 @@ public final class Service {
                         return "Ok";
                     }
                 );
-                final ArtipieEndpoint endpoint = this.settings.artipieEnpoint();
-                final RepositoryService repository = new RepositoryService(endpoint);
+                final RepositoryService repository = new RepositoryService(this.rest);
                 final RepositoryInfo info = new RepositoryInfo();
                 final RepositoryTemplate template = new RepositoryTemplate();
                 this.ignite.path(
                     "/repository", () -> {
-                        final String layout = this.settings.layout();
-                        this.ignite.get("/list", new RepoList(repository, layout), engine);
-                        if ("flat".equals(layout)) {
+                        this.ignite.get(
+                            "/list",
+                            new RepoList(repository, this.layout),
+                            this.engine
+                        );
+                        if ("flat".equals(this.layout)) {
                             this.ignite.get(
                                 "/edit/:repo",
-                                new RepoEdit(repository, layout, info),
-                                engine
+                                new RepoEdit(repository, this.layout, info),
+                                this.engine
                             );
                             this.ignite.post(
                                 "/update/:repo",
-                                new RepoSave(repository, layout),
-                                engine
+                                new RepoSave(repository, this.layout),
+                                this.engine
                             );
                             this.ignite.post(
                                 "/remove/:repo",
-                                new RepoRemove(repository, layout),
-                                engine
+                                new RepoRemove(repository, this.layout),
+                                this.engine
                             );
                         } else {
                             this.ignite.get(
                                 "/edit/:user/:repo",
-                                new RepoEdit(repository, layout, info),
-                                engine
+                                new RepoEdit(repository, this.layout, info),
+                                this.engine
                             );
                             this.ignite.post(
                                 "/update/:user/:repo",
-                                new RepoSave(repository, layout),
-                                engine
+                                new RepoSave(repository, this.layout),
+                                this.engine
                             );
                             this.ignite.post(
                                 "/remove/:user/:repo",
-                                new RepoRemove(repository, layout),
-                                engine
+                                new RepoRemove(repository, this.layout),
+                                this.engine
                             );
                         }
-                        this.ignite.get("/add/info", new RepoAddInfo(), engine);
+                        this.ignite.get("/add/info", new RepoAddInfo(), this.engine);
                         this.ignite.get(
                             "/add/config",
-                            new RepoAddConfig(layout, info, template),
-                            engine
+                            new RepoAddConfig(this.layout, info, template),
+                            this.engine
                         );
                     }
                 );
@@ -362,6 +415,8 @@ public final class Service {
         this.ignite.exception(NotFoundException.class, Service.error(HttpStatus.NOT_FOUND_404));
         this.ignite.exception(JsonException.class, Service.error(HttpStatus.BAD_REQUEST_400));
         this.ignite.exception(JsonParseException.class, Service.error(HttpStatus.BAD_REQUEST_400));
+        this.ignite.exception(RestException.class, this.restError());
+        this.ignite.exception(Exception.class, this.error());
         this.ignite.awaitInitialization();
         Logger.info(this, "service started on port: %d", this.ignite.port());
     }
@@ -416,6 +471,49 @@ public final class Service {
                     .build().toString()
             );
             rsp.status(status);
+        };
+    }
+
+    /**
+     * Handle RestException by rendering html-page with errorMessage and http status code
+     * received from rest service.
+     * @return Instance of {@link ExceptionHandler}
+     */
+    private ExceptionHandler<RestException> restError() {
+        return (exc, rqs, rsp) -> {
+            rsp.type(MimeTypes.Type.TEXT_HTML.asString());
+            rsp.body(
+                this.engine.render(
+                    new ModelAndView(
+                        Map.of(
+                            "errorMessage", exc.getMessage(),
+                            "statusCode", exc.statusCode()
+                        ),
+                        "restError"
+                    )
+                )
+            );
+        };
+    }
+
+    /**
+     * Handle Exception by rendering html-page with errorMessage.
+     * @return Instance of {@link ExceptionHandler}
+     */
+    private ExceptionHandler<Exception> error() {
+        return (exc, rqs, rsp) -> {
+            rsp.type(MimeTypes.Type.TEXT_HTML.asString());
+            rsp.body(
+                this.engine.render(
+                    new ModelAndView(
+                        Map.of(
+                            "errorMessage", ExceptionUtils.getMessage(exc),
+                            "stackTrace", ExceptionUtils.getStackTrace(exc)
+                        ),
+                        "error"
+                    )
+                )
+            );
         };
     }
 }

@@ -6,11 +6,11 @@ package com.artipie.front.ui.repository;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryName;
 import com.artipie.front.rest.RepositoryService;
 import com.artipie.front.ui.HbPage;
-import io.vavr.Tuple3;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public final class RepoEdit extends RouteWrap.TemplateViewRoute {
      * @param layout Layout.
      * @param info Repository info templates.
      */
-    public RepoEdit(final RepositoryService repository, final String layout,
+    public RepoEdit(final RepositoryService repository, final Layout layout,
         final RepositoryInfo info) {
         super(
             new HbPage(
@@ -38,16 +38,15 @@ public final class RepoEdit extends RouteWrap.TemplateViewRoute {
                 req -> {
                     final RepositoryName rname = new RepositoryName.FromRequest(req, layout);
                     final String repo = req.params(":repo");
-                    final String user = req.session().attribute("uname");
-                    final Tuple3<Integer, String, String> result = repository.repo(
+                    final String uid = req.session().attribute("uid");
+                    final String conf = repository.repo(
                         req.session().attribute("token"), rname
                     );
                     return Map.of(
                         "title", String.format("Repository %s", rname),
                         "rname", rname,
-                        "result", result,
-                        "error", "",
-                        "info", RepoEdit.repoType(result._2)
+                        "conf", conf,
+                        "info", RepoEdit.repoType(conf)
                             .map(
                                 type -> {
                                     String rendered;
@@ -55,7 +54,7 @@ public final class RepoEdit extends RouteWrap.TemplateViewRoute {
                                         rendered = info.render(
                                             type,
                                             Map.of(
-                                                "user", user,
+                                                "user", uid,
                                                 "repo", repo,
                                                 "type", type
                                             )

@@ -4,8 +4,6 @@
  */
 package com.artipie.front.rest;
 
-import com.artipie.front.settings.ArtipieEndpoint;
-import io.vavr.Tuple3;
 import java.util.Optional;
 import javax.json.Json;
 
@@ -22,19 +20,19 @@ public class AuthService extends BaseService {
 
     /**
      * Ctor.
-     * @param endpoint Artipie endpoint configuration.
+     * @param rest Artipie rest endpoint.
      */
-    public AuthService(final ArtipieEndpoint endpoint) {
-        super(endpoint);
+    public AuthService(final String rest) {
+        super(rest);
     }
 
     /**
      * Obtain JWT-token from auth rest-service.
      * @param name User name.
      * @param password User password.
-     * @return Tuple3 of 'Status code, JWT-token, Error message'.
+     * @return JWT-token.
      */
-    public Tuple3<Integer, String, String> getJwtToken(final String name, final String password) {
+    public String getJwtToken(final String name, final String password) {
         return BaseService.handle(
             this.httpPost(
                 Optional.empty(),
