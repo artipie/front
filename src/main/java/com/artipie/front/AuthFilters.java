@@ -23,7 +23,7 @@ public enum AuthFilters implements Filter {
      */
     AUTHENTICATE(
         (req, rsp) -> {
-            if (req.pathInfo().equals("/signin") || req.pathInfo().equals("/token")) {
+            if ("/signin".equals(req.pathInfo()) || "/.health".equals(req.pathInfo())) {
                 return;
             }
             if (req.session() == null || !req.session().attributes().contains("uid")) {
@@ -43,16 +43,17 @@ public enum AuthFilters implements Filter {
             );
             if (req.session() == null) {
                 attrs.values().forEach(attr -> attr.remove(req));
-            }
-            attrs.forEach(
-                (name, attr) -> {
-                    if (req.session().attributes().contains(name)) {
-                        attr.write(req, req.session().attribute(name));
-                    } else {
-                        attr.remove(req);
+            } else {
+                attrs.forEach(
+                    (name, attr) -> {
+                        if (req.session().attributes().contains(name)) {
+                            attr.write(req, req.session().attribute(name));
+                        } else {
+                            attr.remove(req);
+                        }
                     }
-                }
-            );
+                );
+            }
         }
     );
 
@@ -71,8 +72,6 @@ public enum AuthFilters implements Filter {
 
     @Override
     public void handle(final Request req, final Response rsp) throws Exception {
-        if (!req.pathInfo().startsWith("/api")) {
-            this.func.handle(req, rsp);
-        }
+        this.func.handle(req, rsp);
     }
 }
