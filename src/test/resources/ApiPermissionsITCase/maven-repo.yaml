@@ -1,5 +1,0 @@
-repo:
-  type: maven
-  storage:
-    type: fs
-    path: /var/artipie/data/

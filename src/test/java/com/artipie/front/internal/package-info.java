@@ -7,4 +7,4 @@
  * Tests for internal API.
  * @since 1.0
  */
-package com.artipie.front.inernal;
+package com.artipie.front.internal;

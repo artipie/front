@@ -2,9 +2,8 @@
  * The MIT License (MIT) Copyright (c) 2022 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
-package com.artipie.front.inernal;
+package com.artipie.front.internal;
 
-import com.artipie.front.internal.HealthRoute;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
