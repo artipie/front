@@ -15,7 +15,7 @@ import spark.TemplateViewRoute;
  * Handlebars page.
  * @since 1.0
  */
-final class HbPage implements TemplateViewRoute {
+public final class HbPage implements TemplateViewRoute {
 
     /**
      * Template name.
@@ -32,7 +32,7 @@ final class HbPage implements TemplateViewRoute {
      * @param template Template name
      * @param params Params
      */
-    HbPage(final String template, final Map<String, ? extends Object> params) {
+    public HbPage(final String template, final Map<String, ? extends Object> params) {
         this(template, req -> params);
     }
 
@@ -41,7 +41,7 @@ final class HbPage implements TemplateViewRoute {
      * @param template Template name
      * @param params Create params from request
      */
-    HbPage(final String template,
+    public HbPage(final String template,
         final Function<? super Request, ? extends Map<String, ? extends Object>> params) {
         this.template = template;
         this.params = params;

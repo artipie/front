@@ -1,0 +1,6 @@
+Add local repository to the list of Debian packages for <code>apt</code> by adding
+the following line to the <code>/etc/apt/sources.list</code>:
+<pre>
+deb [trusted=yes] http://{{user}}:password@central.artipie.com/{{user}}/{{repo}} {{repo}} main
+</pre>
+Then use <code>apt-get</code> as usual.

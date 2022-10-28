@@ -1,0 +1,14 @@
+To install packages from <code>rpm</code> Artipie repository, add the following file
+to <code>yum</code> settings by path <code>/etc/yum.repos.d/example.repo</code>:
+<pre>
+[example]
+name=Example Repository
+baseurl=http://{{user}}:password@central.artipie.com/{{user}}/{{repo}}
+enabled=1
+gpgcheck=0
+</pre>
+Then <code>list</code> and <code>install</code> packages with specified repository:
+<pre>
+yum -y repo-pkgs example list
+yum -y repo-pkgs example install
+</pre>

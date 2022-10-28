@@ -1,0 +1,13 @@
+Before uploading your gems, obtain a key for authorization. A base64 encoded
+<code>login:password</code> would be a valid key:
+<pre>
+    export GEM_HOST_API_KEY=$(echo -n "{{user}}:****" | base64)
+</pre>
+Now, to upload <code>.gem</code> file into Artipie repository, use <code>gem push</code> command:
+<pre>
+    gem push <your_project.gem> --host https://central.artipie.com/{{user}}/{{repo}}
+</pre>
+To install an existing <code>gem</code>, use <code>gem install</code> command:
+<pre>
+    gem install awesome_gem --source https://central.artipie.com/{{user}}/{{repo}}
+</pre>

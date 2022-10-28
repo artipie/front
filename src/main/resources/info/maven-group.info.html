@@ -1,0 +1,8 @@
+<p>To use Maven grouped (virtual) repository first create at least two Maven or Maven proxy repositories.
+It can be either just a Maven repository or Maven proxy (mirror) repository. Then specify
+<code>https://central.artipie.com/{{user}}/{{repo}}</code> as distribution management, or
+repositories in <code>pom.xml</code> or as a mirror in <code>settings.xml</code> (see
+more details in concrete repositories documentation). Then group repositories under
+group-settings, pay attention that order does matter: first repository in the list will be
+accessed first, then second, etc. Repository name should be fully formatted, include your username
+prefix, e.g. <code>{{user}}/maven</code>.</p>

@@ -1,0 +1,9 @@
+{{#partial "content"}}
+
+<div>{{result}}</div>
+{{#if redirectUrl}}
+<a href="{{redirectUrl}}">{{redirectMessage}}</a>
+{{/if}}
+
+{{/partial}}
+{{> base}}

@@ -1,0 +1,9 @@
+<p>It's just a binary files repository. Use <code>PUT</code> HTTP request to upload a file,
+and <code>GET</code> for downloading.</p>
+<p>E.g. using <a href="https://httpie.org/">HTTPie</a> CLI tool:
+<pre>
+# uploading file.bin
+http -a {{user}}:password PUT https://central.artipie.com/{{user}}/{{repo}}file.bin @file.bin
+# downloading file.bin
+http GET https://central.artipie.com/{{user}}/{{repo}}file.bin --output=./file.bin
+</pre>
