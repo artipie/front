@@ -69,7 +69,23 @@ public final class PostSignIn implements Route {
             req.queryParamOrDefault("password", "")
         );
         req.session().attribute("token", token);
-        req.session().attribute("uid", req.queryParamOrDefault("username", ""));
+        req.session().attribute("uid", deleteGithubPrefix(req.queryParamOrDefault("username", "")));
         rsp.redirect("/dashboard");
+    }
+
+    /**
+     * Delete github prefix from user name.
+     * @param username User name.
+     * @return User name without github prefix.
+     */
+    private static String deleteGithubPrefix(final String username) {
+        final String prefix = "github.com/";
+        final String result;
+        if (username.startsWith(prefix)) {
+            result = username.substring(prefix.length());
+        } else {
+            result = username;
+        }
+        return result;
     }
 }
