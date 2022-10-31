@@ -69,7 +69,22 @@ public final class PostSignIn implements Route {
             req.queryParamOrDefault("password", "")
         );
         req.session().attribute("token", token);
-        req.session().attribute("uid", req.queryParamOrDefault("username", ""));
+        req.session().attribute("uid", deleteBySlash(req.queryParamOrDefault("username", "")));
         rsp.redirect("/dashboard");
+    }
+
+    /**
+     * Delete all characters by slash if string contains slash.
+     * @param str String.
+     * @return String with deleted characters by slash.
+     */
+    private static String deleteBySlash(final String str) {
+        final String result;
+        if (str.contains("/")) {
+            result = str.substring(str.lastIndexOf('/') + 1);
+        } else {
+            result = str;
+        }
+        return result;
     }
 }
