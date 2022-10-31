@@ -69,21 +69,22 @@ public final class PostSignIn implements Route {
             req.queryParamOrDefault("password", "")
         );
         req.session().attribute("token", token);
-        req.session().attribute("uid", deleteBySlash(req.queryParamOrDefault("username", "")));
+        req.session().attribute("uid", deleteGithubPrefix(req.queryParamOrDefault("username", "")));
         rsp.redirect("/dashboard");
     }
 
     /**
-     * Delete all characters by slash if string contains slash.
-     * @param str String.
-     * @return String with deleted characters by slash.
+     * Delete github prefix from user name.
+     * @param username User name.
+     * @return User name without github prefix.
      */
-    private static String deleteBySlash(final String str) {
+    private static String deleteGithubPrefix(final String username) {
+        final String prefix = "github.com/";
         final String result;
-        if (str.contains("/")) {
-            result = str.substring(str.lastIndexOf('/') + 1);
+        if (username.startsWith(prefix)) {
+            result = username.substring(prefix.length());
         } else {
-            result = str;
+            result = username;
         }
         return result;
     }
