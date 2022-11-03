@@ -7,6 +7,7 @@ package com.artipie.front;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.rest.AuthService;
 import com.artipie.front.rest.RepositoryService;
+import com.artipie.front.rest.SettingsService;
 import com.artipie.front.ui.HbTemplateEngine;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.SignInPage;
@@ -21,7 +22,6 @@ import com.artipie.front.ui.repository.RepositoryTemplate;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.jcabi.log.Logger;
 import java.util.Map;
-import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonException;
 import org.apache.commons.cli.CommandLine;
@@ -63,13 +63,6 @@ public final class Service {
     );
 
     /**
-     * Name for argument artipie layout.
-     */
-    private static final Option LAYOUT = new Option(
-        "l", "layout", true, "The artipie layout. Default value is flat"
-    );
-
-    /**
      * Spark service instance.
      */
     private volatile spark.Service ignite;
@@ -96,7 +89,6 @@ public final class Service {
         final Options options = new Options();
         options.addOption(Service.PORT);
         options.addOption(Service.REST);
-        options.addOption(Service.LAYOUT);
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd;
         try {
@@ -104,18 +96,7 @@ public final class Service {
             final var service = new Service();
             service.start(
                 Integer.parseInt(new Param(Service.PORT, "ARTIPIE_PORT", "8080").get(cmd)),
-                new Param(Service.REST, "ARTIPIE_REST", "http://localhost:8086").get(cmd),
-                Optional.ofNullable(new Param(Service.LAYOUT, "ARTIPIE_LAYOUT", "flat").get(cmd))
-                    .map(
-                        value -> {
-                            final Layout result;
-                            if (Layout.FLAT.toString().equals(value)) {
-                                result = Layout.FLAT;
-                            } else {
-                                result = Layout.ORG;
-                            }
-                            return result;
-                        }).orElse(Layout.FLAT)
+                new Param(Service.REST, "ARTIPIE_REST", "http://localhost:8086").get(cmd)
             );
             Runtime.getRuntime().addShutdownHook(new Thread(service::stop, "shutdown"));
         } catch (final ParseException ex) {
@@ -129,9 +110,8 @@ public final class Service {
      * Start service.
      * @param port Port for service
      * @param rest Artipie rest endpoint
-     * @param layout Artipie layout
      */
-    void start(final int port, final String rest, final Layout layout) {
+    void start(final int port, final String rest) {
         if (this.ignite != null) {
             throw new IllegalStateException("already started");
         }
@@ -166,6 +146,7 @@ public final class Service {
                 final RepositoryService repository = new RepositoryService(rest);
                 final RepositoryInfo info = new RepositoryInfo();
                 final RepositoryTemplate template = new RepositoryTemplate();
+                final Layout layout = new SettingsService(rest).layout();
                 this.ignite.path(
                     "/repository", () -> {
                         this.ignite.get(

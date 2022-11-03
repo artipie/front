@@ -33,7 +33,7 @@ public final class RepoList extends RouteWrap.TemplateViewRoute {
                     final String uid = req.session().attribute("uid");
                     final String token = req.session().attribute("token");
                     final List<String> repos;
-                    if ("flat".equals(layout)) {
+                    if (layout == Layout.FLAT) {
                         repos = repository.list(token);
                     } else {
                         repos = repository.list(token, uid);
