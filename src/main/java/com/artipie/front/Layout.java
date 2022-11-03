@@ -4,6 +4,8 @@
  */
 package com.artipie.front;
 
+import java.util.Arrays;
+
 /**
  * Repository layout.
  *
@@ -38,5 +40,22 @@ public enum Layout {
      */
     public String toString() {
         return this.name;
+    }
+
+    /**
+     * Get layout by name.
+     * @param name Layout's name
+     * @return Layout
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static Layout byName(final String name) {
+        return Arrays.stream(Layout.values())
+            .filter(layout -> name.equals(layout.toString()))
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("Incorrect layout name '%s'", name)
+                )
+            );
     }
 }
