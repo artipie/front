@@ -4,26 +4,30 @@
  */
 package com.artipie.front.ui.repository;
 
+import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.ui.HbPage;
 import java.util.Map;
 
 /**
- * Add repository info view page.
+ * Create repository info view page.
  *
  * @since 1.0
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class RepoAddInfo extends RouteWrap.TemplateViewRoute {
+public final class RepoCreate extends RouteWrap.TemplateViewRoute {
     /**
      * Add repository info page.
+     * @param layout Repository layout
      */
-    public RepoAddInfo() {
+    public RepoCreate(final Layout layout) {
         super(
             new HbPage(
-                "repository/add_info",
+                "repository/create",
                 req -> Map.of(
-                    "title", "Add repository"
+                    "title", "Create repository",
+                    "uid", req.session().attribute("uid"),
+                    "layout", layout
                 )
             )
         );

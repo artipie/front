@@ -4,6 +4,8 @@
  */
 package com.artipie.front;
 
+import com.artipie.front.api.RepositoryInfoRest;
+import com.artipie.front.api.RepositoryTemplateRest;
 import com.artipie.front.internal.HealthRoute;
 import com.artipie.front.rest.AuthService;
 import com.artipie.front.rest.RepositoryService;
@@ -11,8 +13,7 @@ import com.artipie.front.rest.SettingsService;
 import com.artipie.front.ui.HbTemplateEngine;
 import com.artipie.front.ui.PostSignIn;
 import com.artipie.front.ui.SignInPage;
-import com.artipie.front.ui.repository.RepoAddConfig;
-import com.artipie.front.ui.repository.RepoAddInfo;
+import com.artipie.front.ui.repository.RepoCreate;
 import com.artipie.front.ui.repository.RepoEdit;
 import com.artipie.front.ui.repository.RepoList;
 import com.artipie.front.ui.repository.RepoRemove;
@@ -117,7 +118,10 @@ public final class Service {
         }
         Logger.info(this, "starting service on port: %d", port);
         this.ignite = spark.Service.ignite().port(port);
+        this.ignite.staticFileLocation("public");
         this.ignite.get("/.health", new HealthRoute());
+        final RepositoryInfo info = new RepositoryInfo();
+        final RepositoryTemplate template = new RepositoryTemplate();
         this.ignite.path(
             "/signin",
             () -> {
@@ -134,6 +138,13 @@ public final class Service {
             }
         );
         this.ignite.path(
+            "/api",
+            () -> {
+                this.ignite.post("/template", new RepositoryTemplateRest(template));
+                this.ignite.post("/info", new RepositoryInfoRest(info));
+            }
+        );
+        this.ignite.path(
             "/dashboard",
             () -> {
                 this.ignite.get(
@@ -144,8 +155,6 @@ public final class Service {
                     }
                 );
                 final RepositoryService repository = new RepositoryService(rest);
-                final RepositoryInfo info = new RepositoryInfo();
-                final RepositoryTemplate template = new RepositoryTemplate();
                 final Layout layout = new SettingsService(rest).layout();
                 this.ignite.path(
                     "/repository", () -> {
@@ -154,6 +163,7 @@ public final class Service {
                             new RepoList(repository, layout),
                             this.engine
                         );
+                        this.ignite.get("/create", new RepoCreate(layout), this.engine);
                         if (layout == Layout.FLAT) {
                             this.ignite.get(
                                 "/edit/:repo",
@@ -187,12 +197,6 @@ public final class Service {
                                 this.engine
                             );
                         }
-                        this.ignite.get("/add/info", new RepoAddInfo(), this.engine);
-                        this.ignite.get(
-                            "/add/config",
-                            new RepoAddConfig(layout, info, template),
-                            this.engine
-                        );
                     }
                 );
             }
