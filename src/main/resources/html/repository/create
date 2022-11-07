@@ -1,0 +1,118 @@
+{{#partial "content"}}
+<script>
+$(document).ready(function () {
+  $("#new-repo-type").val("maven");
+  updateFormFields();
+  $("#new-repo-name").change(function() {
+    sendPost('/api/info', setInfo);
+  });
+});
+
+function updateFormFields() {
+  if (sendPost('/api/template', setTemplate)) {
+    sendPost('/api/info', setInfo);
+  }
+}
+
+function setTemplate(data) {
+  $("#new-repo-config").val(data.content);
+}
+
+function setInfo(data) {
+  $("#repositoryInfo").html(data.content);
+}
+
+function sendPost(path, callback) {
+  let result = true;
+  $.ajax({
+      url: path,
+      type: 'POST',
+      data: JSON.stringify(
+        {
+            "type": $("#new-repo-type").val(),
+            "name": $("#new-repo-name").val()
+        }
+      ),
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json',
+      async: true,
+      success: callback,
+      error: function(error) {
+        result = false;
+        errorHandler(error)
+      }
+  });
+  return result;
+}
+
+function errorHandler(error) {
+  alert("Something went wrong");
+}
+
+function formSubmit() {
+  let path = "/dashboard/repository/update/";
+  let layout = '{{{layout}}}';
+  let user = '{{{uid}}}';
+  let repo = $("#new-repo-name").val();
+  if ("flat" == layout) {
+    path += repo;
+  } else {
+    path += user + "/" + repo;
+  }
+  $("#new-repo-form").attr('action', path);
+  return true;
+}
+</script>
+
+<p>
+  This is <a href="https://yaml.org/">YAML</a> config
+  of your new repository
+  (read this
+  <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a>
+  file to get help):
+</p>
+
+<form action="#" method="POST" id="new-repo-form" onsubmit="return formSubmit();">
+  <label>Create new repository:</label>
+  <input id="new-repo-name" name="name" type="text" size="25" required="true" pattern="[a-z0-9]{3,16}"/>
+  <label>Type:</label>
+  <select id="new-repo-type" name="type" onchange="updateFormFields()">
+    <option value="maven">Maven</option>
+    <option value="file">Binary</option>
+    <option value="docker">Docker</option>
+    <option value="pypi">Python</option>
+    <option value="npm">NPM</option>
+    <option value="rpm">RPM</option>
+    <option value="gem">Gem</option>
+    <option value="helm">Helm</option>
+    <option value="php">PHP</option>
+    <option value="deb">Debian</option>
+    <option value="nuget">Nuget</option>
+    <option value="go">Go</option>
+    <option value="conda">Anaconda</option>
+    <option value="maven-proxy">Maven proxy (mirror)</option>
+    <option value="file-proxy">Binary proxy (mirror)</option>
+    <option value="npm-proxy">NPM proxy (mirror)</option>
+    <option value="pypi-proxy">Python proxy (mirror)</option>
+    <option value="php-proxy">Php proxy (remote)</option>
+    <option value="maven-group">Maven group (virtual)</option>
+  </select>
+  <fieldset>
+    <textarea id="new-repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;"></textarea>
+  </fieldset>
+  <input id="new-repo-submit" type="submit" value="Add repository"/>
+</form>
+
+<div id="repositoryInfo"></div>
+
+<p>
+  <span class="firebrick">DISCLAIMER</span>:
+  The service provided to you by Artipie is free of charge
+  and we expect you to behave good. Don't host here anything aside from
+  your private software packages. Too large or abusive files may be deleted without
+  notice. We truly hope that you enjoy our service and want it to stay alive.
+  Thanks!
+</p>
+
+{{/partial}}
+{{> base}}

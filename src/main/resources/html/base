@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="/logo.png"/>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css"/>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css"/>
+    <script src="/scripts/jquery-3.6.1.min.js"></script>
   </head>
   <body>
     <header>
@@ -24,7 +25,7 @@
         <ul id="navMenu">
           <li><a href="/dashboard/repository/list">Repositories</a>
             <ul>
-                <li><a href="/dashboard/repository/add/info">Create</a></li>
+                <li><a href="/dashboard/repository/create">Create</a></li>
             </ul>
           </li>
           <li>Artipie

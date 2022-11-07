@@ -245,6 +245,8 @@ https://github.com/artipie/front/LICENSE.txt
           <excludes combine.children="append">
             <exclude>checkstyle:.*/src/test/resources/.*</exclude>
             <exclude>pmd:.*/src/test/resources/.*</exclude>
+            <exclude>checkstyle:.*/src/main/resources/public/.*</exclude>
+            <exclude>pmd:.*/src/main/resources/public/.*</exclude>
           </excludes>
         </configuration>
       </plugin>
