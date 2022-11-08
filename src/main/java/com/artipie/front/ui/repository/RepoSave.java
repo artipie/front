@@ -4,10 +4,10 @@
  */
 package com.artipie.front.ui.repository;
 
-import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryName;
 import com.artipie.front.rest.RepositoryService;
+import com.artipie.front.rest.SettingsService;
 import com.artipie.front.ui.HbPage;
 import java.util.Map;
 
@@ -23,14 +23,17 @@ public final class RepoSave extends RouteWrap.TemplateViewRoute {
      * List of repositories page.
      *
      * @param repository Repository service.
-     * @param layout Layout.
+     * @param settings Settings service.
      */
-    public RepoSave(final RepositoryService repository, final Layout layout) {
+    public RepoSave(final RepositoryService repository, final SettingsService settings) {
         super(
             new HbPage(
                 "repository/result",
                 req -> {
-                    final RepositoryName rname = new RepositoryName.FromRequest(req, layout);
+                    final RepositoryName rname = new RepositoryName.FromRequest(
+                        req,
+                        settings.layout()
+                    );
                     return Map.of(
                         "title", String.format("Repository %s", rname),
                         "result", repository.save(

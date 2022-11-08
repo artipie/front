@@ -7,6 +7,7 @@ package com.artipie.front.ui.repository;
 import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryService;
+import com.artipie.front.rest.SettingsService;
 import com.artipie.front.ui.HbPage;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,9 @@ public final class RepoList extends RouteWrap.TemplateViewRoute {
      * List of repositories page.
      *
      * @param repository Repository service.
-     * @param layout Layout.
+     * @param settings Settings service.
      */
-    public RepoList(final RepositoryService repository, final Layout layout) {
+    public RepoList(final RepositoryService repository, final SettingsService settings) {
         super(
             new HbPage(
                 "repository/list",
@@ -33,7 +34,7 @@ public final class RepoList extends RouteWrap.TemplateViewRoute {
                     final String uid = req.session().attribute("uid");
                     final String token = req.session().attribute("token");
                     final List<String> repos;
-                    if (layout == Layout.FLAT) {
+                    if (settings.layout() == Layout.FLAT) {
                         repos = repository.list(token);
                     } else {
                         repos = repository.list(token, uid);

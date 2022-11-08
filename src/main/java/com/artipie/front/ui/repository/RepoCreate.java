@@ -4,8 +4,8 @@
  */
 package com.artipie.front.ui.repository;
 
-import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
+import com.artipie.front.rest.SettingsService;
 import com.artipie.front.ui.HbPage;
 import java.util.Map;
 
@@ -18,16 +18,16 @@ import java.util.Map;
 public final class RepoCreate extends RouteWrap.TemplateViewRoute {
     /**
      * Add repository info page.
-     * @param layout Repository layout
+     * @param settings Settings service
      */
-    public RepoCreate(final Layout layout) {
+    public RepoCreate(final SettingsService settings) {
         super(
             new HbPage(
                 "repository/create",
                 req -> Map.of(
                     "title", "Create repository",
                     "uid", req.session().attribute("uid"),
-                    "layout", layout
+                    "layout", settings.layout()
                 )
             )
         );
