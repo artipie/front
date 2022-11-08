@@ -155,48 +155,24 @@ public final class Service {
                     }
                 );
                 final RepositoryService repository = new RepositoryService(rest);
-                final Layout layout = new SettingsService(rest).layout();
+                final SettingsService settings = new SettingsService(rest);
                 this.ignite.path(
                     "/repository", () -> {
                         this.ignite.get(
                             "/list",
-                            new RepoList(repository, layout),
+                            new RepoList(repository, settings),
                             this.engine
                         );
-                        this.ignite.get("/create", new RepoCreate(layout), this.engine);
-                        if (layout == Layout.FLAT) {
-                            this.ignite.get(
-                                "/edit/:repo",
-                                new RepoEdit(repository, layout, info),
-                                this.engine
-                            );
-                            this.ignite.post(
-                                "/update/:repo",
-                                new RepoSave(repository, layout),
-                                this.engine
-                            );
-                            this.ignite.post(
-                                "/remove/:repo",
-                                new RepoRemove(repository, layout),
-                                this.engine
-                            );
-                        } else {
-                            this.ignite.get(
-                                "/edit/:user/:repo",
-                                new RepoEdit(repository, layout, info),
-                                this.engine
-                            );
-                            this.ignite.post(
-                                "/update/:user/:repo",
-                                new RepoSave(repository, layout),
-                                this.engine
-                            );
-                            this.ignite.post(
-                                "/remove/:user/:repo",
-                                new RepoRemove(repository, layout),
-                                this.engine
-                            );
-                        }
+                        this.ignite.get("/create", new RepoCreate(settings), this.engine);
+                        final RepoEdit edit = new RepoEdit(repository, settings, info);
+                        this.ignite.get("/edit/:repo", edit, this.engine);
+                        this.ignite.get("/edit/:user/:repo", edit, this.engine);
+                        final RepoSave save = new RepoSave(repository, settings);
+                        this.ignite.post("/update/:repo", save, this.engine);
+                        this.ignite.post("/update/:user/:repo", save, this.engine);
+                        final RepoRemove remove = new RepoRemove(repository, settings);
+                        this.ignite.post("/remove/:repo", remove, this.engine);
+                        this.ignite.post("/remove/:user/:repo", remove, this.engine);
                     }
                 );
             }
