@@ -1,0 +1,18 @@
+.main {
+}
+.menu {
+  float: left;
+  width: 150px;
+}
+.content {
+  float: inline-start;
+  width: 90%;
+}
+header {
+  padding-bottom: 0px;
+}
+footer {
+  float: inline-start;
+  align-content: center;
+  width: 100%;
+}
