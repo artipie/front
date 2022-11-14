@@ -68,17 +68,16 @@ public final class RepoList extends RouteWrap.TemplateViewRoute {
      * Repository information.
      * @since 0.1.3
      */
+    @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
     public static class Repo {
         /**
          * Repository name.
          */
-        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
         private final String name;
 
         /**
          * Artipie server port.
          */
-        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
         private final String port;
 
         /**
