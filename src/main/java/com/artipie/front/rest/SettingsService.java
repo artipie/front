@@ -15,6 +15,7 @@ import javax.json.JsonObject;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public class SettingsService extends BaseService {
     /**
      * Path to port rest-api.
@@ -29,13 +30,11 @@ public class SettingsService extends BaseService {
     /**
      * Port.
      */
-    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     private final AtomicReference<Integer> port;
 
     /**
      * Layout.
      */
-    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     private final AtomicReference<Layout> layout;
 
     /**
@@ -49,8 +48,8 @@ public class SettingsService extends BaseService {
     }
 
     /**
-     * Obtain Artipie layout.
-     * @return Artipie layout
+     * Obtain Artipie server port.
+     * @return Artipie server port
      */
     public int port() {
         return this.value(

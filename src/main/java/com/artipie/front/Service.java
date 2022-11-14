@@ -143,7 +143,9 @@ public final class Service {
                 this.ignite.get(
                     "",
                     (req, rsp) -> {
-                        req.session().invalidate();
+                        if (req.session() != null) {
+                            req.session().invalidate();
+                        }
                         rsp.redirect("/dashboard");
                         return "Ok";
                     }
