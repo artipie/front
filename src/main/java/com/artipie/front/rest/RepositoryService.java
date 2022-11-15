@@ -74,6 +74,16 @@ public class RepositoryService extends BaseService {
      * @return Repository content.
      */
     public String repo(final String token, final RepositoryName rname) {
+        return this.repo(token, rname.toString());
+    }
+
+    /**
+     * Obtain repository content.
+     * @param token Token.
+     * @param rname Repository name.
+     * @return Repository content.
+     */
+    public String repo(final String token, final String rname) {
         return BaseService.handle(
             this.httpGet(
                 Optional.of(token),

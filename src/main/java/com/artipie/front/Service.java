@@ -138,6 +138,21 @@ public final class Service {
             }
         );
         this.ignite.path(
+            "/signout",
+            () -> {
+                this.ignite.get(
+                    "",
+                    (req, rsp) -> {
+                        if (req.session() != null) {
+                            req.session().invalidate();
+                        }
+                        rsp.redirect("/dashboard");
+                        return "Ok";
+                    }
+                );
+            }
+        );
+        this.ignite.path(
             "/api",
             () -> {
                 this.ignite.post("/template", new RepositoryTemplateRest(template));

@@ -1,14 +1,70 @@
 {{#partial "content"}}
+<style>
+ #search {
+  background-image: url('/images/searchicon.png');
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+#repos {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ddd;
+  font-size: 18px;
+}
+
+#repos th, #repos td {
+  text-align: left;
+  padding: 12px;
+}
+
+#repos tr {
+  border-bottom: 1px solid #ddd;
+}
+
+#repos tr.header, #repos tr:hover {
+  background-color: #f1f1f1;
+}
+</style>
+<script>
+function filterReposByName() {
+  let filter = $("#search").val().toUpperCase();
+  $("#repos tr").each(function(i, tr) {
+    let td = tr.getElementsByTagName("td")[0];
+    if (td) {
+      let txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr.style.display = "";
+      } else {
+        tr.style.display = "none";
+      }
+    }
+  });
+}
+</script>
 <p>
   Your repositories:
 </p>
-<ul>
+<input type="text" id="search" onkeyup="filterReposByName()" placeholder="Search for names..">
+<table id="repos">
+  <tr class="header">
+    <th style="width:50%;">Name</th>
+    <th style="width:25%;">Type</th>
+    <th style="width:25%;">Port</th>
+  </tr>
 {{#repos}}
-  <li>
-    <a href="/dashboard/repository/edit/{{this}}">{{this}}</a>
-  </li>
+  <tr>
+    <td><a href="/dashboard/repository/edit/{{this.name}}">{{this.name}}</a></td>
+    <td>{{this.type}}</td>
+    <td>{{this.port}}</td>
+  </tr>
 {{/repos}}
-</ul>
+</table>
 
 <p>
   <span class="firebrick">DISCLAIMER</span>:

@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="/logo.png"/>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css"/>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css"/>
+    <link rel="stylesheet" href="/css/style.css"/>
     <script src="/scripts/jquery-3.6.1.min.js"></script>
   </head>
   <body>
@@ -19,33 +20,34 @@
         </ul>
       </nav>
     </header>
-    <table>
-    <tr>
-      <td>
-        <ul id="navMenu">
-          <li><a href="/dashboard/repository/list">Repositories</a>
-            <ul>
+    <main>
+      <div class="main">
+        <div class="menu">
+          <ul id="navMenu">
+            <li><a href="/dashboard/repository/list">Repositories</a>
+              <ul>
                 <li><a href="/dashboard/repository/create">Create</a></li>
-            </ul>
-          </li>
-          <li>Artipie
-            <ul>
+              </ul>
+            </li>
+            <li>Artipie
+              <ul>
                 <li><a href="https://github.com/artipie">Github</a></li>
                 <li><a href="https://github.com/artipie/artipie/wiki">Wiki</a></li>
-            </ul>
-          </li>
-        </ul>
-      </td>
-      <td>
-        <section style="width:90%">
-          <article>
-            {{#block "content"}}
-            {{/block}}
-          </article>
-        </section>
-      </td>
-    </tr>
-    </table>
+              </ul>
+            </li>
+            <li><a href="/signout">Sign out</a></li>
+          </ul>
+        </div>
+        <div class="content">
+          <section style="width:100%">
+            <article>
+              {{#block "content"}}
+              {{/block}}
+            </article>
+          </section>
+        </div>
+      </div>
+    </main>
     <footer>
       <nav>
         <ul>
