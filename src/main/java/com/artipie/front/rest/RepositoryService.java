@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT) Copyright (c) 2022 artipie.com
+ * The MIT License (MIT) Copyright (c) 2022-2023 artipie.com
  * https://github.com/artipie/front/LICENSE.txt
  */
 package com.artipie.front.rest;
