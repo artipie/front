@@ -9,7 +9,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryName;
 import com.artipie.front.rest.RepositoryService;
-import com.artipie.front.rest.SettingsService;
 import com.artipie.front.ui.HbPage;
 import java.io.IOException;
 import java.util.Map;
@@ -27,19 +26,14 @@ public final class RepoEdit extends RouteWrap.TemplateViewRoute {
      * Repository editor page.
      *
      * @param repository Repository service.
-     * @param settings Settings service.
      * @param info Repository info templates.
      */
-    public RepoEdit(final RepositoryService repository, final SettingsService settings,
-        final RepositoryInfo info) {
+    public RepoEdit(final RepositoryService repository, final RepositoryInfo info) {
         super(
             new HbPage(
                 "repository/edit",
                 req -> {
-                    final RepositoryName rname = new RepositoryName.FromRequest(
-                        req,
-                        settings.layout()
-                    );
+                    final RepositoryName rname = new RepositoryName.FromRequest(req);
                     final String repo = req.params(":repo");
                     final String uid = req.session().attribute("uid");
                     final String conf = repository.repo(
