@@ -51,14 +51,8 @@ function errorHandler(error) {
 
 function formSubmit() {
   let path = "/dashboard/repository/update/";
-  let layout = '{{{layout}}}';
-  let user = '{{{uid}}}';
   let repo = $("#new-repo-name").val();
-  if ("flat" == layout) {
-    path += repo;
-  } else {
-    path += user + "/" + repo;
-  }
+  path += repo;
   $("#new-repo-form").attr('action', path);
   return true;
 }

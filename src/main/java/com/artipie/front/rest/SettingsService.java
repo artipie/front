@@ -4,7 +4,6 @@
  */
 package com.artipie.front.rest;
 
-import com.artipie.front.Layout;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -23,19 +22,9 @@ public class SettingsService extends BaseService {
     private static final String PORT_PATH = "/api/v1/settings/port";
 
     /**
-     * Path to layout rest-api.
-     */
-    private static final String LAYOUT_PATH = "/api/v1/settings/layout";
-
-    /**
      * Port.
      */
     private final AtomicReference<Integer> port;
-
-    /**
-     * Layout.
-     */
-    private final AtomicReference<Layout> layout;
 
     /**
      * Ctor.
@@ -44,7 +33,6 @@ public class SettingsService extends BaseService {
     public SettingsService(final String rest) {
         super(rest);
         this.port = new AtomicReference<>();
-        this.layout = new AtomicReference<>();
     }
 
     /**
@@ -60,24 +48,12 @@ public class SettingsService extends BaseService {
     }
 
     /**
-     * Obtain Artipie layout.
-     * @return Artipie layout
-     */
-    public Layout layout() {
-        return this.value(
-            this.layout,
-            SettingsService.LAYOUT_PATH,
-            json -> Layout.byName(json.getString("layout"))
-        );
-    }
-
-    /**
      * Obtain Artipie setting's value.
      * @param ref Reference to setting value
      * @param path Path to rest service
      * @param handler Handler of json content
      * @param <T> Resulting type of handler
-     * @return Artipie layout
+     * @return Value
      */
     private <T> T value(final AtomicReference<T> ref, final String path,
         final Function<JsonObject, T> handler) {

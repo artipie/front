@@ -6,7 +6,6 @@ package com.artipie.front.ui.repository;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.front.Layout;
 import com.artipie.front.misc.RouteWrap;
 import com.artipie.front.rest.RepositoryService;
 import com.artipie.front.rest.SettingsService;
@@ -36,14 +35,8 @@ public final class RepoList extends RouteWrap.TemplateViewRoute {
             new HbPage(
                 "repository/list",
                 req -> {
-                    final String uid = req.session().attribute("uid");
                     final String token = req.session().attribute("token");
-                    final List<String> names;
-                    if (settings.layout() == Layout.FLAT) {
-                        names = repository.list(token);
-                    } else {
-                        names = repository.list(token, uid);
-                    }
+                    final List<String> names = repository.list(token);
                     final List<Repo> repos = new ArrayList<>(names.size());
                     names.stream().sorted().forEach(
                         name ->

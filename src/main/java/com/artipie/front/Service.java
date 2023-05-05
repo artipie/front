@@ -174,18 +174,16 @@ public final class Service {
                 this.ignite.path(
                     "/repository", () -> {
                         this.ignite.get(
-                            "/list",
-                            new RepoList(repository, settings),
-                            this.engine
+                            "/list", new RepoList(repository, settings), this.engine
                         );
-                        this.ignite.get("/create", new RepoCreate(settings), this.engine);
-                        final RepoEdit edit = new RepoEdit(repository, settings, info);
+                        this.ignite.get("/create", new RepoCreate(), this.engine);
+                        final RepoEdit edit = new RepoEdit(repository, info);
                         this.ignite.get("/edit/:repo", edit, this.engine);
                         this.ignite.get("/edit/:user/:repo", edit, this.engine);
-                        final RepoSave save = new RepoSave(repository, settings);
+                        final RepoSave save = new RepoSave(repository);
                         this.ignite.post("/update/:repo", save, this.engine);
                         this.ignite.post("/update/:user/:repo", save, this.engine);
-                        final RepoRemove remove = new RepoRemove(repository, settings);
+                        final RepoRemove remove = new RepoRemove(repository);
                         this.ignite.post("/remove/:repo", remove, this.engine);
                         this.ignite.post("/remove/:user/:repo", remove, this.engine);
                     }
