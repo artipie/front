@@ -31,7 +31,9 @@ public final class RepositoryTemplate {
     /**
      * Pre-defined template names.
      */
-    private static final List<String> PREDEFINED = List.of("maven-group", "maven-proxy");
+    private static final List<String> PREDEFINED = List.of(
+        "maven-proxy", "docker-proxy", "file-proxy", "npm-proxy", "php-proxy", "pypi-proxy"
+    );
 
     /**
      * Template engine.

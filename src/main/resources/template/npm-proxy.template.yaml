@@ -1,0 +1,6 @@
+repo:
+  type: npm-proxy
+  storage: default
+  # proxy for NPM public registry
+  remotes:
+    - uri: https://registry.npmjs.org

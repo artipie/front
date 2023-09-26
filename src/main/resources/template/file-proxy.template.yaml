@@ -1,0 +1,6 @@
+repo:
+  type: file-proxy
+  storage: default
+  # proxy some general file storage
+  remotes:
+    - uri: https://some-general-storage.com

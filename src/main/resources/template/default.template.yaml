@@ -1,9 +1,3 @@
 repo:
   type: {{type}}
   storage: default
-  permissions:
-    {{user}}:
-      - upload
-      - download
-    "*":
-      - download
