@@ -1,0 +1,6 @@
+repo:
+  type: pypi-proxy
+  storage: default
+  # proxy for PyPI repository
+  remotes:
+    - uri: https://pypi.org/pypi

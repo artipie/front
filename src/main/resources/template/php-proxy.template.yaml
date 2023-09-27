@@ -1,0 +1,6 @@
+repo:
+  type: php-proxy
+  storage: default
+  # proxy for php composer central repository
+  remotes:
+    - uri: https://packagist.org/

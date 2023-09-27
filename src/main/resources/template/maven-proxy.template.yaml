@@ -1,14 +1,6 @@
 repo:
   type: maven-proxy
   storage: default
-  # proxy for Apache Maven central
+  # proxy for Apache Maven central (several remotes supported)
   remotes:
     - uri: https://repo.maven.apache.org/maven2
-      cache:
-        storage: default
-  permissions:
-    {{user}}:
-      - upload
-      - download
-    "*":
-      - download

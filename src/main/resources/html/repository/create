@@ -89,7 +89,7 @@ function formSubmit() {
     <option value="npm-proxy">NPM proxy (mirror)</option>
     <option value="pypi-proxy">Python proxy (mirror)</option>
     <option value="php-proxy">Php proxy (remote)</option>
-    <option value="maven-group">Maven group (virtual)</option>
+    <option value="docker-proxy">Docker proxy (remote)</option>
   </select>
   <fieldset>
     <textarea id="new-repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;"></textarea>
