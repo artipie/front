@@ -84,6 +84,7 @@ function formSubmit() {
     <option value="nuget">Nuget</option>
     <option value="go">Go</option>
     <option value="conda">Anaconda</option>
+    <option value="conan">Conan</option>
     <option value="maven-proxy">Maven proxy (mirror)</option>
     <option value="file-proxy">Binary proxy (mirror)</option>
     <option value="npm-proxy">NPM proxy (mirror)</option>
