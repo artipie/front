@@ -1,0 +1,13 @@
+To install conan packages from Artipie, add repository URL to conan using command below.
+Note that `False` is required to force disable SSL protocol.
+Check <a href="https://docs.conan.io/2/tutorial/conan_repositories/uploading_packages.html">documentation</a> for more details):
+
+<pre>
+  conan remote add conan-test http://artipie.artipie:9300 False
+</pre>
+
+When you upload or download package you can specify remote repository explicitly in conan client by `-r` option.
+<pre>
+conan upload -r conan-test ...
+conan download -r conan-test ...
+</pre>
