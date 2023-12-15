@@ -17,12 +17,12 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '17'
+          java-version: '21'
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-jdk-17-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-jdk-21-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-jdk-17-maven-
+            ${{ runner.os }}-jdk-21-maven-
       - name: Build with Maven
         run: mvn -B verify -Pqulice
