@@ -1,7 +1,7 @@
 # The MIT License (MIT) Copyright (c) 2022 artipie.com
 # https://github.com/artipie/front/LICENSE.txt
 
-FROM openjdk:17-oracle
+FROM openjdk:21-oracle
 ARG JAR_FILE
 ENV JVM_OPTS=""
 
