@@ -68,7 +68,7 @@ function formSubmit() {
 
 <form action="#" method="POST" id="new-repo-form" onsubmit="return formSubmit();">
   <label>Create new repository:</label>
-  <input id="new-repo-name" name="name" type="text" size="25" required="true" pattern="[a-z0-9]{3,16}"/>
+  <input id="new-repo-name" name="name" type="text" size="25" required="true" pattern="[a-z0-9-]{3,16}"/>
   <label>Type:</label>
   <select id="new-repo-type" name="type" onchange="updateFormFields()">
     <option value="maven">Maven</option>
