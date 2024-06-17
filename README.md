@@ -19,6 +19,40 @@ If you have any question or suggestions, do not hesitate to [create an issue](ht
 [Telegram](https://t.me/artipie).  
 Artipie [roadmap](https://github.com/orgs/artipie/projects/3).
 
+## Quick start
+
+````
+$ TAG=artipie-front
+$ docker build . -t $TAG
+$ docker run -p8080:8080 -eARTIPIE_REST=http://registry.local:8086 $TAG
+````
+
+## Build notes
+
+### Building with maven
+
+````
+mvn clean install -Pqulice
+````
+(the qulice profile do not exists any more ?)
+
+To avoid build errors use Maven 3.2+. (the 3.8 looks like working too)
+
+### Export pom dependencies inside a folder
+
+````
+mvn dependency:copy-dependencies -DoutputDirectory=target/dependencies/
+````
+
+## Dockerfile notes
+
+the Dockerfile use two layers, one build layer and the run layer (built with copying libraries from the build layer)
+
+## Environment variables (not exhaustive list)
+
+- ARTIPIE_REST : (default : http://localhost:8086) url to the artipie API (example : http://registry.local:8086), 
+- ARTIPIE_PORT : (default : 8080) port on which the server will listen to 
+
 ## How to contribute
 
 Please read [contributing rules](https://github.com/artipie/artipie/blob/master/CONTRIBUTING.md).
@@ -27,9 +61,3 @@ Fork repository, make changes, send us a pull request. We will review
 your changes and apply them to the `master` branch shortly, provided
 they don't violate our quality standards. To avoid frustration, before
 sending us your pull request please run full Maven build:
-
-```
-$ mvn clean install -Pqulice
-```
-
-To avoid build errors use Maven 3.2+.
